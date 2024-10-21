@@ -130,28 +130,35 @@
                 <thead>
                     <tr>
                         <th></th>
+                        <th>ORDER ID</th>
                         <th>USER ID</th>
-                        <th>USER NAME</th>
-                        <th>EMAIL ADDRESS</th>
-                        <th>DATE</th>
+                        <th>TOTAL AMOUNT</th>
+                        <th>ORDERED DATE</th>
+                        <th>DELIVARED DATE</th>
+                        <th>PAYMENT METHOD</th>
+                        <th>STATUS</th>
                         <th>ACTION</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for user in users%}
+                    {% for order in orders%}
                     <tr>
                         <td></td>
-                        <td>{{user.id}}</td>
-                        <td>{{user.username}} </td>
-                        <td>{{user.email}}</td>
-                        <td>{{user.date_joined|date:"d-m-y"}}</td>
+                        <td>{{order.id}}</td>
+                        <td>{{order.user.id}} </td>
+                        <td>{{order.total_amount}}</td>
+                        <td>{{order.order_date}}</td>
+                        {% if order.deliver_date %}
+                            <td>{{ order.deliver_date }}</td>
+                        {% else %}
+                            <td>Not Yet</td>
+                        {% endif %}
+                        <td>{{order.payment_method}} </td>
+                        
+                        <td>{{order.status}}</td>
+                        
                         <td>
-                            <button class="action-btn">VIEW</button>
-                            {% if user.is_active %}
-                            <a href="{% url 'user_status' user.id%}"><button class="deactivate-btn">BLOCK</button></a>
-                            {% else %}
-                            <a href="{% url 'user_status' user.id%}"><button class="activate-btn">UNBLOCK</button></a>
-                            {% endif %}
+                            <a href="{% url 'order_items' order.id %}"><button class="action-btn">VIEW</button></a>
                         </td>
                     </tr>
                 {% endfor %}

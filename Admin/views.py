@@ -6,6 +6,7 @@ from product_app.models import Product
 from variant_app.models import Variant
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
+from User.models import Order,Order_details,Address
 
 #---------------- ADMIN LOGIN SECTION --------------#
 
@@ -52,6 +53,7 @@ def productadd(request):
     }
     return render(request,'admin/productadd.html', context)
 
+
 def product(request):
     if not request.user.is_authenticated or not request.user.is_superuser: 
         return redirect('login_admin')
@@ -69,6 +71,7 @@ def users(request):
 
     users = User.objects.filter(is_staff = False).order_by('id')
     return render(request,'admin/users.html', {'users':users})
+
 
 def user_status(request,user_id):
     if not request.user.is_authenticated or not request.user.is_superuser:  
@@ -90,6 +93,7 @@ def art(request):
         return redirect('login_admin')
     art_type = Art.objects.all().order_by('id')
     return render(request,'admin/art.html',{'art_type':art_type})
+
 
 def paint(request):
     if not request.user.is_authenticated or not request.user.is_superuser:  
@@ -121,5 +125,32 @@ def variant(request, product_id):
 
     return render(request,'admin/variant.html', {'variants' : variants})
 
-# def orders(request):
-#     return render(request,'admin/orders.html')
+
+def all_orders(request):
+    orders = Order.objects.all().order_by('-id')
+    return render(request,'admin/orders.html', {'orders': orders})
+
+
+def order_items(request,order_id):
+    order_id = get_object_or_404(Order, id = order_id)
+    total_amount=order_id.total_amount
+    order_items=Order_details.objects.filter(order=order_id)
+    order_address=Address.objects.get(id=order_id.address.id)
+    context={
+        'order_items':order_items,
+        'order_address':order_address,
+        'total_amount':total_amount,
+        'order_id':order_id    
+    }
+    return render(request,'admin/order_items.html', context)
+
+
+def change_order_status(request, order_id):
+    if request.method == 'POST':
+        new_status = request.POST.get('order_status')
+        order = get_object_or_404(Order, id=order_id)
+        order.status = new_status
+        order.save()
+        return redirect('order_items', order_id=order_id)
+
+    

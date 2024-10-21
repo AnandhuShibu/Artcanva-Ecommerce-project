@@ -29,7 +29,7 @@
 
     .navbar {
       background-color: #ffffe4;
-      padding: 25px;
+      padding: 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -363,6 +363,8 @@
             <p>{{info.city}}, {{info.district}}, {{info.pincode}}, {{info.state}}</p>
             <p>Mobile : {{info.mobile}}</p>
             <button class="btn" onclick="openEditModal({{info.id}}, '{{info.fullname}}', '{{info.mobile}}', '{{info.pincode}}', '{{info.address}}', '{{info.city}}', '{{info.district}}', '{{info.state}}')">Edit</button>
+            <a href="{% url 'remove_address_profile' info.id %}"><button class="btn btn-sm btn-outline-danger">DELETE</button></a>
+            
           </div>
         </div>
         {% endfor %}

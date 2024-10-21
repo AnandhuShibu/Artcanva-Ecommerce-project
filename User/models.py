@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from product_app.models import Product
 from variant_app.models import Variant
 
-# Create your models here.
+
 class Address(models.Model):
     fullname = models.CharField(max_length=50)
     mobile = models.CharField(max_length=15) 
@@ -40,6 +40,7 @@ class Order(models.Model):
     order_date = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
     address = models.ForeignKey(Address, on_delete=models.CASCADE)
+    deliver_date = models.DateTimeField(null=True, blank= True)
     
 
 class Order_details(models.Model):

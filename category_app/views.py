@@ -59,6 +59,7 @@ def add_paint(request):
         return redirect ('paint')
     return render(request,'admin/paint.html')
 
+
 #================ STATUS =================#
 
 def art_status(request,art_id):
@@ -79,6 +80,7 @@ def paint_status(request,paint_id):
     paint.save()
     return redirect('paint')
  
+
 #================ EDITING SECTION =================#
 
 def edit_art(request):

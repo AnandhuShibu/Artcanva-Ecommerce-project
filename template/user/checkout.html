@@ -284,7 +284,7 @@
             '{{address.fullname}}', '{{address.mobile}}', '{{address.pincode}}', '{{address.address}}',
             '{{address.city}}', '{{address.district}}', '{{address.state}}')">Edit</button>
 
-            <a href="{% url 'remove_address' address.id %}"><button class="btn btn-sm btn-outline-danger">DELETE</button></a>
+           <button class="btn btn-sm btn-outline-danger">DELETE</button>
           </div>
         </div>
         {% endfor %}
@@ -383,7 +383,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form action='' method = 'POST'>
+        <form action= "{% url 'checkout' %}" method = 'POST'>
           {% csrf_token %}
           <input type="text" class="form-control mb-3" name='fullname' placeholder="Full Name" required>
           <input type="text" class="form-control mb-3" name='mobile' placeholder="Mobile" required>
@@ -408,7 +408,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form>
+        <form action="{% url 'edit_address' %}" method='POST'>
           <input type="hidden" name="address_id">
           <input type="text" class="form-control mb-3" name='fullname' placeholder="Full Name">
           <input type="text" class="form-control mb-3" name='mobile' placeholder="Mobile">

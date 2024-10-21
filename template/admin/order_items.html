@@ -1,0 +1,164 @@
+{% extends "admin/sidebar.html" %}
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .content-wrapper {
+            flex: 1;
+            padding: 30px;
+            background-color: white;
+            position: relative;
+        }
+
+        .content-wrapper h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .order-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 78px;
+        }
+
+        .info-box {
+            width: 45%;
+            background-color: #f0f0f0;
+            padding: 9px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-box h2 {
+            margin-bottom: 10px;
+            background-color: #c4c4c4;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .table-wrapper {
+            margin-top: 20px;
+            overflow-x: auto;
+            padding-top: 40px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f0f0f0;
+        }
+
+        /* Dropdown styling */
+        .dropdown-container {
+            position: absolute;
+           top: 269px;
+            right: 32px;
+        }
+
+        .dropdown select {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="content-wrapper">
+        
+
+        <h1>ORDERED ITEMS</h1>
+
+        <div class="order-info">
+            <div class="info-box">
+                <h2>ORDERED TO</h2>
+                <p>
+                    {{ order_address.fullname }}<br>{{ order_address.address }},
+                    {{ order_address.city }}<br>{{ order_address.district }}, 
+                    {{ order_address.pincode }},<br>Mobile: {{ order_address.mobile }}
+                </p>
+            </div>
+
+            <div class="info-box">
+                <h2>TOTAL AMOUNT</h2>
+                <p>{{ total_amount }}</p>
+            </div>
+        </div>
+        <h1>{{ order_id.status }}</h1>
+        <!-- Dropdown placed at the top-right corner -->
+        <div class="dropdown-container">
+            <form method="POST" action="{% url 'change_order_status' order_id.id %}">
+                {% csrf_token %}
+                <div class="dropdown">
+                    <select name="order_status">
+                        <option value="Pending">Pending</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                    </select>
+                </div>
+                <br>
+                <button type="submit">Update Status</button>
+                <br>
+            </form>
+            
+            <br>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Product ID</th>
+                        <th>Product Name</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Category</th>
+                        <th>Frame Size</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order_items %}
+                    <tr>
+                        <td>
+                            <img src="{{ item.product.images1.url }}" alt="Product Image" style="width: 100px; height: 100px; object-fit: cover;">
+                        </td>
+                        
+                        <td>{{ item.product.id }}</td>
+                        <td>{{item.product.product_name}}</td>
+                        <td>{{item.quantity}}</td>
+                        <td>{{ item.variant.price }}</td>
+                        <td>{{item.product.art_category.art_type}}</td>
+                        <td>{{item.variant.frame_size}}</td>
+                        <td>Pending</td>
+                    </tr>
+                    {% endfor %}
+                    <!-- Add more rows as needed -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% endblock %}
+
+</body>
+</html>

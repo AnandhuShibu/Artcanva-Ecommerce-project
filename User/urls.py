@@ -32,9 +32,7 @@ urlpatterns = [
     path('password_change',views.password_change, name='password_change'),
     path('edit_address/',views.edit_address, name='edit_address'),
     path('remove_address/<int:address_id>',views.remove_address, name='remove_address'),
+    path('remove_address_profile/<int:address_id>',views.remove_address_profile, name='remove_address_profile'),
     path('place_order/',views.place_order, name='place_order'),
    
-   
-    # path('change',views.change, name='change'),
-
     ]

@@ -216,7 +216,7 @@
     <ul>
       <li><a href="{% url 'cart'%}">Cart</a></li>
       <li><a href="#">Wishlist</a></li>
-      <li><a href="#"></a></li>
+      <li><a href="{% url 'profile'%}">Profile</a></li>
     </ul>
   </div>
 
@@ -228,8 +228,6 @@
     <div class="content-wrapper">
         <div class="delivery-address">
             <h2>Delivery Address</h2>
-            {% comment %} <p>{{orders.address}}</p> {% endcomment %}
-            {% comment %} <p>Gandhi Nagar, Near Aguaglass Shop, P.O Thalasserry, Kannur District</p> {% endcomment %}
             <p>{{orders.address.fullname}},</p>
             <p>{{orders.address.address}},</p>
             <p>Phone Number: {{orders.address.mobile}}</p>
@@ -237,8 +235,6 @@
             <p>District : {{orders.address.district}}</p>
             <p>Pincode : {{orders.address.pincode}}</p>
             <p>State : {{orders.address.state}}</p>
-            
-
         </div>
 
         <div class="order-review">
@@ -253,9 +249,6 @@
     <!-- Product section below -->
     {% for item in order_items %}
     <div class="order-details">
-        
-       
-        
         <div class="product-image">
             <img src="{{ item.product.images1.url }}" alt="Shree Ganesha Kerala Mural Painting">
         </div>
@@ -265,7 +258,6 @@
             <p>Price : {{item.variant.price}}</p>
         </div>
         <div class="order-actions">
-            <span class="pending">Pending</span>
             <button class="cancel-btn">Cancel Order</button>
         </div>
         

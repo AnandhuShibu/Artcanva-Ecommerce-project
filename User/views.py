@@ -237,30 +237,38 @@ def shop(request):
     if request.method == 'POST':
         selected_categories = request.POST.getlist('categories')
         selected_size = request.POST.getlist('size')
-        print("Selected categories:", selected_categories)
-        print("Selected categories:", selected_size)
-
+        price_order = request.POST.get('price_order') 
+        products = Product.objects.all()
 
         if selected_categories:
             products = Product.objects.filter(art_category__id__in=selected_categories)
 
         if selected_size:
             products = Product.objects.filter(variants__id__in=selected_size)
+
+        if price_order:
+            if price_order == 'asc':
+                products = products.order_by('variants__price')
+            elif price_order == 'desc':
+                products = products.order_by('-variants__price')
         
     else:
         selected_categories = []
         selected_size = []
         products = Product.objects.all()
+    no_products_found = not products.exists()
     unique_frame_sizes = Variant.objects.order_by('frame_size').distinct()
     paints = Paint.objects.all()
     arts = Art.objects.all()
+
     context = {
         'products': products,
         'paints': paints,
         'arts': arts,
         'variants': unique_frame_sizes,
         'selected_categories': selected_categories,
-        'selected_size': selected_size, 
+        'selected_size': selected_size,
+        'no_products_found': no_products_found,
     }
     return render(request,'user/shop.html',context)
 
@@ -277,7 +285,6 @@ def jasir(request):
     return render(request, 'user/jasir.html')
 
 def change(request):
-
     return render(request, 'user/password_verify.html')
 
 
@@ -344,7 +351,6 @@ def profile(request):
         'username': username,
         'email': email
     }
-    print(username)
     return render(request,'user/profile.html', context)
 
 
@@ -376,12 +382,16 @@ def edit_address(request):
             )
         return redirect('profile')
 
+def remove_address_profile(request,address_id):
+    address = Address.objects.filter(id=address_id)
+    address.delete()    
+    return redirect('profile')
+
 
 #============== CHANGE PASSWORD SECTION =============#
 
 def password_verify(request):
     if request.method == 'POST':
-        print('fghj')
         old_password = request.POST.get('old_password')
         if check_password(old_password, request.user.password):
             return redirect('password_change')
@@ -414,7 +424,7 @@ def cart(request):
         messages.info(request, "Please log in view Cart.")
         return redirect('login')
 
-    cart_items = Cart.objects.all().order_by('-id')
+    cart_items = Cart.objects.filter(user=request.user).order_by('-id')
     return render(request,'user/cart.html', {'cart_items': cart_items})
 
 def add_cart(request,product_id, variant_id):
@@ -435,6 +445,7 @@ def remove_cart_item(request, variant_id):
     cart_items = Cart.objects.get(variant=variant_id)
     cart_items.delete()    
     return redirect('cart')
+
 
 #====================== CHECK OUT SECTION ===================#
 
@@ -483,31 +494,26 @@ def checkout(request):
     
     all_address = Address.objects.filter(user_id_id = request.user)
     total_price = request.session.get('total_price', 0)
-    cart_items=Cart.objects.all()
-
+    cart_items=Cart.objects.filter(user=request.user)
     return render(request,'user/checkout.html', {'all_address': all_address, 'total_price':total_price, 'cart_items':cart_items})
-
 
 def remove_address(request,address_id):
     address = Address.objects.filter(id=address_id)
     address.delete()    
     return redirect('checkout')
 
+
 #================== PLACE ORDER SECTION ==================#
 
 def place_order(request):
     cart_items=Cart.objects.filter(user=request.user)
-    print(cart_items)
     if request.method == 'POST':
         payment_method = request.POST.get('payment_method')
         selected_address_id = request.POST.get('selected_address')
         selected_address = Address.objects.get(id=selected_address_id)
         ordered_items = Cart.objects.all()
         total_price = request.session.get('total_price', 0)
-        print(payment_method)
         print(ordered_items)
-        print(selected_address)
-        print(total_price)
 
         order=Order.objects.create(
             user=request.user,
@@ -522,36 +528,25 @@ def place_order(request):
                 quantity=item.quantity,
                 variant=item.variant
             )
+            item.variant.stock -= item.quantity
+            item.variant.save()
+        
+        cart_items=Cart.objects.filter(user=request.user)
+        cart_items.delete()
+       
         return redirect('order_placed')
             
 
-
-
-        
-    
-
-
-
 #==================== ORDERS SECTION ==================#
 
-
 def orders(request):
-
     orders=Order.objects.filter(user=request.user)
-
     return render(request, 'user/orders.html', {'orders':orders})
 
 def order_details(request, order_id):
     orders = get_object_or_404(Order, id=order_id)
-    print(orders)
-
     order_items=Order_details.objects.filter(order = orders)
-    print(order_items)
-
-    
     return render(request, 'user/order_details.html', {'order_items':order_items, 'orders':orders})
-
-
 
 def order_placed(request):
     return render(request, 'user/order_placed.html')

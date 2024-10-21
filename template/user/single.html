@@ -217,7 +217,7 @@
             width: 150px;
             height: 150px;
             box-shadow: 0 0 5px #000;
-            display: none; /* Hidden initially */
+            display: none; 
         }
 
         .size-options {
@@ -233,21 +233,21 @@
         
         .size-box {
             display: inline-block;
-            width: 65px; /* Width of the box */
-            height: 35px; /* Height of the box */
-            background-color: #f0f0f0; /* Background color */
-            border: 1px solid #ccc; /* Border */
-            text-align: center; /* Center the text horizontally */
-            line-height: 30px; /* Center the text vertically */
-            font-size: 14px; /* Font size */
-            text-decoration: none; /* Remove underline */
-            color: #000000; /* Text color */
-            border-radius: 5px; /* Rounded corners */
+            width: 65px;
+            height: 35px;
+            background-color: #f0f0f0; 
+            border: 1px solid #ccc;
+            text-align: center; 
+            line-height: 30px; 
+            font-size: 14px; 
+            text-decoration: none;
+            color: #000000; 
+            border-radius: 5px; 
             transition: background-color 0.3s ease;
         }
         
         .size-box:hover {
-            background-color: #ddd; /* Change background on hover */
+            background-color: #ddd; 
         }
         /* Popup styles */
         .popup-message {
@@ -255,7 +255,7 @@
             top: -100px;
             left: 50%;
             transform: translateX(-50%);
-            background-color: #4CAF50; /* Green color for success */
+            background-color: #4CAF50;
             color: white;
             padding: 15px 30px;
             border-radius: 5px;
@@ -265,10 +265,10 @@
             font-family: Arial, sans-serif;
         }
         .popup-error {
-            background-color: #f44336; /* Red color for error */
+            background-color: #f44336;
         }
         .popup-warning {
-            background-color: #ff9800; /* Orange color for warning */
+            background-color: #ff9800;
         }
         .popup-show {
             top: 20px;
@@ -330,7 +330,6 @@
           <a class="nav-link" href="{% url 'profile'%}"><i class="bi bi-person"></i> User</a>
         </li>
       </ul>
-
     </div>
   </nav>
   <!-- Navbar End -->
@@ -373,7 +372,11 @@
 
         <div class="product-actions">
             <button class="buy-now">Buy now</button>
+            {% if variant.stock == 0 %}
+            <p>Out of Stock</p>
+            {% elif variant.stock > 0 %}
             <a href="{% url 'addcart' product.id variant.id %}"><button class="add-to-cart">Add to cart</button></a>
+            {% endif %}
         </div>
 
         <p class="short-description">
@@ -388,17 +391,13 @@
 
 <div class="related-products">
     <h3>Related Products</h3>
-    
     <div class="related-product-list">
-       
         <div class="related-product">
             <img src="{% static 'images/abc.jpg' %}"alt="Related Product 1">
             <p>helloo</p>
             <p>hellooo</p>
         </div>
-      
     </div>
-    
 </div>
 
   <!-- Footer Section Start -->
@@ -408,7 +407,7 @@
         <div class="col-md-4">
           <h5>About Us</h5>
           <p>We are a team dedicated to providing the best products and services for our customers.</p>
-          <p>&copy; 2024 Your Company</p>
+          <p>&copy; 2024 Company</p>
         </div>
         <div class="col-md-4">
           <h5>Quick Links</h5>

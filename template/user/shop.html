@@ -278,33 +278,25 @@
             </div>
             {% endfor %}
           </div>
-        </div>
-
+          <hr>
         <!-- Price Filter -->
         <div class="filter-group">
           <h5>Filter Price</h5>
           <ul class="list-unstyled">
-            <li><input type="radio" name="price" id="price1"> <label for="price1">5,000 - 10,000</label></li>
-            <li><input type="radio" name="price" id="price2"> <label for="price2">10,000 - 15,000</label></li>
-            <li><input type="radio" name="price" id="price3"> <label for="price3">15,000 - 20,000</label></li>
-            <li><input type="radio" name="price" id="price4"> <label for="price4">20,000 - 25,000</label></li>
-            <li><input type="radio" name="price" id="price5"> <label for="price5">25,000+</label></li>
-            <li><input type="radio" name="price" id="price1"> <label for="price1">5,000 - 10,000</label></li>
-            <li><input type="radio" name="price" id="price2"> <label for="price2">10,000 - 15,000</label></li>
-            <li><input type="radio" name="price" id="price3"> <label for="price3">15,000 - 20,000</label></li>
-            <li><input type="radio" name="price" id="price4"> <label for="price4">20,000 - 25,000</label></li>
-            <li><input type="radio" name="price" id="price5"> <label for="price5">25,000+</label></li>
+            <li><input type="radio" name="price_order" value="asc" id="price1"><label for="price1">LOW TO HIGH</label></li>
+            <li><input type="radio" name="price_order" value="desc" id="price2"><label for="price2">HIGH TO LOW</label></li>
           </ul>
       </div>
-<hr>
-        
         </form>
-
+      </div>
       </div>
 
 
 
     <div class="col-lg-9 col-md-8">
+      {% if no_products_found %}
+        <p class="text-center text-danger">No items found matching these filters. Please try different filters.</p>
+      {% else %}
         <div class="row g-3"> <!-- Add 'g-3' class to manage spacing between cards -->
           {% for product in products %}
             
@@ -322,6 +314,7 @@
           </div>
           {% endfor %}
         </div>
+        {% endif %}
       </div>
       
 <!-- Bootstrap JS -->
