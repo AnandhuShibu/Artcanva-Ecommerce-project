@@ -1,0 +1,329 @@
+{% extends "admin/sidebar.html" %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art Canva Dashboard</title>
+    <style>
+        
+
+
+        main {
+            flex-grow: 1;
+            padding: 30px;
+            background-color: #f0f2f5;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .header input {
+            padding: 10px;
+            width: 250px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        .add-btn {
+            padding: 10px 20px;
+            background-color: #00b894;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-btn:hover {
+            background-color: #009970;
+        }
+
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0px 3px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .product-table th, .product-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .product-table th {
+            background-color: #f4f4f4;
+        }
+
+        .product-table td {
+            font-size: 15px;
+            color: #2d3436;
+        }
+
+        .product-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .action-btn {
+            padding: 5px 10px;
+            margin-right: 5px;
+            background-color: #0984e3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background-color: #006bb5;
+        }
+
+        .deactivate-btn {
+            padding: 9px 13px;
+            background-color: #f01e2c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+            decoration : none
+            text-color:#ffffff
+        }
+
+        .activate-btn{
+            padding: 9px 20px;
+            background-color: #46923c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+            decoration : none
+            text-color:#ffffff
+
+        }
+
+        
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 30%;
+            border-radius: 10px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .modal-btn {
+            background-color: #00b894;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        .modal-btn:hover {
+            background-color: #009970;
+        }
+
+        .modal-content {
+            /* Your existing modal styles */
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            background-color: #f9f9f9;
+            color: #333;
+            display: inline-block;
+        }
+        
+        select.input-field {
+            /* Ensures that select has the same height and look as input */
+            appearance: none; /* Removes default arrow styling */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="5" viewBox="0 0 10 5"><path fill="none" stroke="gray" stroke-width="1" d="M0 0l5 5 5-5"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 10px 5px;
+        }
+        
+        select.input-field:focus {
+            outline: none;
+            border-color: #007bff; /* Highlight border on focus */
+        }
+        
+        /* Optionally add a custom style for the dropdown arrow */
+        
+    </style>
+</head>
+<body>
+    
+    <div class="container">
+        <main>
+            <div class="header">
+                <h1>Products</h1>
+                <input type="text" placeholder="Search...">
+                <a href="{% url 'productadd' %}"><button class="add-btn">ADD NEW PRODUCT</button></a>
+            </div>
+
+            <table class="product-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>ID</th>
+                        <th>Product name</th>
+                        <th>Art Category</th>
+                        <th>Paint Category</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                 <td></td>
+                        <td>{{product.id}}</td>
+                        <td>{{product.product_name}}</td>
+                        <td>{{ product.art_category.art_type }}</td>
+                        <td>{{ product.paint_category.paint_type }}</td>
+                        <td>
+                            <a href = "{% url 'variant' product.id %}"><button class="action-btn">view variant</button></a>
+                            <button class="action-btn edit_product">Edit product</button>
+                            {% if product.product_status %}
+                            <a href="{% url 'product_status' product.id %}"><button class="deactivate-btn">De activate</button></a>
+                            {% else %}
+                            <a href="{% url 'product_status' product.id %}"><button class="activate-btn">Activate</button></a>
+
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </main>
+    </div>
+
+    <div id="editproductModal" class="modal">
+        <div class="modal-content">
+            <span class="close-edit">&times;</span>
+            <h2>Edit Product</h2>
+            <form action="" method="POST">
+                {% csrf_token %}
+                <input type="text" name="product_name" id="productNameInput" placeholder="Product Name" required>
+                <select name="art_type" id="artTypeSelect" required>
+                    {% for i in art %}
+                    <option value="{{ i.art_type }}">{{ i.art_type }}</option>
+                    {% endfor %}
+                </select>
+                <select name="paint_type" id="paintTypeSelect" required>
+                    {% for i in paint %}
+                    <option value="{{ i.paint_type }}">{{ i.paint_type }}</option>
+                    {% endfor %}
+                </select>
+    
+                <button type="submit" class="modal-btn">Save Changes</button>
+            </form>
+        </div>
+    </div>
+<script>
+    
+    // Edit Art Modal
+    var editModal = document.getElementById("editproductModal");
+    var editButtons = document.querySelectorAll(".edit_product");
+    var closeEditModal = document.getElementsByClassName("close-edit")[0];
+
+    editButtons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            editModal.style.display = "block";
+            var row = btn.closest('tr');
+            var Id = row.cells[1].textContent;
+            var productname = row.cells[2].textContent;
+            var art_category = row.cells[3].textContent;
+            var paint_category = row.cells[4].textContent;
+
+            document.getElementById("Id").value = Id;
+            document.getElementById("productname").value = productname;
+            document.getElementById("art_category").value = art_category;
+            document.getElementById("paint_category").value = paint_category;
+        });
+    });
+
+    closeEditModal.onclick = function() {
+        editModal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        if (event.target == editModal) {
+            editModal.style.display = "none";
+        }
+    }
+</script>
+</body>
+</html>
+{% endblock %}

@@ -1,0 +1,339 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      background-color: #ffffe4;
+    }
+    .filter-section {
+        background-color:  #ffffe4;
+        padding: 20px;
+        border-radius: 10px;
+        {% comment %} box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); {% endcomment %}
+        border: 1px solid #ddd;
+      }
+  
+      .filter-heading {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #343a40;
+        border-bottom: 2px solid #dc3545;
+        padding-bottom: 8px;
+      }
+  
+      .filter-group {
+        margin-bottom: 20px;
+      }
+  
+      .filter-group label {
+        font-weight: 500;
+        margin-left: 5px;
+      }
+  
+      .form-range {
+        width: 100%;
+      }
+  
+      .filter-group input {
+        margin-right: 8px;
+      }
+    .product-card {
+        margin-bottom: 15px; /* Increased bottom margin for better spacing between rows */
+        transition: transform 0.4s;
+        border-radius: 8px;
+        max-width: 90%; /* Slightly reduce card width */
+      }
+      
+      .product-card:hover {
+        transform: scale(1.02);
+      }
+      
+      .product-card img {
+        height: 280px; /* Reduced image height */
+        width: 100%; /* Ensure image fits card width */
+        object-fit: cover;
+        border-radius: 8px 8px 0 0;
+      }
+      
+      .card {
+        margin-left: 15px; /* Add some spacing between cards */
+        margin-right: 15px;
+      }
+      
+      .add-wishlist {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
+        color: #dc3545;
+        font-size: 1.5rem;
+        display: none;
+      }
+      
+      .product-card:hover .add-wishlist {
+        display: block;
+      }
+3      
+      
+      
+    .rating {
+      margin: 10px 0;
+    }
+    .btn {
+      margin-top: 5px; /* Space between buttons */
+      margin-bottom:20px;
+    }
+    /* Custom navbar height */
+    .navbar {
+        height: 80px; /* Adjust the height as needed */
+        
+
+    }
+
+    .logo {
+        font-size: 1.8rem; /* Increase logo size */
+        color: #000000; /* Logo color */
+        font-weight: bold; /* Make the logo bold */
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+        letter-spacing: 1px; /* Increase letter spacing */
+        text-decoration: none;
+    }
+    
+    .navbar-nav .nav-link {
+        font-size: 1.3rem; /* Optional: Increase font size for links */
+        color:#000000
+        }
+
+
+
+    .navbar-nav .nav-item {
+        margin: 0 15px; /* Add horizontal margin between links */
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 10px; /* Optional: Adjust padding for links */
+    }
+    
+    .navbar-toggler {
+        padding: 0.5rem; /* Adjust padding for the toggler button */
+        }
+    hr {
+        border: none;
+        height: 1px;
+        background-color: #000000;
+        margin: 0;
+        }
+        .breadcrumb {
+            font-size: 14px;
+            color: #000000;
+            margin-top: 25px;
+            margin-bottom: 40px;
+            margin-left: 20px;
+          }
+          
+          .breadcrumb a {
+            text-decoration: none;
+            color: #000000;
+            margin-right: 10px;
+            margin-left: 10px;
+          }
+          
+          .breadcrumb a:hover {
+            text-decoration: underline;
+          }
+          
+          .breadcrumb span {
+            font-weight: bold;
+            color: #000;
+          }
+          
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+
+    <!-- Navbar Start -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+    
+          <!-- Left Logo Section -->
+          <a class="logo" href="#">ART CANVA</a>
+    
+          <!-- Center Links -->
+          <button 
+            class="navbar-toggler" 
+            type="button" 
+            data-bs-toggle="collapse" 
+            data-bs-target="#navbarNav" 
+            aria-controls="navbarNav" 
+            aria-expanded="false" 
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+            <ul class="navbar-nav navbar-nav-center">
+              <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="{% url 'home'%}">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'shop'%}">Shop</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Contact</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'signup' %}">Signup</a>
+              </li>
+            </ul>
+          </div>
+    
+          <!-- Right Section (Cart, Wishlist, User) -->
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'cart'%}"><i class="bi bi-cart"></i> Cart</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#"><i class="bi bi-heart"></i> Wishlist</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'profile'%}"><i class="bi bi-person"></i> User</a>
+            </li>
+          </ul>
+    
+        </div>
+      </nav>
+      <!-- Navbar End -->
+    
+      <hr>
+
+      <!-- Simple Breadcrumb -->
+      <nav class="breadcrumb">
+        <a href="{% url "home" %}">Home</a> /
+        <a href="{% url "shop" %}"><span>Shop</span></a>
+      </nav>
+      
+    
+<!-- Main Content -->
+<div class="container-fluid mt-4">
+  <div class="row">
+
+    <!-- Filters Section -->
+    <div class="col-lg-3 col-md-4">
+
+      
+      
+      <form action="" method='POST'>
+        {% csrf_token %}
+        <div class="filter-section">
+          <h3 class="filter-heading">Filters</h3>
+
+          <div class="button-container">
+            <button type="submit" class="btn btn-danger w-90">Apply Filters</button>
+            <a href="{% url 'shop' %}" class="btn btn-secondary">Reset</a> 
+          </div>
+
+          <hr>
+          
+          <!-- Category Filter -->
+          <div class="filter-group">
+            <h5>Category</h5>
+            {% for i in arts %}
+            <div class="form-check">
+              <input 
+              class="form-check-input"
+              type="checkbox"
+              name="categories"
+              id="cat{{ forloop.counter }}" 
+              value="{{ i.id }}">
+              {% comment %} {% if i.id|stringformat:"s" in selected_ids %}checked{% endif %}>  <!-- Keep checked if selected --> {% endcomment %}
+              <label class="form-check-label" for="cat{{ forloop.counter }}">{{ i.art_type }}</label>
+              </div>
+            {% endfor %}
+          </div>
+  <hr>
+          <!-- Size Filter -->
+          <div class="filter-group">
+            <h5>Size</h5>
+            {% for size in variants %}
+            <div class="form-check">
+              <input 
+              class="form-check-input"
+              type="checkbox"
+              name="size"
+              id="cat{{ forloop.counter }}"
+              value="{{ size.id }}">
+              <label class="form-check-label" for="cat{{ forloop.counter }}">{{size.frame_size}}</label>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Price Filter -->
+        <div class="filter-group">
+          <h5>Filter Price</h5>
+          <ul class="list-unstyled">
+            <li><input type="radio" name="price" id="price1"> <label for="price1">5,000 - 10,000</label></li>
+            <li><input type="radio" name="price" id="price2"> <label for="price2">10,000 - 15,000</label></li>
+            <li><input type="radio" name="price" id="price3"> <label for="price3">15,000 - 20,000</label></li>
+            <li><input type="radio" name="price" id="price4"> <label for="price4">20,000 - 25,000</label></li>
+            <li><input type="radio" name="price" id="price5"> <label for="price5">25,000+</label></li>
+            <li><input type="radio" name="price" id="price1"> <label for="price1">5,000 - 10,000</label></li>
+            <li><input type="radio" name="price" id="price2"> <label for="price2">10,000 - 15,000</label></li>
+            <li><input type="radio" name="price" id="price3"> <label for="price3">15,000 - 20,000</label></li>
+            <li><input type="radio" name="price" id="price4"> <label for="price4">20,000 - 25,000</label></li>
+            <li><input type="radio" name="price" id="price5"> <label for="price5">25,000+</label></li>
+          </ul>
+      </div>
+<hr>
+        
+        </form>
+
+      </div>
+
+
+
+    <div class="col-lg-9 col-md-8">
+        <div class="row g-3"> <!-- Add 'g-3' class to manage spacing between cards -->
+          {% for product in products %}
+            
+          <!-- Product Card 1 -->
+          <div class="col-lg-4 col-md-6 col-sm-12 product-card">
+            <div class="card">
+              <a href="{% url 'single' product.id product.variants.first.id %}"><img src="{{product.images1.url}}" class="card-img-top" alt="Product 1"></a>
+              <div class="card-body">
+                <h6 class="card-title">{{product.product_name}}</h6>
+                <div class="rating">★★★★☆</div>
+                {% comment %} <p class="card-text">{{produ}}</p> {% endcomment %}
+                <button class="add-wishlist" title="Add to Wishlist"><i class="fas fa-heart"></i></button>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const priceRange = document.getElementById('priceRange');
+  const priceValue = document.getElementById('priceValue');
+
+  priceRange.addEventListener('input', () => {
+    priceValue.textContent = priceRange.value;
+  });
+</script>
+
+</body>
+</html>

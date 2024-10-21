@@ -1,0 +1,164 @@
+{% extends "admin/sidebar.html" %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art Canva Dashboard</title>
+    <style>
+
+        main {
+            flex-grow: 1;
+            padding: 30px;
+            background-color: #f0f2f5;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .header input {
+            padding: 10px;
+            width: 250px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        .add-btn {
+            padding: 10px 20px;
+            background-color: #00b894;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-btn:hover {
+            background-color: #009970;
+        }
+
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0px 3px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .product-table th, .product-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .product-table th {
+            background-color: #f4f4f4;
+        }
+
+        .product-table td {
+            font-size: 15px;
+            color: #2d3436;
+        }
+
+        .product-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .action-btn {
+            padding: 5px 10px;
+            margin-right: 5px;
+            background-color: #0984e3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background-color: #006bb5;
+        }
+
+        .deactivate-btn {
+            padding: 5px 10px;
+            margin-right: 5px;
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .activate-btn {
+            padding: 5px 10px;
+            margin-right: 5px;
+            background-color: #46923c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <main>
+            <div class="header">
+                <h1>ORDERS</h1>
+                <input type="text" placeholder="Search...">
+            </div>
+            <table class="product-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>USER ID</th>
+                        <th>USER NAME</th>
+                        <th>EMAIL ADDRESS</th>
+                        <th>DATE</th>
+                        <th>ACTION</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users%}
+                    <tr>
+                        <td></td>
+                        <td>{{user.id}}</td>
+                        <td>{{user.username}} </td>
+                        <td>{{user.email}}</td>
+                        <td>{{user.date_joined|date:"d-m-y"}}</td>
+                        <td>
+                            <button class="action-btn">VIEW</button>
+                            {% if user.is_active %}
+                            <a href="{% url 'user_status' user.id%}"><button class="deactivate-btn">BLOCK</button></a>
+                            {% else %}
+                            <a href="{% url 'user_status' user.id%}"><button class="activate-btn">UNBLOCK</button></a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </main>
+    </div>
+</body>
+</html>
+{% endblock %}

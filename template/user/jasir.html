@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password Input Page</title>
+  <style>
+    /* Reset some default styles for better consistency */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
+
+    /* Full-page layout and alignment */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #DEAD6F;
+    }
+
+    /* Styling the container */
+    .container {
+      width: 100%;
+      max-width: 400px;
+      background-color: white;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    /* Heading styling */
+    h2 {
+      margin-bottom: 1rem;
+      color: #333;
+    }
+
+    /* Input groups */
+    .input-group {
+      margin-bottom: 1.5rem;
+      text-align: left;
+    }
+
+    /* Labels */
+    .input-group label {
+      font-size: 0.9rem;
+      color: #444;
+    }
+
+    /* Inputs */
+    .input-group input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    /* Button styling */
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #0984e3;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    /* Button hover effect */
+    button:hover {
+      background-color: #74b9ff;
+    }
+
+    /* Responsive design */
+    @media (max-width: 480px) {
+      .container {
+        padding: 1.5rem;
+      }
+
+      h2 {
+        font-size: 1.2rem;
+      }
+
+      input {
+        font-size: 0.9rem;
+      }
+
+      button {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Password Verification</h2>
+    <form>
+      <div class="input-group">
+        <label for="password1">Enter Password:</label>
+        <input type="password" id="password1" placeholder="Enter your password" required>
+      </div>
+      
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+</body>
+</html>

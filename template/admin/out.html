@@ -1,0 +1,23 @@
+<!-- Modal for Adding or Editing Paint -->
+<form action="{% url 'add_paint'%}" method = 'POST'>
+    {% csrf_token %}
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="modal-header">
+                <h2 id="modal-title">Add New Paint</h2>
+            </div>
+            <div class="modal-body">
+                <!-- <label for="paint-id">Paint ID:</label>
+                <input type="text" id="paint-id" placeholder="Enter Paint ID"> -->
+
+                <label for="paint-type">Paint Type:</label>
+                <input type="text" id="paint-type" name = 'add_paint' placeholder="Enter paint type">
+
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="save-btn" id="modal-save-btn">SUBMIT</button>
+            </div>
+        </div>
+    </div>
+    </form>

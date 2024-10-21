@@ -1,0 +1,294 @@
+{% extends "admin/sidebar.html" %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art Canva Dashboard</title>
+    <style>
+        main {
+            flex-grow: 1;
+            padding: 30px;
+            background-color: #f0f2f5;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .header input {
+            padding: 10px;
+            width: 250px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        .add-btn {
+            padding: 10px 20px;
+            background-color: #00b894;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-btn:hover {
+            background-color: #009970;
+        }
+
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0px 3px 15px rgba(0, 0, 0, 0.05);
+            border: 2px solid #2d3436;
+        }
+
+        .product-table th, .product-table td {
+            padding: 15px;
+            text-align: left;
+            border: 1px solid #2d3436;
+        }
+
+        .product-table th {
+            background-color: #f4f4f4;
+        }
+
+        .product-table td {
+            font-size: 15px;
+            color: #2d3436;
+        }
+
+        .action-btn, .deactivate-btn {
+            padding: 5px 10px;
+            margin-right: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        .activate-btn {
+            padding: 5px 10px;
+            margin-right: 5px;
+            background-color: #46923c;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+
+        .action-btn {
+            background-color: #0984e3;
+            color: white;
+        }
+
+        .action-btn:hover {
+            background-color: #006bb5;
+        }
+
+        .deactivate-btn {
+            background-color: #ff0000;
+            color: white;
+        }
+
+        .deactivate-btn:hover {
+            background-color: #b21719;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover, .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+        }
+
+        .modal-body input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .save-btn {
+            padding: 10px 20px;
+            background-color: #00b894;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .save-btn:hover {
+            background-color: #009970;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Main content -->
+        <main>
+            <div class="header">
+                <h1>TYPES OF VERIANTS</h1>
+                <input type="text" placeholder="Search...">
+                <button class="add-btn" id="openModalBtn">ADD NEW VERIANT</button>
+            </div>
+           
+            <table class="product-table">
+                <thead>
+                    <tr>
+
+                        <th></th>
+                        <th>VERIANT ID</th>
+                        <th>SIZE(inches)</th>
+                        <th>PRICE</th>
+                        <th>STOCK</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for variant in variants %}
+                    <tr>
+                        <td></td>
+                        <td>{{ variant.id }}</td>
+                        <td>{{ variant.frame_size}}</td>
+                        <td>{{ variant.price}}</td>
+                        <td>{{ variant.stock}}</td>
+
+                        <td>
+                            <button class="action-btn edit-btn">EDIT</button>
+                            {% if variant.variant_status%}
+                            <a href="{% url 'variant_app:variant_status' variant.id variant.product.id %}"><button class="deactivate-btn">DEACTIVATE</button></a>
+                            {% else %}
+                            <a href="{% url 'variant_app:variant_status' variant.id variant.product.id %}"><button class="activate-btn">ACTIVATE</button></a>
+                            {% endif %}
+                        </td>
+                      
+                    </tr>
+                    {% endfor %}
+                   
+                </tbody>
+            </table>
+        </main>
+    </div>
+
+    <div id="veriantModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <form id="variantForm" method="POST">
+                {% csrf_token %} 
+                <div class="modal-header">
+                    <h2 id="modal-title">Add Product Variant</h2>
+                </div>
+                <div class="modal-body">
+                    <label for="size">Size (inches):</label>
+                    <input type="text" name="size" placeholder="Enter size" required>
+    
+                    <label for="price">Price:</label>
+                    <input type="number" name="price" placeholder="Enter Price" required>
+    
+                    <label for="stock">Stock:</label>
+                    <input type="number" name="stock" placeholder="Enter stock" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="save-btn" id="modal-save-btn">SAVE</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+      
+        var modal = document.getElementById("veriantModal");
+        var btn = document.getElementById("openModalBtn");
+        var span = document.getElementsByClassName("close")[0];
+        btn.onclick = function() {
+            modal.style.display = "block";
+            document.getElementById("variant-id").value = "";
+            document.getElementById("size").value = "";
+            document.getElementById("price").value = "";
+            document.getElementById("stock").value = "";
+        }
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+        var editButtons = document.querySelectorAll(".edit-btn");
+
+        editButtons.forEach(function(editBtn) {
+            editBtn.onclick = function() {
+                var row = editBtn.closest("tr");
+                var variantId = row.cells[1].textContent;
+                var size = row.cells[2].textContent;
+                var price = row.cells[3].textContent;
+                var stock = row.cells[4].textContent;
+                modal.style.display = "block";
+                document.getElementById("variant-id").value = variantId;
+                document.getElementById("size").value = size;
+                document.getElementById("price").value = price;
+                document.getElementById("stock").value = stock;
+            };
+        });
+    </script>
+</body>
+</html>
+
+{% endblock %}

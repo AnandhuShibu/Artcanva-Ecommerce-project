@@ -1,0 +1,339 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Artcanva</title>
+  <link 
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" 
+    rel="stylesheet"
+  >
+  <style>
+
+    body{
+      background-color:#ffffe4
+    }
+    /* Custom navbar height */
+    .navbar {
+      height: 80px; /* Adjust the height as needed */
+      
+
+    }
+
+    .logo {
+      font-size: 1.8rem; /* Increase logo size */
+      color: #000000; /* Logo color */
+      font-weight: bold; /* Make the logo bold */
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+      letter-spacing: 1px; /* Increase letter spacing */
+      text-decoration: none;
+  }
+  
+    .navbar-nav .nav-link {
+      font-size: 1.3rem; /* Optional: Increase font size for links */
+      color:#000000
+    }
+
+
+
+    .navbar-nav .nav-item {
+      margin: 0 15px; /* Add horizontal margin between links */
+  }
+  
+  
+    .navbar-toggler {
+      padding: 0.5rem; /* Adjust padding for the toggler button */
+    }
+    /* Carousel and video setup for full-screen view */
+    .carousel-item {
+      height: 80vh; /* Full height of the screen */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    video {
+      width: 100vw; /* Full width of the viewport */
+      height: auto; /* Full height of the viewport */
+      object-fit: cover; /* Crop and scale video to fill the area */
+    }
+
+    .popular-products {
+      margin-top: 50px; /* Space above the heading */
+      text-align: left; /* Center the heading */
+    }
+
+    .new-arrivals {
+      margin-top: 50px; /* Space above the heading */
+      text-align: center; /* Align the heading to the left */
+  }
+  
+  .new-arrivals-heading {
+      font-size: 2.5rem; /* Increase font size for attractiveness */
+      color: #5B534F; /* Change this to your preferred color */
+      font-weight: bold; /* Make the heading bold */
+      margin-bottom: 10px; /* Space below the heading */
+  }
+  .new-arrivals p {
+      font-size: 1.25rem; /* Slightly larger font size for the paragraph */
+      color: #6c757d; /* Change to a softer text color */
+  }
+    .card {
+     
+      width: 90%; /* Set a specific width for the card */
+      margin: 0 auto; /* Center the card in its column */
+    }
+
+    .small-card {
+      width: 80%; /* Set a specific width for smaller cards */
+      margin: 0 auto; /* Center the smaller cards in their column */
+    }
+
+    #card_image_arrival{
+      height:310px ;
+      }
+     
+
+      #card_image_popular{
+        height:243px ;
+        }
+       
+    .quotes-section {
+      background-color: #f8f9fa; /* Light background color */
+      padding: 30px; /* Padding around the section */
+      background-color:#ffffe4
+  }
+  
+  .quotes-section h3 {
+      color: #343a40; /* Dark color for the heading */
+  }
+  
+  .quotes-section blockquote {
+     
+      padding-left: 15px; /* Padding inside the blockquote */
+      margin-bottom: 20px; /* Space between quotes */
+      font-style: italic; /* Italic text style for quotes */
+      color: #6c757d; /* Softer text color */
+  }
+  .slow-underline {
+    position: relative;
+    color: inherit; /* Keep the link color the same */
+    text-decoration: none;
+    overflow: hidden;
+    display: inline-block;
+  }
+
+  /* Create the underline effect */
+  .slow-underline::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 90%;
+    height: 1px; /* Thickness of the underline */
+    background-color: currentColor; /* Same color as text */
+    transform: scaleX(0); /* Initially hidden */
+    transition: transform 0.4s ease-in-out; /* Smooth animation */
+    transform-origin: left; /* Start animation from the left */
+  }
+
+  /* On hover, reveal the underline */
+  .slow-underline:hover::after {
+    transform: scaleX(1); /* Expand to full width */
+  }
+
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMKtkz0p5sy4R8l1L4/fC1RfwD1kLwL4RbfE8" crossorigin="anonymous">
+</head>
+<body>
+
+<!-- Navbar Start -->
+  <nav class="navbar navbar-expand-lg navbar-dark ">
+    <div class="container-fluid">
+
+  <!-- Left Logo Section -->
+      <a class="logo" href="#">ART CANVA</a>
+
+  <!-- Center Links -->
+      <button 
+        class="navbar-toggler" 
+        type="button" 
+        data-bs-toggle="collapse" 
+        data-bs-target="#navbarNav" 
+        aria-controls="navbarNav" 
+        aria-expanded="false" 
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+        <ul class="navbar-nav navbar-nav-center">
+          <li class="nav-item">
+            <a class="nav-link slow-underline" aria-current="page" href="{% url 'home'%}">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link slow-underline" href="{% url 'shop'%}">Shop</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link slow-underline" href="#">Contact</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link slow-underline" href="{% url 'signup' %}">Signup</a>
+          </li>
+        </ul>
+      </div>
+
+  <!-- Right Section (Cart, Wishlist, User) -->
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'cart' %}"><i class="bi bi-cart"></i> Cart</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#"><i class="bi bi-heart"></i> Wishlist</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'profile'%}"><i class="bi bi-person"></i> User</a>
+        </li>
+      </ul>
+
+    </div>
+  </nav>
+<!-- Navbar End -->
+
+
+<!-- Carousel Start -->
+  <div id="staticCarousel" class="carousel slide">
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <video autoplay loop muted>
+          <source src="{% static 'images/video.mp4' %}" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    </div>
+  </div>
+<!-- Carousel End -->
+
+
+<!-- New Arrivals Section Start -->
+<div class="container my-5 new-arrivals">
+  <h2 class="new-arrivals-heading">NEW ARRIVALS</h2>
+  <hr class="my-4">
+  <p class="lead">Discover our latest products that just hit the shelves!</p>
+</div>
+<!-- New Arrivals Section End -->
+
+
+<!-- Card Section Start -->
+  <div class="container my-5">
+    <div class="row">
+      {% for arrival in arrivals %}
+      <div class="col-md-4">
+        <div class="card">
+          <img src="{{ arrival.images1.url }}" id="card_image_arrival" class="card-img-top" alt="Card Image">
+          <div class="card-body">
+            <h5 class="card-title">{{arrival.product_name}}</h5>
+            <p class="card-text">{{arrival.}}</p>
+            {% comment %} <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> {% endcomment %}
+            <a href="single" ><button type="button" class="btn btn-primary btn-sm">Small button</button></a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+<!-- Card Section End -->
+
+
+<!-- Popular Products Section -->
+   <div class="container my-5 popular-products">
+    <h2>| POPULAR PRODUCTS</h2>
+  </div>
+
+<!-- Smaller Card Section Start -->
+  <div class="container my-5">
+    <div class="row">
+    {% for popular in populars %}
+      <div class="col-md-3">
+        <div class="card small-card">
+          <img src="{{popular.images1.url}}" id="card_image_popular" class="card-img-top" alt="Small Card Image 1">
+          <div class="card-body">
+            <h5 class="card-title">Product 1</h5>
+            <p class="card-text">Short description.</p>
+            <a href="#" class="btn btn-primary">View</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+<!-- Smaller Card Section End -->
+
+
+<!-- Quotes Section Start -->
+<div class="container my-5 quotes-section text-center">
+  <h3 class="mb-4">The Essence of Painting</h3>
+  <blockquote class="blockquote">
+      <p class="mb-0">"Painting is the silent dialogue of the soul, capturing emotions where words fall short”</p>  
+  </blockquote>
+
+  <blockquote class="blockquote">
+      <p class="mb-0">“It is a timeless expression that invites us to see the world through the artist's heart."</p>
+  </blockquote>
+</div>
+<!-- Quotes Section End -->
+
+
+<!-- Footer Section Start -->
+<footer class="bg-dark text-white mt-5 pt-4">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-4">
+        <h5>About Us</h5>
+        <p>We are a team dedicated to providing the best products and services for our customers.</p>
+        <p>&copy; 2024 Your Company</p>
+      </div>
+      <div class="col-md-4">
+        <h5>Quick Links</h5>
+        <ul class="list-unstyled">
+          <li><a href="#" class="text-white">Home</a></li>
+          <li><a href="#" class="text-white">About</a></li>
+          <li><a href="#" class="text-white">Services</a></li>
+          <li><a href="#" class="text-white">Contact</a></li>
+        </ul>
+      </div>
+      <div class="col-md-4 text-end">
+        <h5>Subscribe to Our Newsletter</h5>
+        <form class="d-flex justify-content-end mt-3">
+          <input type="email" class="form-control me-2" placeholder="Enter your email" aria-label="Email" required>
+          <button class="btn btn-primary" type="submit">Subscribe</button>
+        </form>
+        <h5 class="mt-4">Follow Us</h5>
+        <div>
+          <a href="#" class="text-white me-2"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="text-white me-2"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="text-white me-2"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="text-white"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+<!-- Footer Section End -->
+
+
+<!-- Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMKtkz0p5sy4R8l1L4/fC1RfwD1kLwL4RbfE8" crossorigin="anonymous">
+
+
+  <script 
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
+  </script>
+  <link 
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" 
+    rel="stylesheet"
+  >
+</body>
+</html>

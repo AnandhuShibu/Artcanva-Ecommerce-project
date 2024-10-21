@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>OTP Verification</title>
+        <style>
+            body {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                background-color: #D9D9D9;
+                font-family: 'Poppins', sans-serif;
+                background-image: url(https://img.freepik.com/free-vector/watercolor-world-art-day-background_23-2149327050.jpg?w=1060&t=st=1727767359~exp=1727767959~hmac=a9ed0c0f43e017edd3d208c881e99a997df7d293cf7704f027f645110bdef901); /* Replace with your own art background image */
+                background-size: cover;
+                background-position: center;
+            }
+           
+            .otp-container {
+                background: #D9D9D9;
+                padding: 40px;
+                border-radius: 18px;
+                box-shadow: 0 35px 100px rgba(0, 0, 0, 0.1);
+                text-align: center;
+                max-width: 410px;
+                width: 100%;
+            }
+            .otp-container h2 {
+                font-size: 28px;
+                font-weight: 600;
+                color: #D9D9D9;
+                margin-bottom: 20px;
+            }
+            .otp-inputs {
+                display: flex;
+                justify-content: center;
+                margin-bottom: 20px;
+            }
+            .otp-inputs input {
+                width: 60px;
+                height: 60px;
+                margin: 0 5px;
+                font-size: 24px;
+                text-align: center;
+                border: 2px solid #ddd;
+                border-radius: 10px;
+                transition: border-color 0.3s ease;
+            }
+            .otp-inputs input:focus {
+                outline: none;
+                border-color: #DEAD6F; /* Coral color to match art theme */
+            }
+
+            #otp-timer {
+                margin-top: 20px;
+                font-size: 18px;
+                color: #333;
+            }
+            #resend-otp-container {
+                margin-top: 20px;
+                font-size: 16px;
+            }
+            #resend-otp-link {
+                color: #007bff;
+                text-decoration: none;
+            }
+            #resend-otp-link:hover {
+                text-decoration: underline;
+            }
+            .submit-btn {
+                padding: 12px 25px;
+                background-color: #DEAD6F; /* Coral color */
+                color: white;
+                border: none;
+                border-radius: 30px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+            .submit-btn:hover {
+                background-color: #FF6347; /* Darker coral on hover */
+            }
+            .alert {
+                margin-top: 15px;
+                padding: 10px;
+                color: white;
+                background-color: #ff4d4d;
+                border-radius: 5px;
+                width: 80%;
+                margin: 0 auto;
+                font-size: 14px;
+            }
+            /* Responsive Design */
+            @media (max-width: 600px) {
+                .otp-container {
+                    padding: 20px;
+                }
+                .otp-inputs input {
+                    width: 50px;
+                    height: 50px;
+                    font-size: 20px;
+                }
+                .submit-btn {
+                    font-size: 14px;
+                    padding: 10px 20px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        
+        <div class="otp-container">
+            <h2>Verify Your OTP</h2>
+            <p>Please enter the 4-digit code sent to your email.</p>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="otp-inputs">
+                    <input type="text" name="input_otp" id="input_otp" maxlength="4" placeholder="0000" required>
+                </div>
+                <button type="submit" class="submit-btn">Submit</button>
+            </form>
+
+            <div id="otp-timer">
+                <p>Time remaining: <span id="remaining-time">{{ remaining_time }}</span> seconds</p>
+            </div>
+
+            {% if messages %}
+                <ul class="messages">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                {{ message }}
+            </li>
+            {% endfor %}
+            </ul>
+            {% endif %}
+    
+            <div id="resend-otp-container" style="display: none;">
+                <p>OTP has expired. Please request a new one.</p>
+                <a id="resend-otp-link" href="{% url 'resend_otp' %}">Resend OTP</a>
+    </div>
+
+    <script>
+        let remainingTime = parseInt('{{ remaining_time }}', 10);
+        const timerElement = document.getElementById('remaining-time');
+        const resendOtpContainer = document.getElementById('resend-otp-container');
+        const otpTimerDiv = document.getElementById('otp-timer');
+
+        function startTimer() {
+            const countdownInterval = setInterval(function() {
+                remainingTime--;
+
+                if (remainingTime <= 0) {
+                    clearInterval(countdownInterval);
+                    otpTimerDiv.style.display = 'none';
+                    resendOtpContainer.style.display = 'block';
+                } else {
+                    timerElement.textContent = remainingTime;
+                }
+            }, 1000);
+        }
+
+        window.onload = startTimer;
+</script>
+
+    </div>
+    </body>
+    
+    </html>
+    

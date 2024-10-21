@@ -1,0 +1,533 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>product</title>
+    <link 
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" 
+    rel="stylesheet"
+  >
+
+    <style>
+        body{
+            background-color:#ffffe4
+          }
+          /* Custom navbar height */
+          .navbar {
+            height: 80px; /* Adjust the height as needed */
+            
+      
+          }
+      
+          .logo {
+            font-size: 1.8rem; /* Increase logo size */
+            color: #000000; /* Logo color */
+            font-weight: bold; /* Make the logo bold */
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+            letter-spacing: 1px; /* Increase letter spacing */
+            text-decoration: none;
+        }
+        
+          .navbar-nav .nav-link {
+            font-size: 1.3rem; /* Optional: Increase font size for links */
+            color:#000000
+          }
+      
+      
+      
+          .navbar-nav .nav-item {
+            margin: 0 15px; /* Add horizontal margin between links */
+        }
+        
+        .navbar-nav .nav-link {
+            padding: 10px; /* Optional: Adjust padding for links */
+        }
+        
+          .navbar-toggler {
+            padding: 0.5rem; /* Adjust padding for the toggler button */
+          }
+
+          .product-container {
+            display: flex;
+            justify-content: space-between;
+            padding: 30px;
+            margin: 30px auto;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            max-width: 1200px;
+        }
+
+        .product-images {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            padding: 10px;
+        }
+
+        /* Main Product Image */
+        .product-images img#main-image {
+            width: 80%;
+            max-width: 400px;
+            border-radius: 8px;
+            cursor: crosshair;
+            transition: transform 0.3s ease;
+        }
+
+        .thumbnail-images {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .thumbnail-images img {
+            width: 60px;
+            margin: 0 5px;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: border 0.3s;
+        }
+
+        .thumbnail-images img:hover {
+            border: 2px solid #007bff;
+        }
+
+        .product-details {
+            flex: 1.5;
+            padding: 20px;
+            margin-left: 20px;
+        }
+
+        .product-title {
+            font-size: 28px;
+            margin-bottom: 15px;
+            font-weight: 700;
+            color: #000000;
+        }
+
+        .rating {
+            color: #ffc107;
+            margin-bottom: 15px;
+        }
+
+        .short-description {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .short-description ul {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+
+        .size-options select {
+            padding: 10px;
+            margin-bottom: 25px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+           
+        }
+
+        .price {
+            font-size: 26px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #000000;
+        }
+
+        .product-actions button {
+            padding: 15px 30px;
+            margin: 5px 10px 12px 0;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .buy-now {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .buy-now:hover {
+            background-color: #218838;
+        }
+
+        .add-to-cart {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .add-to-cart:hover {
+            background-color: #0056b3;
+        }
+
+        .related-products {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 30px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .related-products h3 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .related-product-list {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .related-product {
+            text-align: center;
+            margin: 10px;
+            padding: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .related-product img {
+            width: 180px;
+            height: 180px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .related-product:hover {
+            transform: scale(1.05);
+        }
+
+        /* Magnifier Lens Styles */
+        .img-magnifier-glass {
+            position: absolute;
+            border: 3px solid #000;
+            border-radius: 50%;
+            cursor: none;
+            /* Size of the magnifier glass: */
+            width: 150px;
+            height: 150px;
+            box-shadow: 0 0 5px #000;
+            display: none; /* Hidden initially */
+        }
+
+        .size-options {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sizes-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .size-box {
+            display: inline-block;
+            width: 65px; /* Width of the box */
+            height: 35px; /* Height of the box */
+            background-color: #f0f0f0; /* Background color */
+            border: 1px solid #ccc; /* Border */
+            text-align: center; /* Center the text horizontally */
+            line-height: 30px; /* Center the text vertically */
+            font-size: 14px; /* Font size */
+            text-decoration: none; /* Remove underline */
+            color: #000000; /* Text color */
+            border-radius: 5px; /* Rounded corners */
+            transition: background-color 0.3s ease;
+        }
+        
+        .size-box:hover {
+            background-color: #ddd; /* Change background on hover */
+        }
+        /* Popup styles */
+        .popup-message {
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50; /* Green color for success */
+            color: white;
+            padding: 15px 30px;
+            border-radius: 5px;
+            z-index: 1000;
+            transition: top 0.5s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-family: Arial, sans-serif;
+        }
+        .popup-error {
+            background-color: #f44336; /* Red color for error */
+        }
+        .popup-warning {
+            background-color: #ff9800; /* Orange color for warning */
+        }
+        .popup-show {
+            top: 20px;
+        }
+        
+    </style>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMKtkz0p5sy4R8l1L4/fC1RfwD1kLwL4RbfE8" crossorigin="anonymous">
+
+</head>
+<body>
+
+  <div id="popup-message" class="popup-message"></div>
+     <!-- Navbar Start -->
+  <nav class="navbar navbar-expand-lg navbar-dark ">
+    <div class="container-fluid">
+
+      <!-- Left Logo Section -->
+      <a class="logo" href="#">ART CANVA</a>
+
+      <!-- Center Links -->
+      <button 
+        class="navbar-toggler" 
+        type="button" 
+        data-bs-toggle="collapse" 
+        data-bs-target="#navbarNav" 
+        aria-controls="navbarNav" 
+        aria-expanded="false" 
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+        <ul class="navbar-nav navbar-nav-center">
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="{% url 'home'%}">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'shop'%}">Shop</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Contact</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Signup</a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Right Section (Cart, Wishlist, User) -->
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'cart' %}"><i class="bi bi-cart"></i> Cart</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#"><i class="bi bi-heart"></i> Wishlist</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'profile'%}"><i class="bi bi-person"></i> User</a>
+        </li>
+      </ul>
+
+    </div>
+  </nav>
+  <!-- Navbar End -->
+  <hr>
+  <div class="product-container">
+    <div class="product-images">
+        <div class="zoom-container">
+            <img id="main-image" src="{{ product.images1.url }}" alt="Main Product Image">
+            <div id="magnifier-glass" class="img-magnifier-glass"></div>
+        </div>
+        <div class="thumbnail-images">
+            <img src="{{ product.images2.url }}" alt="Thumbnail 1" onclick="changeImage(this)">
+            <img src="{{ product.images3.url }}" alt="Thumbnail 2" onclick="changeImage(this)">
+        </div>
+    </div>
+    <div class="product-details">
+        <h2 class="product-title">{{ product.product_name }}</h2>
+        <div class="rating">
+            ⭐⭐⭐⭐⭐ (7/10)
+        </div>
+
+        <div class="price">
+            ₹{{variant.price}}
+        </div>
+
+        <h6>SELECTED SIZE : {{ variant.frame_size }} </h6>
+
+        <div class="size-options">
+            <label for="sizes">Available sizes (inches):</label>
+            <div class="sizes-container">
+                {% for size in sizes %}
+                <a href="{% url 'single' product.id size.id %}" class="size-box">{{ size.frame_size }}</a>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div>
+            <p></p>
+        </div>
+
+        <div class="product-actions">
+            <button class="buy-now">Buy now</button>
+            <a href="{% url 'addcart' product.id variant.id %}"><button class="add-to-cart">Add to cart</button></a>
+        </div>
+
+        <p class="short-description">
+            <strong>About this product</strong><br>
+            <h6>{{ product.description }}</h6><br>
+            <h6>PAINT TYPE : {{ product.paint_category.paint_type }}</h6><br>
+            <h6>ART TYPE : {{ product.art_category.art_type }}</h6><br>
+        </p>
+    </div>
+</div>
+
+
+<div class="related-products">
+    <h3>Related Products</h3>
+    
+    <div class="related-product-list">
+       
+        <div class="related-product">
+            <img src="{% static 'images/abc.jpg' %}"alt="Related Product 1">
+            <p>helloo</p>
+            <p>hellooo</p>
+        </div>
+      
+    </div>
+    
+</div>
+
+  <!-- Footer Section Start -->
+<footer class="bg-dark text-white mt-5 pt-4">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4">
+          <h5>About Us</h5>
+          <p>We are a team dedicated to providing the best products and services for our customers.</p>
+          <p>&copy; 2024 Your Company</p>
+        </div>
+        <div class="col-md-4">
+          <h5>Quick Links</h5>
+          <ul class="list-unstyled">
+            <li><a href="#" class="text-white">Home</a></li>
+            <li><a href="#" class="text-white">About</a></li>
+            <li><a href="#" class="text-white">Services</a></li>
+            <li><a href="#" class="text-white">Contact</a></li>
+          </ul>
+        </div>
+        <div class="col-md-4 text-end">
+          <h5>Subscribe to Our Newsletter</h5>
+          <form class="d-flex justify-content-end mt-3">
+            <input type="email" class="form-control me-2" placeholder="Enter your email" aria-label="Email" required>
+            <button class="btn btn-primary" type="submit">Subscribe</button>
+          </form>
+          <h5 class="mt-4">Follow Us</h5>
+          <div>
+            <a href="#" class="text-white me-2"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="text-white me-2"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="text-white me-2"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="text-white"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <!-- Footer Section End -->
+  
+  <!-- Font Awesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMKtkz0p5sy4R8l1L4/fC1RfwD1kLwL4RbfE8" crossorigin="anonymous">
+  
+  
+    <script 
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
+    </script>
+    <link 
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" 
+      rel="stylesheet"
+    >
+
+    <script>
+
+        function changeImage(thumbnail) {
+            const mainImage = document.getElementById('main-image');
+            const magnifierGlass = document.getElementById('magnifier-glass');
+            mainImage.src = thumbnail.src;
+            magnifierGlass.style.backgroundImage = `url(${thumbnail.src})`;
+        }
+
+        function magnify(imgID, zoom) {
+            const img = document.getElementById(imgID);
+            const magnifierGlass = document.getElementById("magnifier-glass");
+            let w, h, bw;
+
+            magnifierGlass.style.backgroundImage = `url(${img.src})`;
+            magnifierGlass.style.backgroundRepeat = "no-repeat";
+            magnifierGlass.style.backgroundSize = (img.width * zoom) + "px " + (img.height * zoom) + "px";
+
+            img.addEventListener("mousemove", moveMagnifier);
+            magnifierGlass.addEventListener("mousemove", moveMagnifier);
+            img.addEventListener("touchmove", moveMagnifier);
+            magnifierGlass.addEventListener("touchmove", moveMagnifier);
+
+            function moveMagnifier(e) {
+                let pos, x, y;
+                e.preventDefault();
+                pos = getCursorPos(e);
+                x = pos.x;
+                y = pos.y;
+
+                if (x > img.width - (magnifierGlass.offsetWidth / 2)) x = img.width - (magnifierGlass.offsetWidth / 2);
+                if (x < magnifierGlass.offsetWidth / 2) x = magnifierGlass.offsetWidth / 2;
+                if (y > img.height - (magnifierGlass.offsetHeight / 2)) y = img.height - (magnifierGlass.offsetHeight / 2);
+                if (y < magnifierGlass.offsetHeight / 2) y = magnifierGlass.offsetHeight / 2;
+
+                magnifierGlass.style.left = (x - magnifierGlass.offsetWidth / 2) + "px";
+                magnifierGlass.style.top = (y - magnifierGlass.offsetHeight / 2) + "px";
+                magnifierGlass.style.backgroundPosition = "-" + ((x * zoom) - magnifierGlass.offsetWidth / 2) + "px -" + ((y * zoom) - magnifierGlass.offsetHeight / 2) + "px";
+                magnifierGlass.style.display = "block";
+            }
+        
+            function getCursorPos(e) {
+                let a, x = 0, y = 0;
+                e = e || window.event;
+                a = img.getBoundingClientRect();
+
+                x = e.pageX - a.left;
+                y = e.pageY - a.top;
+                x = x - window.pageXOffset;
+                y = y - window.pageYOffset;
+
+                return { x: x, y: y };
+            }
+
+            img.onmouseout = function () {
+                magnifierGlass.style.display = "none";
+            }
+        }
+        magnify("main-image", 2);
+
+        // Function to show the popup message
+        function showPopup(message, type) {
+          const popup = document.getElementById('popup-message');
+          popup.textContent = message;
+          popup.className = `popup-message popup-${type} popup-show`;
+
+          // Hide the popup after 3 seconds
+          setTimeout(() => {
+              popup.className = 'popup-message';
+          }, 3000);
+      }
+
+      // Check for Django messages and display them
+      {% if messages %}
+          {% for message in messages %}
+              showPopup("{{ message }}", "{{ message.tags }}");
+          {% endfor %}
+      {% endif %}
+    </script>
+</body>
+</html>

@@ -1,0 +1,359 @@
+{% extends "admin/sidebar.html" %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art Canva Dashboard</title>
+    <style>
+        main {
+            flex-grow: 1;
+            padding: 30px;
+            background-color: #f0f2f5;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .header input {
+            padding: 10px;
+            width: 250px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        .add-btn {
+            padding: 10px 20px;
+            background-color: #00b894;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-btn:hover {
+            background-color: #009970;
+        }
+
+        .product-table {
+            width: 100%;
+            border-collapse: collapse; 
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0px 3px 15px rgba(0, 0, 0, 0.05);
+            border: 2px solid #2d3436;
+        }
+
+        .product-table th, .product-table td {
+            padding: 15px;
+            text-align: left;
+            border: 1px solid #2d3436; 
+        }
+
+        .product-table th {
+            background-color: #f4f4f4;
+        }
+
+        .product-table td {
+            font-size: 15px;
+            color: #2d3436;
+        }
+
+        .action-btn, .deactivate-btn {
+            padding: 5px 10px;
+            margin-right: 5px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .activate-btn{
+            padding: 5px 10px;
+            margin-right: 5px;
+            background-color:  #46923c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+
+        }
+
+        .action-btn {
+            background-color: #0984e3;
+        }
+
+        .action-btn:hover {
+            background-color: #006bb5;
+        }
+
+        .deactivate-btn {
+            background-color: #ff0000;
+        }
+
+        .deactivate-btn:hover {
+            background-color: #b21719;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 30%;
+            border-radius: 10px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .modal-btn {
+            background-color: #00b894;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        .modal-btn:hover {
+            background-color: #009970;
+        }
+
+        .sweet-alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            width: 300px;
+            height: 30px;
+            border-radius: 10px;
+            padding: 20px;
+            border: none;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); 
+            background: linear-gradient(145deg, #f0f4f8, #e0e7ee); 
+            text-align: center;
+            animation: slideDown 0.5s ease;
+        }
+        
+        /* Adding slide-down animation */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -20px);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0); 
+            }
+        }
+        
+        .message-box {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .alert-info {
+            color: #007bff;
+            font-weight: bold;
+        }
+        
+        .alert-button {
+            margin-top: 20px; /* Space above button */
+            padding: 10px 20px; /* Padding for button */
+            border: none; /* Remove border */
+            border-radius: 5px; /* Rounded corners for button */
+            background-color: #007bff; /* Button color */
+            color: white; /* Button text color */
+            cursor: pointer; /* Change cursor to pointer */
+            transition: background-color 0.3s ease; /* Transition for hover effect */
+        }
+        
+        .alert-button:hover {
+            background-color: #0056b3; /* Darker button on hover */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <main>
+            <div class="header">
+                <h1>ART TYPES</h1>
+                <input type="text" placeholder="Search...">
+                <button id="addArtBtn" class="add-btn">ADD NEW ART</button>
+            </div>
+
+            {% if messages %}
+            <div class="sweet-alert">
+                <div class="alert alert-info message-box" role="alert">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                 {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <table class="product-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>CATEGORY ID</th>
+                        <th>TYPES OF ART</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for art in art_type%}
+                    <tr>
+                        <td></td>
+                        <td>{{art.id}}</td>
+                        <td>{{art.art_type}}</td>
+                        <td>
+                            <button class="action-btn edit-btn">EDIT</button>
+                            {% if art.art_type_status %}
+                            <a href="{% url 'art_status' art.id%}"><button class="deactivate-btn">DE ACTIVATE</button></a>
+                            {% else %}
+                            <a href="{% url 'art_status' art.id%}"><button class="activate-btn">ACTIVATE</button></a>
+                            {% endif %}
+                            
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </main>
+    </div>
+
+    <form action="{% url 'add_art'%}" method = 'POST'>
+    {% csrf_token %}
+    <div id="addArtModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add New Art</h2>
+            <input type="text" name = 'art_type' placeholder="Type of Art" required>
+            <button class="modal-btn">Submit</button>
+        </div>
+    </div>
+    </form>
+    
+    <form action="{% url 'edit_art' %}" method = 'POST'>
+    {% csrf_token %}
+    <div id="editArtModal" class="modal">
+        <div class="modal-content">
+            <span class="close-edit">&times;</span>
+            <h2>Edit Art</h2>
+            <input type="hidden" id="editCategoryId" name="categoryId">
+            <input id="editArtType" name="art_type" type="text" placeholder="Type of Art" required>
+            <button type="submit" class="modal-btn">Save Changes</button>
+        </div>
+    </div>
+    </form>
+    
+    <script>
+        // Add Art Modal
+        var addModal = document.getElementById("addArtModal");
+        var addBtn = document.getElementById("addArtBtn");
+        var closeAddModal = document.getElementsByClassName("close")[0];
+
+        addBtn.onclick = function() {
+            addModal.style.display = "block";
+        }
+
+        closeAddModal.onclick = function() {
+            addModal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == addModal) {
+                addModal.style.display = "none";
+            }
+        }
+
+        // Edit Art Modal
+        var editModal = document.getElementById("editArtModal");
+        var editButtons = document.querySelectorAll(".edit-btn");
+        var closeEditModal = document.getElementsByClassName("close-edit")[0];
+
+        editButtons.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                editModal.style.display = "block";
+                var row = btn.closest('tr');
+                var categoryId = row.cells[1].textContent;
+                var artType = row.cells[2].textContent;
+                document.getElementById("editCategoryId").value = categoryId;
+                document.getElementById("editArtType").value = artType;
+            });
+        });
+
+        closeEditModal.onclick = function() {
+            editModal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == editModal) {
+                editModal.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
+{% endblock %}

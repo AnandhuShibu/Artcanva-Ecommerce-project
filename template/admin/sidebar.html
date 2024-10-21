@@ -1,0 +1,195 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art Canva Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 250px;
+            background-color: #dfe6e9; /* Light blue */
+            color: #2d3436;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .profile-section {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-direction: column;
+        }
+
+        .profile-section img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+
+        .profile-section h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #0984e3;
+        }
+
+        .sidebar ul {
+            list-style-type: none;
+            flex-grow: 1;
+        }
+
+        .sidebar ul li {
+            margin: 15px 0;
+        }
+
+        .sidebar ul li a {
+            text-decoration: none;
+            color: #2d3436;
+            font-size: 16px;
+            padding: 10px 15px;
+            display: block;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .sidebar ul li a.active, .sidebar ul li a:hover {
+            background-color: #0984e3;
+            color: white;
+        }
+
+        /* Dropdown styles */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-button {
+            text-decoration: none;
+            color: #2d3436;
+            font-size: 16px;
+            padding: 10px 15px;
+            display: block;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            background-color: transparent; /* Change to transparent */
+            border: none; /* Remove default border */
+            width: 100%; /* Full width to match other links */
+            text-align: left; /* Align text to the left */
+        }
+
+        .dropdown-button:hover {
+            background-color: #0984e3; /* Match hover effect */
+            color: white; /* Match hover text color */
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #dfe6e9; /* Match sidebar background */
+            min-width: 250px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        .dropdown-content a {
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+            color: #2d3436;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #ddd;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        .action {
+            padding: 10px 20px;
+            margin-right: 5px;
+            background-color: #ff2c2c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        .btn{
+            padding: 5px 10px;
+            margin-right: 5px;
+            background-color: #f01e2c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="profile-section">
+                <img src="https://png.pngtree.com/png-vector/20220628/ourmid/pngtree-user-profile-avatar-vector-admin-png-image_5289693.png" alt="Profile Picture">
+                <h3>ADMIN</h3>
+            </div>
+            <ul>
+                <li><a href="{% url 'panel' %}">Dashboard</a></li>
+                <li><a href="{% url 'users' %}">Users</a></li>
+                <li><a href="{% url 'product' %}">Products</a></li>
+                <li><a href="">Orders</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-button">Categories</a>
+                    <div class="dropdown-content">
+                        <a href="{% url 'art' %}">Type of Art</a>
+                        <a href="{% url 'paint' %}">Type of Paint</a>
+                        
+                    </div>
+                </li>
+                <li><a href="#">Coupons</a></li>
+                <li><a href="#">Discounts</a></li>
+                <li></li>
+                <li></li>
+                <form action="{% url 'logout' %}" method="POST" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Logout</button>
+                </form>
+            </ul>
+
+           
+        </aside>
+
+        <!-- Main content -->
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>
