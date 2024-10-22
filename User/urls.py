@@ -31,6 +31,9 @@ urlpatterns = [
     path('password_verify',views.password_verify, name='password_verify'),
     path('password_change',views.password_change, name='password_change'),
     path('edit_address/',views.edit_address, name='edit_address'),
+    path('edit_address_chechout/',views.edit_address_chechout, name='edit_address_chechout'),
+
+    
     path('remove_address/<int:address_id>',views.remove_address, name='remove_address'),
     path('remove_address_profile/<int:address_id>',views.remove_address_profile, name='remove_address_profile'),
     path('place_order/',views.place_order, name='place_order'),

@@ -112,6 +112,7 @@ def variant(request, product_id):
     
     if request.method == 'POST':
         stock = request.POST.get('stock')
+        print(stock)
         price = request.POST.get('price')
         size = request.POST.get('size')
 

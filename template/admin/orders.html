@@ -147,9 +147,9 @@
                         <td>{{order.id}}</td>
                         <td>{{order.user.id}} </td>
                         <td>{{order.total_amount}}</td>
-                        <td>{{order.order_date}}</td>
+                        <td>{{order.order_date|date:"d-m-y"}}</td>
                         {% if order.deliver_date %}
-                            <td>{{ order.deliver_date }}</td>
+                            <td>{{ order.deliver_date|date:"d-m-y" }}</td>
                         {% else %}
                             <td>Not Yet</td>
                         {% endif %}

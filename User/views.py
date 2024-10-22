@@ -93,7 +93,7 @@ def is_otp_valid(request, input_otp):
 
 def otp(request):
     if request.method == 'POST':
-        input_otp = request.POST.get('input_otp')  # Use 'otp' as the form field name
+        input_otp = request.POST.get('input_otp')
         print(input_otp)
         if is_otp_valid(request, input_otp):
             del request.session['generated_otp']
@@ -396,7 +396,7 @@ def password_verify(request):
         if check_password(old_password, request.user.password):
             return redirect('password_change')
         else:
-            messages.error(request, 'Incorrect password jaassir. Please try again.')
+            messages.error(request, '')
             return redirect('password_verify')
     
     return render(request, 'user/password_verify.html')
@@ -453,7 +453,7 @@ def checkout_og(request):
     if request.method == 'POST':
         total_price = request.POST.get('total_price')
         quantities = {
-            key.split('_')[1]: int(value)  # Extract product ID and quantity
+            key.split('_')[1]: int(value) 
             for key, value in request.POST.items()
             if key.startswith('quantity_')
         }
@@ -496,6 +496,34 @@ def checkout(request):
     total_price = request.session.get('total_price', 0)
     cart_items=Cart.objects.filter(user=request.user)
     return render(request,'user/checkout.html', {'all_address': all_address, 'total_price':total_price, 'cart_items':cart_items})
+
+def edit_address_chechout(request):
+    if request.method == 'POST':
+        address_id = request.POST.get('address_id')
+        fullname = request.POST.get('fullname')
+        mobile = request.POST.get('mobile')
+        pincode = request.POST.get('pincode')
+        address = request.POST.get('address')
+        city = request.POST.get('city')
+        district = request.POST.get('district')
+        state = request.POST.get('state')
+
+        if address_id:
+            address_instance = get_object_or_404(Address, id=address_id)
+            address_instance.fullname = fullname
+            address_instance.mobile = mobile
+            address_instance.pincode = pincode
+            address_instance.address = address
+            address_instance.city = city
+            address_instance.district = district
+            address_instance.state = state
+            address_instance.save()
+        else:
+            Address.objects.create(
+                fullname=fullname, mobile=mobile, pincode=pincode,
+                address=address, city=city, district=district, state=state, user_id=request.user
+            )
+        return redirect('checkout')
 
 def remove_address(request,address_id):
     address = Address.objects.filter(id=address_id)

@@ -280,11 +280,14 @@
           </div>
           <div>
             
-            <button class="btn btn-sm btn-outline-primary" onclick="openEditModal({{address.id}},
-            '{{address.fullname}}', '{{address.mobile}}', '{{address.pincode}}', '{{address.address}}',
-            '{{address.city}}', '{{address.district}}', '{{address.state}}')">Edit</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="openEditModal({{ address.id }},
+            '{{ address.fullname }}', '{{ address.mobile }}', '{{ address.pincode }}', '{{ address.address }}',
+            '{{ address.city }}', '{{ address.district }}', '{{ address.state }}')">Edit</button>
 
-           <button class="btn btn-sm btn-outline-danger">DELETE</button>
+
+            <a href="{% url 'remove_address' address.id %}">
+              <button type="button" class="btn btn-sm btn-outline-danger">DELETE</button>
+            </a>
           </div>
         </div>
         {% endfor %}
@@ -400,28 +403,31 @@
 </div>
 
 <!-- Edit Address Modal -->
-<div class="editmodal fade" id="editAddressModal" tabindex="-1" aria-labelledby="editAddressModalLabel" aria-hidden="true">
-  <div class="editmodal-dialog">
-    <div class="editmodal-content">
-      <div class="editmodal-header">
+<div class="modal fade" id="editAddressModal" tabindex="-1" aria-labelledby="editAddressModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
         <h5 class="modal-title" id="editAddressModalLabel">Edit Address</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form action="{% url 'edit_address' %}" method='POST'>
+        <form action="{% url 'edit_address_chechout' %}" method="POST">
+          {% csrf_token %}
           <input type="hidden" name="address_id">
-          <input type="text" class="form-control mb-3" name='fullname' placeholder="Full Name">
-          <input type="text" class="form-control mb-3" name='mobile' placeholder="Mobile">
-          <input type="text" class="form-control mb-3" name='pincode' placeholder="Pincode">
-          <input type="text" class="form-control mb-3" name='address' placeholder="Address">
-          <input type="text" class="form-control mb-3" name='city' placeholder="City">
-          <input type="text" class="form-control mb-3" name='district' placeholder="District">
-          <input type="text" class="form-control mb-3" name='state' placeholder="State">
+          <input type="text" class="form-control mb-3" name="fullname" placeholder="Full Name">
+          <input type="text" class="form-control mb-3" name="mobile" placeholder="Mobile">
+          <input type="text" class="form-control mb-3" name="pincode" placeholder="Pincode">
+          <input type="text" class="form-control mb-3" name="address" placeholder="Address">
+          <input type="text" class="form-control mb-3" name="city" placeholder="City">
+          <input type="text" class="form-control mb-3" name="district" placeholder="District">
+          <input type="text" class="form-control mb-3" name="state" placeholder="State">
+          <button type="submit" class="btn btn-primary">Save Changes</button>
         </form>
       </div>
     </div>
   </div>
 </div>
+
 
  <!-- Footer Section Start -->
  <footer class="bg-dark text-white mt-5 pt-4">
@@ -473,20 +479,27 @@
 
   <script>
     function openEditModal(id, fullname, mobile, pincode, address, city, district, state) {
-      document.getElementById('editAddressModal').style.display = 'flex';
-    
+      // Get the modal element
+      var modal = document.getElementById('editAddressModal');
+      
       // Populate the form with the address data
-      document.querySelector('#editModal input[name="fullname"]').value = fullname;
-      document.querySelector('#editModal input[name="mobile"]').value = mobile;
-      document.querySelector('#editModal input[name="pincode"]').value = pincode;
-      document.querySelector('#editModal input[name="address"]').value = address;
-      document.querySelector('#editModal input[name="city"]').value = city;
-      document.querySelector('#editModal input[name="district"]').value = district;
-      document.querySelector('#editModal input[name="state"]').value = state;
-    
+      modal.querySelector('input[name="fullname"]').value = fullname;
+      modal.querySelector('input[name="mobile"]').value = mobile;
+      modal.querySelector('input[name="pincode"]').value = pincode;
+      modal.querySelector('input[name="address"]').value = address;
+      modal.querySelector('input[name="city"]').value = city;
+      modal.querySelector('input[name="district"]').value = district;
+      modal.querySelector('input[name="state"]').value = state;
+      
       // Set the hidden input field with the address ID
-      document.querySelector('#editModal input[name="address_id"]').value = id;
+      modal.querySelector('input[name="address_id"]').value = id;
+      
+      // Show the modal using Bootstrap's built-in JavaScript method
+      var editModal = new bootstrap.Modal(modal);
+      editModal.show();
     }
+    
+    
   </script>
 </body>
 </html>

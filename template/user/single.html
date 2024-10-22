@@ -371,13 +371,15 @@
         </div>
 
         <div class="product-actions">
-            <button class="buy-now">Buy now</button>
+            
             {% if variant.stock == 0 %}
-            <p>Out of Stock</p>
+            <h3>OUT OF STOCK</h3>
+            
             {% elif variant.stock > 0 %}
             <a href="{% url 'addcart' product.id variant.id %}"><button class="add-to-cart">Add to cart</button></a>
             {% endif %}
         </div>
+        <br>
 
         <p class="short-description">
             <strong>About this product</strong><br>
@@ -394,8 +396,7 @@
     <div class="related-product-list">
         <div class="related-product">
             <img src="{% static 'images/abc.jpg' %}"alt="Related Product 1">
-            <p>helloo</p>
-            <p>hellooo</p>
+            
         </div>
     </div>
 </div>

@@ -70,7 +70,7 @@
                 <tr>
                     <td>{{ order.id }}</td>
                     <td>{{ order.total_amount }}</td>
-                    <td>{{ order.order_date }}</td>
+                    <td>{{ order.order_date|date:"d-m-y"}}</td>
                     <td>{{ order.status }}</td>
                     <td><a href="{% url 'order_details' order.id %}">view</a></td>
                 </tr>
