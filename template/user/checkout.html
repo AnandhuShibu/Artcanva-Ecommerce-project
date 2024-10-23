@@ -193,11 +193,52 @@
         background-color: #000000;
         margin: 0;
         }
+        .add {
+          background-color: #4CAF50; /* Green background */
+          color: white; /* White text */
+          border: none; /* Remove border */
+          padding: 12px 24px; /* Add padding */
+          text-align: center; /* Center text */
+          font-size: 16px; /* Set font size */
+          font-weight: bold; /* Bold text */
+          border-radius: 8px; /* Rounded corners */
+          cursor: pointer; /* Pointer on hover */
+          transition: background-color 0.3s ease, transform 0.2s ease; /* Add transition effects */
+      }
+      
+      .add:hover {
+          background-color: #45a049; /* Darker green on hover */
+          transform: scale(1.05); /* Slight zoom effect */
+      }
+
+      .popup-message {
+        position: fixed;
+        top: -100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #FFDE21; /* Green color for success */
+        color: #000000;
+        padding: 20px 35px;
+        border-radius: 6px;
+        z-index: 1000;
+        transition: top 0.5s ease-in-out;
+        box-shadow: 0 5px 7px rgba(0, 0, 0, 0.1);
+        font-family: Arial, sans-serif;
+      }
+      .popup-error {
+          background-color: #f44336;
+      }
+      .popup-warning {
+          background-color: #ff9800;
+      }
+      .popup-show {
+          top: 25px;
+      }
   </style>
 </head>
 <body>
+  <div id="popup-message" class="popup-message"></div>
 
-    
     <!-- Navbar Start -->
   <nav class="navbar navbar-expand-lg navbar-dark ">
     <div class="container-fluid">
@@ -293,7 +334,7 @@
         {% endfor %}
       </div>
 
-      <button class="btn btn-add-address w-100" data-bs-toggle="modal" data-bs-target="#addAddressModal">
+      <button type="button" class="btn btn-add-address w-100" data-bs-toggle="modal" data-bs-target="#addAddressModal">
         ADD ADDRESS
       </button>
 
@@ -322,7 +363,7 @@
     <div class="col-lg-4">
       <div class="coupon-section mb-4">
         <input type="text" class="form-control" placeholder="Enter Coupon Code">
-        <button class="btn btn-apply w-100">APPLY</button>
+        <button type="button" class="btn btn-apply w-100">APPLY</button>
         <p></p>
         <p>Discount on Price: ₹0</p>
         <p>Coupon Discount: AMT</p>
@@ -395,7 +436,7 @@
           <input type="text" class="form-control mb-3" name='city' placeholder="City" required>
           <input type="text" class="form-control mb-3" name='district' placeholder="District" required>
           <input type="text" class="form-control mb-3" name='state' placeholder="State" required>
-          <button type='submit'>SUBMIT</button>
+          <button class="add" type='submit'>SUBMIT</button>
         </form>
       </div>
     </div>
@@ -499,6 +540,24 @@
       editModal.show();
     }
     
+     // Function to show the popup message
+     function showPopup(message, type) {
+      const popup = document.getElementById('popup-message');
+      popup.textContent = message;
+      popup.className = `popup-message popup-${type} popup-show`;
+
+      // Hide the popup after 3 seconds
+      setTimeout(() => {
+          popup.className = 'popup-message';
+      }, 3000);
+  }
+
+  // Check for Django messages and display them
+  {% if messages %}
+      {% for message in messages %}
+          showPopup("{{ message }}", "{{ message.tags }}");
+      {% endfor %}
+  {% endif %}
     
   </script>
 </body>

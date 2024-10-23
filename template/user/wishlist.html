@@ -1,0 +1,300 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art Canva Wishlist</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body{
+            background-color:#ffffe4
+          }
+          /* Custom navbar height */
+          .navbar {
+            height: 80px; /* Adjust the height as needed */
+            
+      
+          }
+      
+          .logo {
+            font-size: 1.8rem; /* Increase logo size */
+            color: #000000; /* Logo color */
+            font-weight: bold; /* Make the logo bold */
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+            letter-spacing: 1px; /* Increase letter spacing */
+            text-decoration: none;
+        }
+        
+          .navbar-nav .nav-link {
+            font-size: 1.3rem; /* Optional: Increase font size for links */
+            color:#000000 !important;
+          }
+      
+      
+      
+          .navbar-nav .nav-item {
+            margin: 0 15px; /* Add horizontal margin between links */
+        }
+        
+        
+          .navbar-toggler {
+            padding: 0.5rem; /* Adjust padding for the toggler button */
+          }
+
+          hr {
+            border: none;
+            height: 1px;
+            background-color: #000000;
+            margin: 0;
+            }
+
+        /* Wishlist Item Styles */
+        .wishlist-item {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fff;
+            border-radius: 10px;
+        }
+
+        .wishlist-item img {
+            width: 100px;
+            height: auto;
+            object-fit: cover;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .wishlist-item img:hover {
+            transform: scale(1.05);
+        }
+
+        .wishlist-item .details {
+            flex-grow: 1;
+            padding: 0 15px;
+        }
+
+        .wishlist-item h5 {
+            margin-bottom: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .wishlist-item .actions button {
+            margin-left: 5px;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            border-radius: 5px;
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            color: #fff;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .wishlist-item .actions button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .wishlist-item .stock {
+            color: green;
+            font-weight: bold;
+        }
+
+        .wishlist-item .out-of-stock {
+            color: red;
+            font-weight: bold;
+        }
+
+        .wishlist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .cart-count {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .btn-warning, .btn-danger {
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            color: #fff;
+            border: none;
+        }
+
+        .btn-warning:hover, .btn-danger:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .wishlist-header{
+            font-weight: 600;
+            display: flex;
+            justify-content: center;
+            height: 50px;   
+        }
+        
+    </style>
+</head>
+<body>
+
+    <!-- Navbar Start -->
+  <nav class="navbar navbar-expand-lg navbar-dark ">
+    <div class="container-fluid">
+
+  <!-- Left Logo Section -->
+      <a class="logo" href="#">ART CANVA</a>
+
+  <!-- Center Links -->
+      <button 
+        class="navbar-toggler" 
+        type="button" 
+        data-bs-toggle="collapse" 
+        data-bs-target="#navbarNav" 
+        aria-controls="navbarNav" 
+        aria-expanded="false" 
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+        <ul class="navbar-nav navbar-nav-center">
+          <li class="nav-item">
+            <a class="nav-link slow-underline" aria-current="page" href="{% url 'home'%}">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link slow-underline" href="{% url 'shop'%}">Shop</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link slow-underline" href="#">Contact</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link slow-underline" href="{% url 'signup' %}">Signup</a>
+          </li>
+        </ul>
+      </div>
+
+  <!-- Right Section (Cart, Wishlist, User) -->
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'cart' %}"><i class="bi bi-cart"></i> Cart</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#"><i class="bi bi-heart"></i> Wishlist</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'profile'%}"><i class="bi bi-person"></i> User</a>
+        </li>
+      </ul>
+
+    </div>
+  </nav>
+<!-- Navbar End -->
+<hr>
+    <!-- Wishlist Section -->
+    <div class="container">
+        <div class="wishlist-header">
+            <h2>WISHLIST</h2>
+        </div>
+
+        <!-- Wishlist Item 1 -->
+        <div class="wishlist-item row" id="item1">
+            <div class="col-md-2">
+                <img src="{% static 'images/abc.jpg' %}" alt="Shree Ganesha Kerala Mural Painting">
+            </div>
+            <div class="details col-md-7">
+                <h5>Shree Ganesha Kerala Mural Painting</h5>
+                <p>Frame Size: 20x24 inch</p>
+                <p>₹10,000 <span style="text-decoration: line-through;">₹16,000</span></p>
+                <p class="stock">IN STOCK</p>
+            </div>
+            <div class="actions col-md-3 text-right">
+                <button class="btn btn-warning" onclick="addToCart('item1')">ADD TO CART</button>
+                <button class="btn btn-danger" onclick="removeItem('item1')">REMOVE</button>
+            </div>
+        </div>
+
+        <!-- Wishlist Item 2 -->
+        <div class="wishlist-item row" id="item2">
+            <div class="col-md-2">
+                <img src="{% static 'images/Ganesha1.jpg' %}" alt="Shree Ganesha Kerala Mural Painting">
+            </div>
+            <div class="details col-md-7">
+                <h5>Shree Ganesha Kerala Mural Painting</h5>
+                <p>Frame Size: 20x24 inch</p>
+                <p>₹15,000 <span style="text-decoration: line-through;">₹16,000</span></p>
+                <p class="stock">IN STOCK</p>
+            </div>
+            <div class="actions col-md-3 text-right">
+                <button class="btn btn-warning" onclick="addToCart('item2')">ADD TO CART</button>
+                <button class="btn btn-danger" onclick="removeItem('item2')">REMOVE</button>
+            </div>
+        </div>
+
+        <!-- Wishlist Item 3 -->
+        <div class="wishlist-item row" id="item3">
+            <div class="col-md-2">
+                <img src="{% static 'painting3.jpg' %}" alt="Shree Ganesha Kerala Mural Painting">
+            </div>
+            <div class="details col-md-7">
+                <h5>Shree Ganesha Kerala Mural Painting</h5>
+                <p>Frame Size: 20x24 inch</p>
+                <p>₹8,000 <span style="text-decoration: line-through;">₹16,000</span></p>
+                <p class="out-of-stock">OUT OF STOCK</p>
+            </div>
+            <div class="actions col-md-3 text-right">
+                <button class="btn btn-warning disabled">ADD TO CART</button>
+                <button class="btn btn-danger" onclick="removeItem('item3')">REMOVE</button>
+            </div>
+        </div>
+
+        <!-- Wishlist Item 4 -->
+        <div class="wishlist-item row" id="item4">
+            <div class="col-md-2">
+                <img src="{% static 'painting4.jpg' %}" alt="Shree Ganesha Kerala Mural Painting">
+            </div>
+            <div class="details col-md-7">
+                <h5>Shree Ganesha Kerala Mural Painting</h5>
+                <p>Frame Size: 20x24 inch</p>
+                <p>₹10,000 <span style="text-decoration: line-through;">₹16,000</span></p>
+                <p class="stock">IN STOCK</p>
+            </div>
+            <div class="actions col-md-3 text-right">
+                <button class="btn btn-warning" onclick="addToCart('item4')">ADD TO CART</button>
+                <button class="btn btn-danger" onclick="removeItem('item4')">REMOVE</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let cartCount = 0;
+
+        function addToCart(itemId) {
+            cartCount++;
+            document.getElementById('cartCount').innerText = cartCount;
+            document.getElementById(itemId).remove();
+        }
+
+        function removeItem(itemId) {
+            document.getElementById(itemId).remove();
+        }
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>

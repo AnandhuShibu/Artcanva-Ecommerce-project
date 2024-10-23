@@ -439,7 +439,9 @@ def cart(request):
         return redirect('login')
 
     cart_items = Cart.objects.filter(user=request.user).order_by('-id')
-    return render(request,'user/cart.html', {'cart_items': cart_items})
+    is_empty = not cart_items.exists()
+    return render(request,'user/cart.html', {'cart_items': cart_items, 'is_empty': is_empty})
+
 
 def add_cart(request,product_id, variant_id):
     if not request.user.is_authenticated:
@@ -482,7 +484,11 @@ def checkout_og(request):
             if quantity < 1:
                 messages.error(request, "Quantity cannot be less than 1.")
                 return redirect('cart')
-
+            
+            # elif quantity > 10:  # Check for maximum purchase limit
+            #     messages.error(request, "Purchase quantity cannot exceed 10.")
+            #     return redirect('cart')
+            
             if quantity > variant.stock:
                 messages.error(request, f"Only {variant.stock} items available for {variant.product.product_name}.")
                 return redirect('cart')
@@ -509,6 +515,31 @@ def checkout(request):
         city = request.POST.get('city')
         district = request.POST.get('district')
         state = request.POST.get('state')
+
+        errors = []
+
+        if not fullname or len(fullname) < 3 or not fullname.replace(" ", "").isalpha():
+            errors.append("Fullname must be at least 3 characters long.")
+
+        if not fullname.replace(" ", "").isalpha():
+            errors.append("Fullname must contain only alphabets")
+
+        pattern = r"^[6-9]\d{9}$"
+
+        if not re.match(pattern, mobile):
+            errors.append("Please Enter Valid Phone Number")
+
+        if not pincode.isdigit() or len(pincode) != 6:
+            errors.append("Pincode must be a 6-digit number.")
+
+        if not address or len(address) < 5:
+            errors.append("Address must be at least 5 characters long.")
+
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+            return redirect('checkout')
+
         Address.objects.create(
             fullname=fullname,
             mobile=mobile,
@@ -524,6 +555,8 @@ def checkout(request):
     all_address = Address.objects.filter(user_id_id = request.user)
     total_price = request.session.get('total_price', 0)
     cart_items=Cart.objects.filter(user=request.user)
+
+    
     return render(request,'user/checkout.html', {'all_address': all_address, 'total_price':total_price, 'cart_items':cart_items})
 
 def edit_address_chechout(request):
@@ -536,6 +569,30 @@ def edit_address_chechout(request):
         city = request.POST.get('city')
         district = request.POST.get('district')
         state = request.POST.get('state')
+
+        errors = []
+
+        if not fullname or len(fullname) < 3 or not fullname.replace(" ", "").isalpha():
+            errors.append("Fullname must be at least 3 characters long.")
+
+        if not fullname.replace(" ", "").isalpha():
+            errors.append("Fullname must contain only alphabets")
+
+        pattern = r"^[6-9]\d{9}$"
+
+        if not re.match(pattern, mobile):
+            errors.append("Please Enter Valid Phone Number")
+
+        if not pincode.isdigit() or len(pincode) != 6:
+            errors.append("Pincode must be a 6-digit number.")
+
+        if not address or len(address) < 5:
+            errors.append("Address must be at least 5 characters long.")
+
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+            return redirect('checkout')
 
         if address_id:
             address_instance = get_object_or_404(Address, id=address_id)
@@ -627,3 +684,9 @@ def submit_review(request):
 
         return JsonResponse({'message': 'Review submitted successfully!'}, status=200)
     return JsonResponse({'error': 'Invalid request method.'}, status=400)
+
+
+#==================== WISHLIST SECTION ================#
+
+def wishlist(request):
+    return render(request,'user/wishlist.html')

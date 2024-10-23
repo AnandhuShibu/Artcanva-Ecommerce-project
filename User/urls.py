@@ -35,5 +35,7 @@ urlpatterns = [
     path('remove_address/<int:address_id>',views.remove_address, name='remove_address'),
     path('remove_address_profile/<int:address_id>',views.remove_address_profile, name='remove_address_profile'),
     path('place_order/',views.place_order, name='place_order'),
+    path('wishlist/',views.wishlist, name='wishlist'),
+
    
     ]
