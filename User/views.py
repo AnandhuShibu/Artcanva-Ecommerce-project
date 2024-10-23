@@ -22,7 +22,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import check_password
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
-from . models import Order,Order_details
+from . models import Order,Order_details, Review
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 
 
@@ -275,11 +277,23 @@ def shop(request):
 
 #================= SINGLE PRODUCT SECTION ===============#
 
+from django.shortcuts import render, get_object_or_404
+from .models import Product, Variant, Cart
+
 def single(request, product_id, variant_id):
     product = get_object_or_404(Product, id=product_id)
     variant = get_object_or_404(Variant, id=variant_id)
     sizes = Variant.objects.filter(product=product)
-    return render(request, 'user/single.html',{'product':product, 'variant':variant, 'sizes':sizes })
+
+    # Check if this variant is already in the user's cart
+    in_cart = Cart.objects.filter(user=request.user, product=product, variant=variant).exists()
+
+    return render(request, 'user/single.html', {
+        'product': product,
+        'variant': variant,
+        'sizes': sizes,
+        'in_cart': in_cart,  # Pass the flag to the template
+    })
 
 def jasir(request):
     return render(request, 'user/jasir.html')
@@ -449,21 +463,36 @@ def remove_cart_item(request, variant_id):
 
 #====================== CHECK OUT SECTION ===================#
 
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+from .models import Cart, Variant
+
 def checkout_og(request):
     if request.method == 'POST':
         total_price = request.POST.get('total_price')
         quantities = {
-            key.split('_')[1]: int(value) 
+            key.split('_')[1]: int(value)
             for key, value in request.POST.items()
             if key.startswith('quantity_')
         }
+
         for variant_id, quantity in quantities.items():
+            variant = get_object_or_404(Variant, id=variant_id)
+
+            if quantity < 1:
+                messages.error(request, "Quantity cannot be less than 1.")
+                return redirect('cart')
+
+            if quantity > variant.stock:
+                messages.error(request, f"Only {variant.stock} items available for {variant.product.product_name}.")
+                return redirect('cart')
+
             cart_item = get_object_or_404(Cart, user=request.user, variant_id=variant_id)
             cart_item.quantity = quantity
             cart_item.save()
+
         request.session['total_price'] = total_price
         return redirect('checkout')
-    
     return redirect('cart')
 
 
@@ -580,4 +609,21 @@ def order_placed(request):
     return render(request, 'user/order_placed.html')
 
 
+#================ RATINGS AND REVIEWS ==========#
 
+
+
+
+
+@csrf_exempt  # For simplicity, but consider using CSRF tokens in production
+def submit_review(request):
+    if request.method == 'POST':
+        product_id = request.POST.get('productId')
+        rating = request.POST.get('rating')
+        review = request.POST.get('review')
+
+        # Save the review to your database
+        Review.objects.create(product_id=product_id, rating=rating, review=review)
+
+        return JsonResponse({'message': 'Review submitted successfully!'}, status=200)
+    return JsonResponse({'error': 'Invalid request method.'}, status=400)

@@ -169,6 +169,15 @@
             background-color: #0056b3;
         }
 
+        .go-to-cart {
+          background-color: #FFD300;
+          color: #000000;
+      }
+
+      .go-to-cart:hover {
+          background-color: #e0b800;
+      }
+
         .related-products {
             max-width: 1200px;
             margin: 30px auto;
@@ -370,15 +379,31 @@
             <p></p>
         </div>
 
-        <div class="product-actions">
+        {% comment %} <div class="product-actions">
             
             {% if variant.stock == 0 %}
             <h3>OUT OF STOCK</h3>
             
             {% elif variant.stock > 0 %}
             <a href="{% url 'addcart' product.id variant.id %}"><button class="add-to-cart">Add to cart</button></a>
+            
             {% endif %}
-        </div>
+        </div> {% endcomment %}
+
+
+        <div class="product-actions">
+          {% if variant.stock == 0 %}
+              <h3>OUT OF STOCK</h3>
+          {% elif in_cart %}
+          <a href="{% url 'cart' %}"><button class="go-to-cart">Go to cart</button></a>
+          {% else %}
+              <a href="{% url 'addcart' product.id variant.id %}">
+                  <button class="add-to-cart">Add to Cart</button>
+              </a>
+          {% endif %}
+      </div>
+
+
         <br>
 
         <p class="short-description">

@@ -123,35 +123,11 @@
             background-color: #000000;
             margin: 0;
             }
-            /* Popup styles */
-            .popup-message {
-                position: fixed;
-                top: -100px;
-                left: 50%;
-                transform: translateX(-50%);
-                background-color: #4CAF50; /* Green color for success */
-                color: white;
-                padding: 15px 30px;
-                border-radius: 5px;
-                z-index: 1000;
-                transition: top 0.5s ease-in-out;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                font-family: Arial, sans-serif;
-            }
-            .popup-error {
-                background-color: #f44336; /* Red color for error */
-            }
-            .popup-warning {
-                background-color: #ff9800; /* Orange color for warning */
-            }
-            .popup-show {
-                top: 20px;
-            }
+
     </style>
 </head>
 <body>
-
-   
+    
     <!-- Navbar Start -->
   <nav class="navbar navbar-expand-lg navbar-dark ">
     <div class="container-fluid">
@@ -220,7 +196,7 @@
                         <h5>{{ item.product.product_name }}</h5>
                         <p>Frame Size: {{ item.variant.frame_size }}</p>
                         <p class="price" data-price="{{ item.variant.price }}">₹ {{ item.variant.price }}</p>
-    
+            
                         <div class="quantity d-flex align-items-center mt-2">
                             <button class="btn btn-outline-secondary btn-sm me-2 minus" type="button">-</button>
                             <input 
@@ -229,11 +205,12 @@
                                 min="1" 
                                 class="form-control form-control-sm quantity-input" 
                                 name="quantity_{{ item.variant.id }}" 
-                                data-price="{{ item.variant.price }}">
+                                data-price="{{ item.variant.price }}"
+                                data-stock="{{ item.variant.stock }}">
                             <button class="btn btn-outline-secondary btn-sm ms-2 plus" type="button">+</button>
                         </div>
                     </div>
-    
+            
                     <a href="{% url 'remove_cart_item' item.variant.id %}" class="btn btn-danger btn-sm remove-item">Remove</a>
                 </div>
                 {% endfor %}
@@ -253,7 +230,7 @@
             </div>
         </div>
     </div>
-    
+
     <script>
         // Function to update the total price based on quantity changes
         function updateTotalPrice() {
@@ -283,27 +260,54 @@
                 event.target.appendChild(hiddenInput);
             });
         });
-    
-        // Increment and Decrement Button Handlers
-        document.querySelectorAll('.minus, .plus').forEach(button => {
-            button.addEventListener('click', function (event) {
-                const input = button.classList.contains('minus') 
-                    ? button.nextElementSibling 
-                    : button.previousElementSibling;
-    
-                if (button.classList.contains('minus') && input.value > 1) {
-                    input.value--;
-                } else if (button.classList.contains('plus')) {
-                    input.value++;
-                }
-                displayTotalAmount();
-            });
-        });
-    
-        // Display the initial total amount
         displayTotalAmount();
     </script>
     
+
+    <script>
+       // Handle plus button clicks
+    document.querySelectorAll('.plus').forEach(button => {
+        button.addEventListener('click', function () {
+            const input = this.previousElementSibling;
+            let quantity = parseInt(input.value);
+            const stock = parseInt(input.getAttribute('data-stock'));
+
+            if (quantity < stock) {
+                input.value = quantity + 1;
+            } else {
+                alert('Quantity cannot exceed available stock.');
+            }
+        });
+    });
+
+    // Handle minus button clicks
+    document.querySelectorAll('.minus').forEach(button => {
+        button.addEventListener('click', function () {
+            const input = this.nextElementSibling;
+            let quantity = parseInt(input.value);
+
+            if (quantity > 1) {
+                input.value = quantity - 1;
+            } else {
+                alert('Quantity cannot be less than 1.');
+            }
+        });
+    });
+
+    // Prevent invalid input values
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('input', function () {
+            const stock = parseInt(this.getAttribute('data-stock'));
+            if (this.value < 1) {
+                alert('Quantity cannot be less than 1.');
+                this.value = 1;
+            } else if (this.value > stock) {
+                alert('Quantity cannot exceed available stock.');
+                this.value = stock;  // Reset to max stock
+            }
+        });
+    });
+    </script>
     
     <!-- Font Awesome for Icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMKtkz0p5sy4R8l1L4/fC1RfwD1kLwL4RbfE8" crossorigin="anonymous">

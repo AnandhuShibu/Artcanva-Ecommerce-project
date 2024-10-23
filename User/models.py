@@ -57,3 +57,14 @@ class Order_details(models.Model):
     
     item_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
 
+
+
+class Review(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.PositiveSmallIntegerField()
+    review = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.product.product_name} - {self.rating} Stars"
