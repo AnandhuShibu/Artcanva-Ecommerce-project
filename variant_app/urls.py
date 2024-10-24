@@ -6,6 +6,7 @@ from django.conf.urls.static import static
 app_name = 'variant_app'
 urlpatterns = [
     path('variant_status/<int:variant_id>/<int:product_id>/',views.variant_status, name='variant_status'),
+    
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

@@ -81,8 +81,8 @@
     }
 
     btn-add-address:hover {
-        background-color: #947957;
-        color: white;
+      background-color: #947957 !important;
+      color: white;
       }
 
     .btn-place-order {
@@ -349,7 +349,7 @@
           <img src="{{ item.product.images1.url }}" alt="Product Image">
           <div class="ms-3">
             <p class="mb-1">{{ item.product.product_name }}</p>
-            <p>Price:{{ item.variant.price }}</p>
+            <p>Price: ₹{{ item.variant.price }}</p>
             <p>Frame size:{{ item.variant.frame_size }}</p>
           </div>
         </div>

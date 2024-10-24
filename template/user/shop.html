@@ -58,7 +58,7 @@
       }
       
       .product-card img {
-        height: 280px; /* Reduced image height */
+        max-height: 280px; /* Reduced image height */
         width: 100%; /* Ensure image fits card width */
         object-fit: cover;
         border-radius: 8px 8px 0 0;
@@ -67,6 +67,7 @@
       .card {
         margin-left: 15px; /* Add some spacing between cards */
         margin-right: 15px;
+        max-height:364px;
       }
       
       .add-wishlist {
@@ -299,12 +300,12 @@
           <!-- Product Card 1 -->
           <div class="col-lg-4 col-md-6 col-sm-12 product-card">
             <div class="card">
-              <a href="{% url 'single' product.id product.variants.first.id %}"><img src="{{product.images1.url}}" class="card-img-top" alt="Product 1"></a>
+              <a href="{% url 'single' product.id product.variants.first.id %}"><img src="{{product.images1.url}}" class="card-img-top" alt="Loading"></a>
               <div class="card-body">
                 <h6 class="card-title">{{product.product_name}}</h6>
                 <div class="rating">★★★★☆</div>
                 {% comment %} <p class="card-text">{{produ}}</p> {% endcomment %}
-                <a href=""><button class="add-wishlist" title="Add to Wishlist"><i class="fas fa-heart"></i></button></a>
+                <a href="{% url 'add_wishlist' product.id product.variants.first.id %}"><button class="add-wishlist" title="Add to Wishlist"><i class="fas fa-heart"></i></button></a>
               </div>
             </div>
           </div>

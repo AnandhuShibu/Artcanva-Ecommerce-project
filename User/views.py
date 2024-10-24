@@ -22,7 +22,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import check_password
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
-from . models import Order,Order_details, Review
+from . models import Order,Order_details, Review, Wishlist
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
@@ -688,5 +688,36 @@ def submit_review(request):
 
 #==================== WISHLIST SECTION ================#
 
+# def wishlist(request):
+#     return render(request,'user/wishlist.html')
+
+
 def wishlist(request):
-    return render(request,'user/wishlist.html')
+    if not request.user.is_authenticated:
+        messages.info(request, "Please log in view Cart.")
+        return redirect('login')
+
+    wishlist_items = Wishlist.objects.filter(user=request.user).order_by('-id')
+    is_empty = not wishlist_items.exists()
+    return render(request,'user/wishlist.html', {'wishlist_items': wishlist_items, 'is_empty': is_empty})
+
+
+def add_wishlist(request,product_id, variant_id):
+    if not request.user.is_authenticated:
+        messages.info(request, "Please log in to add items to your wishlist.")
+        return redirect('login')
+    
+    product_id = get_object_or_404(Product, id=product_id)
+    variant_id = get_object_or_404(Variant,id = variant_id)
+    wishlist_item_exists = Wishlist.objects.filter(variant=variant_id).exists()
+    if wishlist_item_exists:
+        messages.warning(request, "This item is already in your wishlist.")
+        return redirect('shop')
+    Wishlist.objects.create(product=product_id, user=request.user, variant=variant_id)
+    return redirect('wishlist')
+
+def remove_wishlist_item(request, variant_id):
+    print("hhhgh")
+    wishlist_items = Wishlist.objects.get(variant=variant_id)
+    wishlist_items.delete()    
+    return redirect('wishlist')

@@ -220,7 +220,73 @@
         }
         
         /* Optionally add a custom style for the dropdown arrow */
-        
+        /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px); /* Blur background */
+        transition: opacity 0.3s ease;
+    }
+
+    .modal-content {
+        background-color: white;
+        margin: 5% auto;
+        padding: 30px;
+        width: 40%;
+        border-radius: 12px;
+        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+        animation: fadeIn 0.5s ease;
+    }
+
+    .close-edit {
+        color: #aaa;
+        float: right;
+        font-size: 24px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .close-edit:hover {
+        color: black;
+    }
+
+    .modal input, .modal select {
+        width: 100%;
+        padding: 12px;
+        margin: 10px 0;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+        background-color: #f8f8f8;
+    }
+
+    .modal-btn {
+        width: 100%;
+        padding: 12px;
+        background-color: #00b894;
+        color: white;
+        font-size: 18px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .modal-btn:hover {
+        background-color: #009970;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
     </style>
 </head>
 <body>
@@ -269,60 +335,66 @@
         </main>
     </div>
 
-    <div id="editproductModal" class="modal">
-        <div class="modal-content">
-            <span class="close-edit">&times;</span>
-            <h2>Edit Product</h2>
-            <form action="" method="POST">
-                {% csrf_token %}
-                <input type="text" name="product_name" id="productNameInput" placeholder="Product Name" required>
-                <select name="art_type" id="artTypeSelect" required>
-                    {% for i in art %}
-                    <option value="{{ i.art_type }}">{{ i.art_type }}</option>
-                    {% endfor %}
-                </select>
-                <select name="paint_type" id="paintTypeSelect" required>
-                    {% for i in paint %}
-                    <option value="{{ i.paint_type }}">{{ i.paint_type }}</option>
-                    {% endfor %}
-                </select>
-    
-                <button type="submit" class="modal-btn">Save Changes</button>
-            </form>
-        </div>
+    <!-- Edit Product Modal -->
+<div id="editproductModal" class="modal">
+    <div class="modal-content">
+        <span class="close-edit">&times;</span>
+        <h2>Edit Product</h2>
+        <form id="editProductForm" action="" method="POST">
+            {% csrf_token %}
+            <input type="text" name="product_name" id="productNameInput" placeholder="Product Name" required>
+            
+            <select name="art_type" id="artTypeSelect" class="input-field" required>
+                <option value="" disabled selected>Select Art Category</option>
+                {% for i in art %}
+                <option value="{{ i.art_type }}">{{ i.art_type }}</option>
+                {% endfor %}
+            </select>
+
+            <select name="paint_type" id="paintTypeSelect" class="input-field" required>
+                <option value="" disabled selected>Select Paint Category</option>
+                {% for i in paint %}
+                <option value="{{ i.paint_type }}">{{ i.paint_type }}</option>
+                {% endfor %}
+            </select>
+
+            <button type="submit" class="modal-btn">Save Changes</button>
+        </form>
     </div>
+</div>
+
 <script>
     
-    // Edit Art Modal
-    var editModal = document.getElementById("editproductModal");
-    var editButtons = document.querySelectorAll(".edit_product");
-    var closeEditModal = document.getElementsByClassName("close-edit")[0];
+    // JavaScript to handle modal functionality
+    const editModal = document.getElementById("editproductModal");
+    const editButtons = document.querySelectorAll(".edit_product");
+    const closeEditModal = document.querySelector(".close-edit");
 
-    editButtons.forEach(function(btn) {
-        btn.addEventListener('click', function() {
+    editButtons.forEach((btn) => {
+        btn.addEventListener("click", function () {
             editModal.style.display = "block";
-            var row = btn.closest('tr');
-            var Id = row.cells[1].textContent;
-            var productname = row.cells[2].textContent;
-            var art_category = row.cells[3].textContent;
-            var paint_category = row.cells[4].textContent;
 
-            document.getElementById("Id").value = Id;
-            document.getElementById("productname").value = productname;
-            document.getElementById("art_category").value = art_category;
-            document.getElementById("paint_category").value = paint_category;
+            const row = btn.closest("tr");
+            const productId = row.cells[1].textContent;
+            const productName = row.cells[2].textContent;
+            const artCategory = row.cells[3].textContent;
+            const paintCategory = row.cells[4].textContent;
+
+            document.getElementById("productNameInput").value = productName;
+            document.getElementById("artTypeSelect").value = artCategory;
+            document.getElementById("paintTypeSelect").value = paintCategory;
         });
     });
 
-    closeEditModal.onclick = function() {
+    closeEditModal.onclick = function () {
         editModal.style.display = "none";
-    }
+    };
 
-    window.onclick = function(event) {
-        if (event.target == editModal) {
+    window.onclick = function (event) {
+        if (event.target === editModal) {
             editModal.style.display = "none";
         }
-    }
+    };
 </script>
 </body>
 </html>

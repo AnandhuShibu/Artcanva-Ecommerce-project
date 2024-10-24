@@ -165,6 +165,11 @@
             color: white;
         }
 
+        .add-to-wishlist {
+          background: linear-gradient(135deg, #ff7e5f, #feb47b);
+          color: white;
+      }
+
         .add-to-cart:hover {
             background-color: #0056b3;
         }
@@ -399,8 +404,12 @@
           {% else %}
               <a href="{% url 'addcart' product.id variant.id %}">
                   <button class="add-to-cart">Add to Cart</button>
+                  
               </a>
+              
           {% endif %}
+
+          <a href=""><button class="add-to-wishlist">Add to Wishlist</button></a>
       </div>
 
 

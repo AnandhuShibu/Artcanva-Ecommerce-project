@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render,redirect
 from . models import Product
 from category_app.models import Paint, Art
@@ -45,3 +46,28 @@ def product_status(request, product_id):
     return redirect('product')
 
 
+#================== EDIT PRODUCT =================#
+
+
+def edit_product(request, product_id):
+    """Handle the product edit."""
+    product = get_object_or_404(Product, id=product_id)
+
+    if request.method == 'POST':
+        product.product_name = request.POST.get('product_name')
+        art_type = request.POST.get('art_type')
+        paint_type = request.POST.get('paint_type')
+
+        product.art_category = get_object_or_404(Art, art_type=art_type)
+        product.paint_category = get_object_or_404(Paint, paint_type=paint_type)
+        product.save()
+
+        return redirect('product_list')
+
+    # Return product data as JSON for the modal
+    data = {
+        'product_name': product.product_name,
+        'art_type': product.art_category.art_type,
+        'paint_type': product.paint_category.paint_type,
+    }
+    return JsonResponse(data)

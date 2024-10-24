@@ -191,7 +191,7 @@
           <a class="nav-link" href="{% url 'cart' %}"><i class="bi bi-cart"></i> Cart</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#"><i class="bi bi-heart"></i> Wishlist</a>
+          <a class="nav-link" href="{% url 'wishlist'%}"><i class="bi bi-heart"></i> Wishlist</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{% url 'profile'%}"><i class="bi bi-person"></i> User</a>
@@ -208,73 +208,35 @@
             <h2>WISHLIST</h2>
         </div>
 
+        {% if is_empty %}
+        <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 400px;">
+            <h4>Your wishlist is empty !</h4>
+        </div>
+    
+        {% else %}
+
         <!-- Wishlist Item 1 -->
+         {% for item in wishlist_items %}
+        
         <div class="wishlist-item row" id="item1">
             <div class="col-md-2">
-                <img src="{% static 'images/abc.jpg' %}" alt="Shree Ganesha Kerala Mural Painting">
+                <img src={{item.product.images1.url}} alt="Shree Ganesha Kerala Mural Painting">
             </div>
             <div class="details col-md-7">
-                <h5>Shree Ganesha Kerala Mural Painting</h5>
-                <p>Frame Size: 20x24 inch</p>
-                <p>₹10,000 <span style="text-decoration: line-through;">₹16,000</span></p>
+                <h5>{{item.product.product_name}}</h5>
+                <p>Frame size:  {{item.variant.frame_size}}  inches</p>
+                <p>₹ {{item.variant.price}}</p>
+
                 <p class="stock">IN STOCK</p>
             </div>
             <div class="actions col-md-3 text-right">
-                <button class="btn btn-warning" onclick="addToCart('item1')">ADD TO CART</button>
-                <button class="btn btn-danger" onclick="removeItem('item1')">REMOVE</button>
+                <button class="btn btn-warning btn-sm">ADD TO CART</button>
+                <a href="{% url 'remove_wishlist_item' item.variant.id %}" class="btn btn-danger btn-sm remove-item">Remove</a>
             </div>
         </div>
+        {% endfor %}
 
-        <!-- Wishlist Item 2 -->
-        <div class="wishlist-item row" id="item2">
-            <div class="col-md-2">
-                <img src="{% static 'images/Ganesha1.jpg' %}" alt="Shree Ganesha Kerala Mural Painting">
-            </div>
-            <div class="details col-md-7">
-                <h5>Shree Ganesha Kerala Mural Painting</h5>
-                <p>Frame Size: 20x24 inch</p>
-                <p>₹15,000 <span style="text-decoration: line-through;">₹16,000</span></p>
-                <p class="stock">IN STOCK</p>
-            </div>
-            <div class="actions col-md-3 text-right">
-                <button class="btn btn-warning" onclick="addToCart('item2')">ADD TO CART</button>
-                <button class="btn btn-danger" onclick="removeItem('item2')">REMOVE</button>
-            </div>
-        </div>
-
-        <!-- Wishlist Item 3 -->
-        <div class="wishlist-item row" id="item3">
-            <div class="col-md-2">
-                <img src="{% static 'painting3.jpg' %}" alt="Shree Ganesha Kerala Mural Painting">
-            </div>
-            <div class="details col-md-7">
-                <h5>Shree Ganesha Kerala Mural Painting</h5>
-                <p>Frame Size: 20x24 inch</p>
-                <p>₹8,000 <span style="text-decoration: line-through;">₹16,000</span></p>
-                <p class="out-of-stock">OUT OF STOCK</p>
-            </div>
-            <div class="actions col-md-3 text-right">
-                <button class="btn btn-warning disabled">ADD TO CART</button>
-                <button class="btn btn-danger" onclick="removeItem('item3')">REMOVE</button>
-            </div>
-        </div>
-
-        <!-- Wishlist Item 4 -->
-        <div class="wishlist-item row" id="item4">
-            <div class="col-md-2">
-                <img src="{% static 'painting4.jpg' %}" alt="Shree Ganesha Kerala Mural Painting">
-            </div>
-            <div class="details col-md-7">
-                <h5>Shree Ganesha Kerala Mural Painting</h5>
-                <p>Frame Size: 20x24 inch</p>
-                <p>₹10,000 <span style="text-decoration: line-through;">₹16,000</span></p>
-                <p class="stock">IN STOCK</p>
-            </div>
-            <div class="actions col-md-3 text-right">
-                <button class="btn btn-warning" onclick="addToCart('item4')">ADD TO CART</button>
-                <button class="btn btn-danger" onclick="removeItem('item4')">REMOVE</button>
-            </div>
-        </div>
+    {% endif %}
 
     </div>
 
