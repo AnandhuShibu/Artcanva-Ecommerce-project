@@ -20,7 +20,7 @@
       display: flex;
       margin: 30px auto;
       max-width: 1400px;
-      height: 700px;
+      height: 535px;
       border-radius: 12px;
       background-color: white;
       overflow: hidden;
@@ -90,7 +90,7 @@
 
     .sidebar ul {
       list-style: none;
-      margin-top: 40px;
+      margin-top: 25px;
     }
 
     .sidebar ul li {
@@ -112,13 +112,13 @@
     .profile-header {
       display: flex;
       align-items: center;
-      margin-top: 20px;
+      margin-top: -6px;
       text-align: center;
     }
 
     .profile-header img {
-      width: 100px;
-      height: 100px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
       margin-right: 20px;
     }
@@ -309,14 +309,15 @@
         <h2>{{username}}</h2>
       </div>
       <ul>
-        <li><a href="{% url 'orders' %}">Order Details</a></li>
+       
         <li><a onclick="showSection('personalInfo')">Personal Info</a></li>
+        <li><a href="{% url 'orders' %}">Order Details</a></li>
         <li><a onclick="showSection('manageAddress')">Manage Addresses</a></li>
         <li><a onclick="showSection('coupons')">Coupons</a></li>
         <li><a onclick="showSection('wallets')">Wallets</a></li>
       </ul>
       <!-- Logout Button at the Bottom -->
-  <div style="margin-top: auto;">
+  <div style="margin-top: -44px;">
     <form action="{% url 'user_logout' %}" method="POST">
       {% csrf_token %}
       <button type="submit" class="btn" style="width: 100%; margin-top: 30px;">LOGOUT</button>
@@ -324,7 +325,7 @@
   </div>
 
   <!-- Logout Button at the Bottom -->
-  <div style="margin-top: auto;">
+  <div style="margin-top: -12px;">
     <form action="{% url 'password_verify' %}" method="POST">
       {% csrf_token %}
       <button type="submit" class="btn" style="width: 100%; margin-top: 30px;">CHANGE PASSWORD</button>
@@ -334,7 +335,7 @@
 
     <!-- Content -->
     <div class="content">
-      <div id="personalInfo" class="section">
+      <div id="personalInfo" class="section active">
         <h2>Personal Information</h2>
         <form>
           <div class="form-group">
@@ -355,6 +356,7 @@
 
       <div id="manageAddress" class="section">
         <h2>Manage Addresses</h2>
+        
         {% for info in informations %}
         <div id="addressList">
           <div class="address-item">
@@ -384,7 +386,7 @@
 
   <!-- Footer -->
   <div class="footer">
-    <p>&copy; 2024 BagZone. All rights reserved.</p>
+    <p>&copy; 2024 ArtCanva. All rights reserved.</p>
   </div>
 
   <!-- Modal -->
@@ -479,6 +481,10 @@
     function openModal() {
       document.getElementById('addressModal').style.display = 'flex';
     }
+
+    window.onload = function () {
+      showSection('personalInfo'); // Automatically display the 'Personal Info' section
+    };
 
 
     function openEditModal(id, fullname, mobile, pincode, address, city, district, state) {

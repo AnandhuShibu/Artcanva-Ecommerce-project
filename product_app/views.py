@@ -3,10 +3,13 @@ from django.shortcuts import render,redirect
 from . models import Product
 from category_app.models import Paint, Art
 from django.shortcuts import get_object_or_404
+from django.contrib import messages
 
 
 
 #=================== ADD PRODUCT ========================
+
+from django.core.exceptions import ValidationError
 
 def add_product(request):
     if request.method == 'POST':
@@ -18,20 +21,35 @@ def add_product(request):
         image2 = request.FILES.get('image2')
         image3 = request.FILES.get('image3')
 
-        paint = Paint.objects.get(id = paint_type)
-        art = Art.objects.get(id = category_name)
+        # Backend validation to ensure files are images
+        def validate_image(file):
+            valid_mime_types = ['image/jpeg', 'image/png', 'image/gif']
+            if file and file.content_type not in valid_mime_types:
+                raise ValidationError('Only image files are allowed.')
+
+        try:
+            validate_image(image1)
+            validate_image(image2)
+            validate_image(image3)
+        except ValidationError as e:
+            messages.error(request, str(e))
+            return redirect('add_product')
+
+        paint = Paint.objects.get(id=paint_type)
+        art = Art.objects.get(id=category_name)
         Product.objects.create(
-            product_name = product_name,
-            description = description,
-            paint_category = paint,
-            art_category = art,
-            images1 = image1,
-            images2 = image2,
-            images3 = image3,
+            product_name=product_name,
+            description=description,
+            paint_category=paint,
+            art_category=art,
+            images1=image1,
+            images2=image2,
+            images3=image3,
         )
         return redirect('product')
-    
-    return render(request,'admin/product.html')
+
+    return render(request, 'admin/product.html')
+
 
 
 #================= PRODUCT STATUS =================#

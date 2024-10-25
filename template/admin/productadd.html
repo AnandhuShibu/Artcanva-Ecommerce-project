@@ -149,20 +149,21 @@
         <textarea class="form-control" name='description' id="description" placeholder="Enter product description"></textarea>
       </div>
       <div class="mb-3">
-        <label for="product-images" class="form-label">Product Images</label>
-        <input type="file" class="form-control" id="product-images" name="image1" multiple accept="image/*">
-        <small class="form-text text-muted">You can upload multiple images.</small>
+        <label for="image1" class="form-label">Product Image 1</label>
+        <input type="file" class="form-control" id="image1" name="image1" accept="image/*">
+        <small class="form-text text-muted">Only images are allowed (e.g., PNG, JPG).</small>
       </div>
       <div class="mb-3">
-        <label for="product-images" class="form-label">Product Images</label>
-        <input type="file" class="form-control" id="product-images" name="image2" multiple accept="image/*">
-        <small class="form-text text-muted">You can upload multiple images.</small>
+        <label for="image2" class="form-label">Product Image 2</label>
+        <input type="file" class="form-control" id="image2" name="image2" accept="image/*">
+        <small class="form-text text-muted">Only images are allowed (e.g., PNG, JPG).</small>
       </div>
       <div class="mb-3">
-        <label for="product-images" class="form-label">Product Images</label>
-        <input type="file" class="form-control" id="product-images" name="image3" multiple accept="image/*">
-        <small class="form-text text-muted">You can upload multiple images.</small>
+        <label for="image3" class="form-label">Product Image 3</label>
+        <input type="file" class="form-control" id="image3" name="image3" accept="image/*">
+        <small class="form-text text-muted">Only images are allowed (e.g., PNG, JPG).</small>
       </div>
+      
 
       <!-- Submit Button -->
       <div class="text-center">
@@ -172,5 +173,22 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  document.querySelectorAll('input[type="file"]').forEach(input => {
+    input.addEventListener('change', function (event) {
+      const file = event.target.files[0];
+      if (file) {
+        const validImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!validImageTypes.includes(file.type)) {
+          alert('Only image files (JPEG, PNG, GIF) are allowed!');
+          event.target.value = ''; // Clear the input field
+        }
+      }
+    });
+  });
+  
+</script>
+
 </body>
 </html>  
