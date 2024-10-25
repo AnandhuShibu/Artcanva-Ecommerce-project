@@ -2,6 +2,7 @@ import random
 import re
 import string
 import time
+from django.core.paginator import Paginator
 from django.urls import reverse
 from django.views.decorators.cache import never_cache
 from django.contrib.auth import authenticate,login as authlogin,logout as authlogout,update_session_auth_hash
@@ -236,43 +237,61 @@ def home(request):
 #================= SHOP SECTION ===============#
 
 def shop(request):
-    if request.method == 'POST':
-        selected_categories = request.POST.getlist('categories')
-        selected_size = request.POST.getlist('size')
-        price_order = request.POST.get('price_order') 
-        products = Product.objects.all()
+    search_query = request.GET.get('q', '').strip()  # Get search query, default to an empty string
 
-        if selected_categories:
-            products = Product.objects.filter(art_category__id__in=selected_categories)
+    # Default empty selections
+    selected_categories = request.POST.getlist('categories') if request.method == 'POST' else []
+    selected_size = request.POST.getlist('size') if request.method == 'POST' else []
+    price_order = request.POST.get('price_order') if request.method == 'POST' else None
 
-        if selected_size:
-            products = Product.objects.filter(variants__id__in=selected_size)
+    # Fetch all products initially
+    products = Product.objects.all()
 
-        if price_order:
-            if price_order == 'asc':
-                products = products.order_by('variants__price')
-            elif price_order == 'desc':
-                products = products.order_by('-variants__price')
-        
-    else:
-        selected_categories = []
-        selected_size = []
-        products = Product.objects.all()
+    # Apply filters based on user selection
+    if selected_categories:
+        products = products.filter(art_category__id__in=selected_categories)
+
+    if selected_size:
+        products = products.filter(variants__id__in=selected_size)
+
+    if price_order:
+        if price_order == 'asc':
+            products = products.order_by('variants__price')
+        elif price_order == 'desc':
+            products = products.order_by('-variants__price')
+
+    # Apply search filter if a search query is provided
+    if search_query:
+        products = products.filter(product_name__icontains=search_query)
+
+    # Pagination: always apply pagination regardless of request method
+    paginator = Paginator(products, 9)  # Show 10 items per page
+    page_number = request.GET.get('page')  # Get the current page number
+    page_obj = paginator.get_page(page_number)  # Get the corresponding page
+
+    # Check if no products are found
     no_products_found = not products.exists()
+
+    # Fetch additional data
     unique_frame_sizes = Variant.objects.order_by('frame_size').distinct()
     paints = Paint.objects.all()
     arts = Art.objects.all()
 
+    # Prepare context for template rendering
     context = {
-        'products': products,
+        'products': page_obj.object_list,  # Use paginated products for display
         'paints': paints,
         'arts': arts,
         'variants': unique_frame_sizes,
         'selected_categories': selected_categories,
         'selected_size': selected_size,
         'no_products_found': no_products_found,
+        'search_query': search_query,
+        'page_obj': page_obj,  # Pass the page object to the template
     }
-    return render(request,'user/shop.html',context)
+
+    # Render the template with context
+    return render(request, 'user/shop.html', context)
 
 
 #================= SINGLE PRODUCT SECTION ===============#
@@ -285,8 +304,10 @@ def single(request, product_id, variant_id):
     variant = get_object_or_404(Variant, id=variant_id)
     sizes = Variant.objects.filter(product=product)
 
-    # Check if this variant is already in the user's cart
-    in_cart = Cart.objects.filter(user=request.user, product=product, variant=variant).exists()
+    in_cart = None
+
+    if request.user.is_authenticated:
+        in_cart = Cart.objects.filter(user=request.user, variant=variant).exists()
 
     return render(request, 'user/single.html', {
         'product': product,
@@ -440,6 +461,10 @@ def cart(request):
 
     cart_items = Cart.objects.filter(user=request.user).order_by('-id')
     is_empty = not cart_items.exists()
+
+    
+
+
     return render(request,'user/cart.html', {'cart_items': cart_items, 'is_empty': is_empty})
 
 
@@ -450,7 +475,7 @@ def add_cart(request,product_id, variant_id):
     
     product_id = get_object_or_404(Product, id=product_id)
     variant_id = get_object_or_404(Variant,id = variant_id)
-    cart_item_exists = Cart.objects.filter(variant=variant_id).exists()
+    cart_item_exists = Cart.objects.filter(variant=variant_id, user=request.user).exists()
     if cart_item_exists:
         messages.warning(request, "This item is already in your cart.")
         return redirect('single', product_id=product_id.id, variant_id=variant_id.id)
@@ -458,7 +483,7 @@ def add_cart(request,product_id, variant_id):
     return redirect('cart')
 
 def remove_cart_item(request, variant_id):
-    cart_items = Cart.objects.get(variant=variant_id)
+    cart_items = Cart.objects.get(variant=variant_id, user=request.user)
     cart_items.delete()    
     return redirect('cart')
 
@@ -655,7 +680,8 @@ def place_order(request):
 
 def orders(request):
     orders=Order.objects.filter(user=request.user)
-    return render(request, 'user/orders.html', {'orders':orders})
+    no_user_orders_found = not orders.exists()
+    return render(request, 'user/orders.html', {'orders':orders, 'no_user_orders_found': no_user_orders_found})
 
 def order_details(request, order_id):
     orders = get_object_or_404(Order, id=order_id)
@@ -694,12 +720,18 @@ def submit_review(request):
 
 def wishlist(request):
     if not request.user.is_authenticated:
-        messages.info(request, "Please log in view Cart.")
+        messages.info(request, "Please log in view wishlist.")
         return redirect('login')
-
+    
     wishlist_items = Wishlist.objects.filter(user=request.user).order_by('-id')
+
+    paginator = Paginator(wishlist_items, 3)  # Show 10 items per page
+    page_number = request.GET.get('page')  # Get the current page number
+    page_obj = paginator.get_page(page_number)  # Get the corresponding page
+
+   
     is_empty = not wishlist_items.exists()
-    return render(request,'user/wishlist.html', {'wishlist_items': wishlist_items, 'is_empty': is_empty})
+    return render(request,'user/wishlist.html', {'is_empty': is_empty, 'page_obj': page_obj})
 
 
 def add_wishlist(request,product_id, variant_id):
@@ -709,7 +741,7 @@ def add_wishlist(request,product_id, variant_id):
     
     product_id = get_object_or_404(Product, id=product_id)
     variant_id = get_object_or_404(Variant,id = variant_id)
-    wishlist_item_exists = Wishlist.objects.filter(variant=variant_id).exists()
+    wishlist_item_exists = Wishlist.objects.filter(user=request.user, variant=variant_id).exists()
     if wishlist_item_exists:
         messages.warning(request, "This item is already in your wishlist.")
         return redirect('shop')
@@ -718,6 +750,6 @@ def add_wishlist(request,product_id, variant_id):
 
 def remove_wishlist_item(request, variant_id):
     print("hhhgh")
-    wishlist_items = Wishlist.objects.get(variant=variant_id)
+    wishlist_items = Wishlist.objects.get(variant=variant_id, user=request.user)
     wishlist_items.delete()    
     return redirect('wishlist')

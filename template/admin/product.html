@@ -287,6 +287,49 @@
         to { opacity: 1; }
     }
 
+    .pagination-container {
+        text-align: center;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .pagination {
+        list-style: none;
+        padding: 0;
+        display: inline-block;
+    }
+    
+    .pagination li {
+        display: inline;
+        margin: 0 5px;
+    }
+    
+    .pagination a {
+        text-decoration: none;
+        color: #007bff;
+        font-weight: bold;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        transition: background-color 0.3s, color 0.3s;
+    }
+    
+    .pagination a:hover {
+        background-color: #007bff;
+        color: white;
+    }
+    .btn {
+        padding: 9px 10px;
+        margin-right: -7px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
+    }
+
     </style>
 </head>
 <body>
@@ -295,11 +338,26 @@
         <main>
             <div class="header">
                 <h1>Products</h1>
-                <input type="text" placeholder="Search...">
+
+                
+                <form method="GET" action="{% url 'product' %}" class="d-flex justify-content-center">
+                    <input 
+                      class="form-control custom-search-input me-2 w-50" 
+                      type="search" 
+                      name="q" 
+                      placeholder="Search products..." 
+                      value="{{ search_query }}" 
+                      aria-label="Search"
+                    >
+                    <button class="btn btn-outline-success custom-search-button" type="submit">Search</button>
+                  </form>
+
+
                 <a href="{% url 'productadd' %}"><button class="add-btn">ADD NEW PRODUCT</button></a>
             </div>
 
             <table class="product-table">
+               
                 <thead>
                     <tr>
                         <th></th>
@@ -311,28 +369,57 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for product in products %}
+
+                {% if no_products_found %}
                     <tr>
-                 <td></td>
-                        <td>{{product.id}}</td>
-                        <td>{{product.product_name}}</td>
+                        <td colspan="6" class="text-center" style="text-align: center; color: red; font-weight: bold;">
+                            No Products found !
+                        </td>
+                    </tr>
+                {% else %}
+
+                    <tr>
+                        {% for product in page_obj %}
+                        <td></td>
+                        <td>{{ product.id }}</td>
+                        <td>{{ product.product_name }}</td>
                         <td>{{ product.art_category.art_type }}</td>
                         <td>{{ product.paint_category.paint_type }}</td>
                         <td>
-                            <a href = "{% url 'variant' product.id %}"><button class="action-btn">view variant</button></a>
-                            <button class="action-btn edit_product">Edit product</button>
+                            <a href="{% url 'variant' product.id %}"><button class="action-btn">View Variant</button></a>
+                            <button class="action-btn edit_product">Edit Product</button>
                             {% if product.product_status %}
-                            <a href="{% url 'product_status' product.id %}"><button class="deactivate-btn">De activate</button></a>
+                            <a href="{% url 'product_status' product.id %}"><button class="deactivate-btn">Deactivate</button></a>
                             {% else %}
                             <a href="{% url 'product_status' product.id %}"><button class="activate-btn">Activate</button></a>
-
                             {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
+                {% endif %}
             </table>
+            
+            <div class="pagination-container">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li><a href="?page=1">&laquo; First</a></li>
+                        <li><a href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+            
+                    <li class="current-page">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</li>
+            
+                    {% if page_obj.has_next %}
+                        <li><a href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                        <li><a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            
         </main>
+
+        
+
     </div>
 
     <!-- Edit Product Modal -->

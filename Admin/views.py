@@ -6,6 +6,7 @@ from product_app.models import Product
 from variant_app.models import Variant
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
+from django.core.paginator import Paginator
 from User.models import Order,Order_details,Address
 
 #---------------- ADMIN LOGIN SECTION --------------#
@@ -55,22 +56,52 @@ def productadd(request):
 
 
 def product(request):
+    search_query = request.GET.get('q', '').strip()  # Get search query, default to an empty string
+
     if not request.user.is_authenticated or not request.user.is_superuser: 
         return redirect('login_admin')
     paint = Paint.objects.all()
     art = Art.objects.all()
     products = Product.objects.all().order_by('-id')
-    return render(request,'admin/product.html',{'products':products, 'paint':paint, 'art':art})
+
+    if search_query:
+        products = products.filter(product_name__icontains=search_query)
+    
+
+    paginator = Paginator(products, 7)  # Show 10 items per page
+    page_number = request.GET.get('page')  # Get the current page number
+    page_obj = paginator.get_page(page_number)  # Get the corresponding page
+
+    no_products_found = not products.exists()
+
+    context = {
+        'paint':paint,
+        'art':art,
+        'page_obj': page_obj,
+        'search_query': search_query,
+        'no_products_found': no_products_found,
+    }
+    return render(request,'admin/product.html', context)
 
 
 #------------------- USERS SECTION ----------------#
 
 def users(request):
+    search_query = request.GET.get('q', '').strip()
     if not request.user.is_authenticated or not request.user.is_superuser:  
         return redirect('login_admin')
-
+    
     users = User.objects.filter(is_staff = False).order_by('id')
-    return render(request,'admin/users.html', {'users':users})
+
+    if search_query:
+        users = users.filter(username__icontains=search_query)
+    no_user_found = not users.exists()
+
+    paginator = Paginator(users, 7)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request,'admin/users.html', {'page_obj': page_obj, 'no_user_found': no_user_found})
 
 
 def user_status(request,user_id):
@@ -89,17 +120,37 @@ def user_status(request,user_id):
 #------------------ CATEGORY SECTION ----------------#
 
 def art(request):
+    search_query = request.GET.get('q', '').strip()
     if not request.user.is_authenticated or not request.user.is_superuser:  
         return redirect('login_admin')
     art_type = Art.objects.all().order_by('id')
-    return render(request,'admin/art.html',{'art_type':art_type})
+
+    if search_query:
+        art_type = art_type.filter(art_type__icontains=search_query)
+
+    paginator = Paginator(art_type, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    no_art_found = not art_type.exists()
+
+    return render(request,'admin/art.html',{'page_obj':page_obj, 'no_art_found': no_art_found})
 
 
 def paint(request):
+    search_query = request.GET.get('q', '').strip()
     if not request.user.is_authenticated or not request.user.is_superuser:  
         return redirect('login_admin')
     paint_type = Paint.objects.all().order_by('id')
-    return render(request,'admin/paint.html',{'paint_type': paint_type})
+    if search_query:
+        paint_type = paint_type.filter(paint_type__icontains=search_query)
+    paginator = Paginator(paint_type, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    no_paint_found = not paint_type.exists()
+
+    return render(request,'admin/paint.html',{'page_obj': page_obj, 'no_paint_found': no_paint_found})
 
 
 #---------------- VARIANTS SECTION ---------------#
@@ -127,9 +178,17 @@ def variant(request, product_id):
     return render(request,'admin/variant.html', {'variants' : variants})
 
 
+#-------------------- ORDERS SECTION -----------------#
+
 def all_orders(request):
     orders = Order.objects.all().order_by('-id')
-    return render(request,'admin/orders.html', {'orders': orders})
+
+    paginator = Paginator(orders, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+
+    return render(request,'admin/orders.html', {'page_obj': page_obj})
 
 
 def order_items(request,order_id):

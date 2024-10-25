@@ -144,6 +144,38 @@
             justify-content: center;
             height: 50px;   
         }
+
+        .pagination-container {
+          text-align: center;
+          margin-top: 20px;
+          margin-bottom: 20px;
+      }
+      
+      .pagination {
+          list-style: none;
+          padding: 0;
+          display: inline-block;
+      }
+      
+      .pagination li {
+          display: inline;
+          margin: 0 5px;
+      }
+      
+      .pagination a {
+          text-decoration: none;
+          color: #007bff;
+          font-weight: bold;
+          padding: 8px 12px;
+          border: 1px solid #ddd;
+          border-radius: 5px;
+          transition: background-color 0.3s, color 0.3s;
+      }
+      
+      .pagination a:hover {
+          background-color: #007bff;
+          color: white;
+      }
         
     </style>
 </head>
@@ -209,24 +241,19 @@
         </div>
 
         {% if is_empty %}
-        <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 400px;">
-            <h4>Your wishlist is empty !</h4>
-        </div>
-    
-        {% else %}
-
-        <!-- Wishlist Item 1 -->
-         {% for item in wishlist_items %}
-        
+    <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 400px;">
+        <h4>Your wishlist is empty!</h4>
+    </div>
+{% else %}
+    {% for item in page_obj %}
         <div class="wishlist-item row" id="item1">
             <div class="col-md-2">
-                <img src={{item.product.images1.url}} alt="Shree Ganesha Kerala Mural Painting">
+                <img src="{{ item.product.images1.url }}" alt="Product Image">
             </div>
             <div class="details col-md-7">
-                <h5>{{item.product.product_name}}</h5>
-                <p>Frame size:  {{item.variant.frame_size}}  inches</p>
-                <p>₹ {{item.variant.price}}</p>
-
+                <h5>{{ item.product.product_name }}</h5>
+                <p>Frame size: {{ item.variant.frame_size }} inches</p>
+                <p>₹ {{ item.variant.price }}</p>
                 <p class="stock">IN STOCK</p>
             </div>
             <div class="actions col-md-3 text-right">
@@ -234,11 +261,25 @@
                 <a href="{% url 'remove_wishlist_item' item.variant.id %}" class="btn btn-danger btn-sm remove-item">Remove</a>
             </div>
         </div>
-        {% endfor %}
+    {% endfor %}
 
-    {% endif %}
+    <div class="pagination-container">
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+                <li><a href="?page=1">&laquo; First</a></li>
+                <li><a href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+            {% endif %}
 
+            <li class="current-page">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</li>
+
+            {% if page_obj.has_next %}
+                <li><a href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                <li><a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
+            {% endif %}
+        </ul>
     </div>
+{% endif %}
+
 
     <script>
         let cartCount = 0;

@@ -229,7 +229,48 @@
         .alert-button:hover {
             background-color: #0056b3; /* Darker button on hover */
         }
+        .pagination-container {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
         
+        .pagination {
+            list-style: none;
+            padding: 0;
+            display: inline-block;
+        }
+        
+        .pagination li {
+            display: inline;
+            margin: 0 5px;
+        }
+        
+        .pagination a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        .pagination a:hover {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn {
+            padding: 9px 10px;
+            margin-right: -7px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
 
     </style>
 </head>
@@ -240,7 +281,17 @@
         <main>
             <div class="header">
                 <h1>TYPES OF PAINT</h1>
-                <input type="text" placeholder="Search...">
+                <form method="GET" action="{% url 'paint' %}" class="d-flex justify-content-center">
+                    <input 
+                      class="form-control custom-search-input me-2 w-50" 
+                      type="search" 
+                      name="q" 
+                      placeholder="Search products..." 
+                      value="{{ search_query }}" 
+                      aria-label="Search"
+                    >
+                    <button class="btn btn-outline-success custom-search-button" type="submit">Search</button>
+                  </form>
                 <button class="add-btn" id="openModalBtn">ADD NEW PAINT</button>
             </div>
             {% if messages %}
@@ -262,7 +313,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for paint in paint_type %}
+                    {% if no_paint_found %}
+                    <tr>
+                        <td colspan="6" class="text-center" style="text-align: center; color: red; font-weight: bold;">
+                            No Paint type found !
+                        </td>
+                    </tr>
+                {% else %}
+                    {% for paint in page_obj %}
                     <tr>
                         <td></td>
                         <td>{{paint.id}}</td>
@@ -278,7 +336,23 @@
                     </tr>
                     {% endfor %}
                 </tbody>
+                {% endif %}
             </table>
+            <div class="pagination-container">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li><a href="?page=1">&laquo; First</a></li>
+                        <li><a href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+            
+                    <li class="current-page">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</li>
+            
+                    {% if page_obj.has_next %}
+                        <li><a href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                        <li><a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
+                    {% endif %}
+                </ul>
+            </div>
         </main>
     </div>
 

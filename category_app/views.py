@@ -11,6 +11,7 @@ def add_art(request):
     if not request.user.is_authenticated or not request.user.is_superuser:
         return redirect('admin_login')
     
+    
     if request.method == 'POST':
         art_type = request.POST.get('art_type').strip()
         low = art_type.lower()
