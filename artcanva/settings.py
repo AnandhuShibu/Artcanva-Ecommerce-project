@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'category_app',
     'variant_app',
     'product_app',
+    'coupon_app'
 
     
 ]
@@ -183,3 +184,10 @@ LOGIN_REDIRECT_URL = 'home'
 
 # MEDIA_URL = '/media/'
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+#========== RAZORPAY INTEGRATIONS =========#
+
+
+RAZORPAY_KEY_ID = 'rzp_test_5LRf17a7ifOGvi'
+RAZORPAY_SECRET_KEY = 'f6IGZGFeSrnrFnCddyAqSX7O'

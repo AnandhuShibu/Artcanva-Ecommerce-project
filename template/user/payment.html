@@ -1,0 +1,14 @@
+<form action="{% url 'payment_verification' %}" method="POST">
+    {% csrf_token %}
+    <script
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        data-key="{{ razorpay_key }}"
+        data-amount="{{ amount }}"
+        data-currency="INR"
+        data-order_id="{{ razorpay_order_id }}"
+        data-buttontext="Pay with Razorpay"
+        data-name="Your Company"
+        data-description="Purchase"
+        data-theme.color="#F37254">
+    </script>
+</form>

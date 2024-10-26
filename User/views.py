@@ -12,6 +12,9 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db.models import Q
 from django.core.mail import send_mail
+import razorpay
+
+
 from product_app.models import Product
 from variant_app.models import Variant
 from category_app.models import Paint, Art
@@ -25,9 +28,11 @@ from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from . models import Order,Order_details, Review, Wishlist
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+# from django.views.decorators.csrf import csrf_exempt
 
+from django.db import transaction
 
+# razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_SECRET_KEY))
 
 
 #============= USER SIGNUP ============#
@@ -651,9 +656,10 @@ def place_order(request):
         selected_address_id = request.POST.get('selected_address')
         selected_address = Address.objects.get(id=selected_address_id)
         ordered_items = Cart.objects.all()
-        total_price = request.session.get('total_price', 0)
+        total_price = int(request.session.get('total_price', 0)) * 100
         print(ordered_items)
-
+        
+ 
         order=Order.objects.create(
             user=request.user,
             total_amount=total_price,
@@ -675,6 +681,130 @@ def place_order(request):
        
         return redirect('order_placed')
             
+
+#============================ SAMPLE ===============================
+
+
+# from django.views.decorators.csrf import csrf_exempt
+
+# # Initialize Razorpay client
+# client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_SECRET_KEY))
+
+# def place_order(request):
+#     print('firsttttttttttttttttt')
+#     cart_items = Cart.objects.filter(user=request.user)
+    
+#     if request.method == 'POST':
+#         payment_method = request.POST.get('payment_method')
+#         selected_address_id = request.POST.get('selected_address')
+#         selected_address = Address.objects.get(id=selected_address_id)
+#         total_price = int(request.session.get('total_price', 0)) * 100  # Amount in paisa
+        
+#         # Check if the payment method is COD or Razorpay
+#         if payment_method == 'COD':
+#             # Handle Cash on Delivery
+#             order = Order.objects.create(
+#                 user=request.user,
+#                 total_amount=total_price,
+#                 payment_method=payment_method,
+#                 address=selected_address,
+#                 payment_status='Pending'  # Mark as unpaid initially
+#             )
+
+#             for item in cart_items:
+#                 Order_details.objects.create(
+#                     order=order,
+#                     product=item.product,
+#                     quantity=item.quantity,
+#                     variant=item.variant
+#                 )
+#                 item.variant.stock -= item.quantity
+#                 item.variant.save()
+
+#             # Clear the cart after creating the order
+#             cart_items.delete()
+
+#             # Redirect to order placed confirmation page
+#             return redirect('order_placed')
+
+#         elif payment_method == 'Razorpay':
+#             # Handle Razorpay payment
+#             razorpay_order = client.order.create({
+#                 'amount': total_price,
+#                 'currency': 'INR',
+#                 'payment_capture': '1'
+#             })
+#             print('aaaaaaaaaaaaaaaaa')
+
+#             order = Order.objects.create(
+#                 user=request.user,
+#                 total_amount=total_price,
+#                 payment_method=payment_method,
+#                 address=selected_address,
+#                 payment_status='Paid'  # Save Razorpay order ID
+#             )
+
+#             for item in cart_items:
+#                 Order_details.objects.create(
+#                     order=order,
+#                     product=item.product,
+#                     quantity=item.quantity,
+#                     variant=item.variant
+#                 )
+#                 item.variant.stock -= item.quantity
+#                 item.variant.save()
+
+#             # Clear the cart after creating the order
+#             cart_items.delete()
+
+#             # Redirect to Razorpay payment page
+#             return render(request, 'user/payment.html', {
+#                 'order': order,
+#                 'razorpay_order_id': razorpay_order['id'],
+#                 'razorpay_key': settings.RAZORPAY_KEY_ID,
+#                 'amount': total_price
+#             })
+#         return redirect('order_placed')
+           
+
+# @csrf_exempt
+# def payment_verification(request):
+    
+#     print('bbbbbbbbbbbbbbbbbb')
+#     if request.method == 'POST':
+#         data = request.POST
+#         razorpay_order_id = data.get('razorpay_order_id')
+#         razorpay_payment_id = data.get('razorpay_payment_id')
+#         razorpay_signature = data.get('razorpay_signature')
+
+#         try:
+#             client.utility.verify_payment_signature({
+#                 'razorpay_order_id': razorpay_order_id,
+#                 'razorpay_payment_id': razorpay_payment_id,
+#                 'razorpay_signature': razorpay_signature
+#             })
+            
+#             # Mark order as paid after successful verification
+#             order = Order.objects.filter(user=request.user, total_amount=data['amount']).last()  # Adjust logic as necessary
+#             if order:
+#                 order.payment_status = 'Paid'  # Update payment status
+#                 order.save()
+#             return redirect('order_placed')
+        
+#         except razorpay.errors.SignatureVerificationError:
+#             # Redirect to payment failure page if verification fails
+#             return redirect('payment_failed')
+
+#     return redirect('home')
+
+
+# def order_placed(request):
+#     return render(request, 'order_placed.html')
+
+# def payment_failed(request):
+#     print('ccccccccccccccccccccc')
+#     return render(request, 'payment_failed.html')
+
 
 #==================== ORDERS SECTION ==================#
 
@@ -698,7 +828,7 @@ def order_placed(request):
 
 
 
-@csrf_exempt  # For simplicity, but consider using CSRF tokens in production
+# @csrf_exempt  # For simplicity, but consider using CSRF tokens in production
 def submit_review(request):
     if request.method == 'POST':
         product_id = request.POST.get('productId')
@@ -753,3 +883,5 @@ def remove_wishlist_item(request, variant_id):
     wishlist_items = Wishlist.objects.get(variant=variant_id, user=request.user)
     wishlist_items.delete()    
     return redirect('wishlist')
+
+

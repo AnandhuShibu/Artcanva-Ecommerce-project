@@ -1,0 +1,106 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coupon Management</title>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <h2>Coupon List</h2>
+    <button class="btn btn-primary my-3" data-bs-toggle="modal" data-bs-target="#addCouponModal">
+        Add New Coupon
+    </button>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Coupon Code</th>
+                <th>Percentage</th>
+                <th>Expiry Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for coupon in coupons %}
+            <tr>
+                <td>{{ coupon.id }}</td>
+                <td>{{ coupon.coupon_code }}</td>
+                <td>{{ coupon.percentage }}%</td>
+                <td>{{ coupon.expiry_date }}</td>
+                <td>
+                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal" 
+                            data-bs-target="#editCouponModal{{ coupon.id }}">Edit</button>
+                </td>
+            </tr>
+
+            <!-- Edit Coupon Modal -->
+            <div class="modal fade" id="editCouponModal{{ coupon.id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Edit Coupon</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form method="POST" action="{% url 'edit_coupon' coupon.id %}">
+                            {% csrf_token %}
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="percentage{{ coupon.id }}" class="form-label">Percentage</label>
+                                    <input type="number" step="0.01" class="form-control" 
+                                           name="percentage" value="{{ coupon.percentage }}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="expiry_date{{ coupon.id }}" class="form-label">Expiry Date</label>
+                                    <input type="date" class="form-control" 
+                                           name="expiry_date" value="{{ coupon.expiry_date }}" required>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Save changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Add Coupon Modal -->
+<div class="modal fade" id="addCouponModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Coupon</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'add_coupon' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="percentage" class="form-label">Percentage</label>
+                        <input type="number" step="0.01" class="form-control" name="percentage" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="expiry_date" class="form-label">Expiry Date</label>
+                        <input type="date" class="form-control" name="expiry_date" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Add Coupon</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

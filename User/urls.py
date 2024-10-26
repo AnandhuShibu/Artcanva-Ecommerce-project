@@ -2,7 +2,7 @@ from django.urls import path
 from . import views
 from .views import user_logout
 
-
+# from .views import place_order, razorpay_checkout
 
 urlpatterns = [
     path('signup/',views.signup, name='signup'),
@@ -39,5 +39,8 @@ urlpatterns = [
     path('add_wishlist/<int:product_id>/<int:variant_id>',views.add_wishlist, name='add_wishlist'),
     path('remove_wishlist_item/<int:variant_id>', views.remove_wishlist_item, name='remove_wishlist_item'),
 
-   
+
+    # path('payment_verification/', views.payment_verification, name='payment_verification'),
+    # path('order_placed/', views.order_placed, name='order_placed'),  # Redirect URL after payment success
+    # path('payment_failed/', views.payment_failed, name='payment_failed')  # Redirect URL for payment failure
     ]

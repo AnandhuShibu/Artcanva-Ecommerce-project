@@ -213,4 +213,7 @@ def change_order_status(request, order_id):
         order.save()
         return redirect('order_items', order_id=order_id)
 
-    
+#----------------- COUPONS SECTION --------------#
+
+def coupons(request):
+    return render(request,'admin/coupons.html')
