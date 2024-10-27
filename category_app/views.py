@@ -138,7 +138,6 @@ def edit_paint(request):
         messages.error(request, "Paint type cannot exceed 100 characters.")
         return redirect('paint')
     
-    
     paint.paint_type=new_type
     paint.save()
     messages.success(request, "Success")

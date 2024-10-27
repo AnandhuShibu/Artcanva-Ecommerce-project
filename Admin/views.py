@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login as authlogin, logout
 from django.contrib.auth.models import User
+from coupon_app.models import Coupons
 from category_app.models import Paint, Art
 from product_app.models import Product
 from variant_app.models import Variant
@@ -215,5 +216,92 @@ def change_order_status(request, order_id):
 
 #----------------- COUPONS SECTION --------------#
 
-def coupons(request):
-    return render(request,'admin/coupons.html')
+
+
+def coupon(request):
+    search_query = request.GET.get('q', '').strip()
+    coupons = Coupons.objects.all()
+    print('hii')
+    if search_query:
+        coupons = coupons.filter(coupon_code__icontains=search_query)
+        print('working')
+    
+    paginator = Paginator(coupons, 8)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    no_coupon_found = not coupons.exists()
+
+    return render(request,'admin/coupons.html', {'page_obj': page_obj, 'no_coupon_found': no_coupon_found})
+
+def remove_coupon(request, coupon_id):
+    print("hhhgh")
+    coupon_item = Coupons.objects.get(id = coupon_id)
+    coupon_item.delete()    
+    return redirect('coupon')
+
+
+def edit_coupon(request):
+    coupon_id = request.POST.get('categoryId')
+    edit_coupon = request.POST.get('edit_coupon').strip()
+    percentage = request.POST.get('percentage').strip()
+    expiry_date = request.POST.get('expiry_date').strip()
+    coupon = get_object_or_404(Coupons, id = coupon_id)
+
+    print(coupon_id)
+
+    
+    if len(edit_coupon) > 6:
+        messages.error(request, "Paint type cannot exceed 6 characters.")
+        return redirect('coupon')
+    
+    Coupons.coupon_code=edit_coupon
+    Coupons.save()
+    messages.success(request, "Success")
+    return redirect('coupon')
+
+
+
+
+
+
+
+def add_coupon(request):
+    print('hai jaseeeeeeeeeeeeer')
+    if not request.user.is_authenticated or not request.user.is_superuser:
+        return redirect('admin_login')
+    
+    if request.method == 'POST':
+        coupon_code = request.POST.get('coupon_code').strip().upper()
+        percentage = request.POST.get('percentage').strip()
+        expiry_date = request.POST.get('expiry_date').strip()
+
+        print(coupon_code)
+        print(percentage)
+        print(expiry_date)
+        
+        all_coupons = [coupon.coupon_code for coupon in Coupons.objects.all()]
+
+        if coupon_code in all_coupons:
+            messages.error(request, "Coupon already exists.")
+            return redirect('coupon')
+        
+        for existing_coupon in all_coupons:
+            if coupon_code in existing_coupon:
+                messages.error(request, f"coupon '{coupon_code}' is too similar to '{existing_coupon}'.")
+                return redirect('coupon')
+
+
+        if Coupons.objects.filter(coupon_code=coupon_code).exists():
+            messages.error(request, "Coupon already exists.")
+            return redirect('coupon')
+        
+        if len(coupon_code) < 6:
+            messages.error(request, "Must be six character")
+            return redirect('coupon')
+        
+        Coupons.objects.create(coupon_code=coupon_code, expiry_date=expiry_date, percentage=percentage)
+        messages.success(request, "Coupon added successfully!")
+        return redirect('coupon')
+    
+    return render(request, 'admin/coupons.html')

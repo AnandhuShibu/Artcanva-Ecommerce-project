@@ -67,6 +67,7 @@
       background-color: #28a745;
       color: white;
       margin-top: 10px;
+      margin-bottom: 10px;
     }
 
     .btn-apply:hover {
@@ -362,14 +363,25 @@
     <!-- Coupon and Payment Section -->
     <div class="col-lg-4">
       <div class="coupon-section mb-4">
-        <input type="text" class="form-control" placeholder="Enter Coupon Code">
-        <button type="button" class="btn btn-apply w-100">APPLY</button>
-        <p></p>
-        <p>Discount on Price: ₹0</p>
-        <p>Coupon Discount: AMT</p>
-        <p>Delivery Charge: FREE</p>
-        <h5>Total Amount: ₹{{total_price}}</h5>
-      </div>
+        <h5>Amount: ₹{{ total_price }}</h5>
+        
+        <br><br>
+        <select id="couponSelect" class="form-control">
+            <option value="" disabled selected>Select a coupon</option>
+            {% for coupon in coupons %}
+                <option value="{{ coupon.percentage }}">{{ coupon.coupon_code }} - {{ coupon.percentage }}% off</option>
+            {% endfor %}
+        </select>
+        <button type="button" class="btn btn-apply w-100" id="applyButton">APPLY</button>
+
+        
+
+        <h6 id="selectedCoupon" class="mt-2" >
+          Coupon Discount: <span id="couponInfo"></span>
+      </h6>
+       
+        <h5>Total Amount: ₹<span id="totalPrice">{{ total_price }}</span></h5>
+    </div>
         <div class="payment-method">
           <h5>Select Payment Method</h5>
       
@@ -518,7 +530,39 @@
     rel="stylesheet"
   >
 
+  
+    <script>
+    document.getElementById('applyButton').addEventListener('click', function() {
+        var couponSelect = document.getElementById('couponSelect');
+        var selectedCoupon = couponSelect.value;
+        var selectedCouponText = couponSelect.options[couponSelect.selectedIndex].text; // Get the text of the selected option
+        var totalPriceElement = document.getElementById('totalPrice');
+        var couponInfoElement = document.getElementById('couponInfo');
+        var selectedCouponDisplay = document.getElementById('selectedCoupon');
+        var originalPrice = parseFloat("{{ total_price }}");
+
+        if (selectedCoupon) {
+            // Calculate the new price based on the selected coupon discount
+            var discountPercentage = parseFloat(selectedCoupon);
+            var discountAmount = (discountPercentage / 100) * originalPrice;
+            var newPrice = originalPrice - discountAmount;
+
+            // Update the total price displayed
+            totalPriceElement.textContent = newPrice.toFixed(0);
+
+            // Update and show the selected coupon information
+            couponInfoElement.textContent = ": ₹" + discountAmount.toFixed(2);
+            couponInfo.style.color = "green";
+            selectedCouponDisplay.style.display = "block"; // Show the coupon information
+        } else {
+            alert('Please select a coupon.');
+            selectedCouponDisplay.style.display = ""; // Hide the coupon information if no coupon is selected
+        }
+    });
+</script>
+
   <script>
+  
     function openEditModal(id, fullname, mobile, pincode, address, city, district, state) {
       // Get the modal element
       var modal = document.getElementById('editAddressModal');

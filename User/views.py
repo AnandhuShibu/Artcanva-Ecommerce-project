@@ -14,7 +14,7 @@ from django.db.models import Q
 from django.core.mail import send_mail
 import razorpay
 
-
+from coupon_app . models import Coupons
 from product_app.models import Product
 from variant_app.models import Variant
 from category_app.models import Paint, Art
@@ -386,10 +386,12 @@ def profile(request):
         email = request.user.email
         password = request.user.password
     print(password)
+    coupons = Coupons.objects.all()
     context = {
         'informations':informations,
         'username': username,
-        'email': email
+        'email': email,
+        'coupons': coupons
     }
     return render(request,'user/profile.html', context)
 
@@ -585,9 +587,16 @@ def checkout(request):
     all_address = Address.objects.filter(user_id_id = request.user)
     total_price = request.session.get('total_price', 0)
     cart_items=Cart.objects.filter(user=request.user)
+    coupons = Coupons.objects.all()
+    context = {
+        'all_address': all_address,
+        'total_price': total_price,
+        'cart_items': cart_items,
+        'coupons': coupons
+    }
 
     
-    return render(request,'user/checkout.html', {'all_address': all_address, 'total_price':total_price, 'cart_items':cart_items})
+    return render(request,'user/checkout.html', context)
 
 def edit_address_chechout(request):
     if request.method == 'POST':
@@ -657,7 +666,9 @@ def place_order(request):
         selected_address = Address.objects.get(id=selected_address_id)
         ordered_items = Cart.objects.all()
         total_price = int(request.session.get('total_price', 0)) * 100
+        new_price = request.POST.get('newPrice')
         print(ordered_items)
+        print('new:',new_price)
         
  
         order=Order.objects.create(
