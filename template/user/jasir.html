@@ -113,3 +113,449 @@
   </div>
 </body>
 </html>
+
+
+
+
+
+cart details  html  
+
+
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #ffffe4;
+        }
+        .cart-container {
+            margin-top: 30px;
+        }
+
+        .cart-item {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #ffffe4;
+            margin-bottom: 20px;
+            padding: 15px;
+        }
+
+        .cart-item img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .item-details h5 {
+            font-weight: bold;
+        }
+
+        .item-details .price {
+            color: #000000;
+            font-size: 19px;
+        }
+
+        {% comment %} .item-details .original-price {
+            text-decoration: line-through;
+            margin-left: 10px;
+            color: #999;
+        } {% endcomment %}
+
+        .summary {
+            background-color: #fafafa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            /* Make the summary sticky */
+            position: sticky;
+            top: 20px;
+        }
+
+        .summary h5 {
+            color: #e67e22;
+        }
+
+        .btn-order {
+            background-color:#DEAD6F;
+            color: white;
+        }
+
+        .btn-order:hover {
+            background-color: #947957;
+            color: white;
+        }
+
+        /* Adjust quantity input field width */
+        .quantity input {
+            width: 60px; /* Smaller width for a compact look */
+            text-align: center;
+        }
+
+        /* Limit the height of the cart items section for better scrolling */
+        .cart-items {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 15px; /* Prevents the scroll bar from overlapping content */
+        }
+        /* Custom navbar height */
+        .navbar {
+            height: 80px; /* Adjust the height as needed */
+            
+
+        }
+
+        .logo {
+            font-size: 1.8rem; /* Increase logo size */
+            color: #000000; /* Logo color */
+            font-weight: bold; /* Make the logo bold */
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+            letter-spacing: 1px; /* Increase letter spacing */
+            text-decoration: none;
+        }
+        
+        .navbar-nav .nav-link {
+            font-size: 1.3rem; /* Optional: Increase font size for links */
+            color:#000000
+            }
+
+
+
+        .navbar-nav .nav-item {
+            margin: 0 15px; /* Add horizontal margin between links */
+        }
+        
+        .navbar-nav .nav-link {
+            padding: 10px; /* Optional: Adjust padding for links */
+        }
+        
+        .navbar-toggler {
+            padding: 0.5rem; /* Adjust padding for the toggler button */
+            }
+        hr {
+            border: none;
+            height: 1px;
+            background-color: #000000;
+            margin: 0;
+            }
+
+            .popup-message {
+                position: fixed;
+                top: -100px;
+                left: 50%;
+                transform: translateX(-50%);
+                background-color: #FFDE21;
+                color: White;
+                padding: 20px 35px;
+                border-radius: 6px;
+                z-index: 1000;
+                transition: top 0.5s ease-in-out;
+                box-shadow: 0 5px 7px rgba(0, 0, 0, 0.1);
+                font-family: Arial, sans-serif;
+            }
+            .popup-error {
+                background-color: #f44336;
+            }
+            .popup-warning {
+                background-color: #ff9800;
+            }
+            .popup-show {
+                top: 25px;
+            }
+
+            .cart-header {
+                text-align: center; /* Centers the text horizontally */
+                margin-top: 20px; /* Optional: Adds some space from the top */
+            }
+        
+            .cart-header h2 {
+                font-weight: 600;
+                margin-bottom: 20px; /* Keeps consistent spacing with mb-4 */
+            }
+
+            
+
+    </style>
+</head>
+<body>
+    <div id="popup-message" class="popup-message"></div>
+    <!-- Navbar Start -->
+  <nav class="navbar navbar-expand-lg navbar-dark ">
+    <div class="container-fluid">
+
+      <!-- Left Logo Section -->
+      <a class="logo" href="#">ART CANVA</a>
+
+      <!-- Center Links -->
+      <button 
+        class="navbar-toggler" 
+        type="button" 
+        data-bs-toggle="collapse" 
+        data-bs-target="#navbarNav" 
+        aria-controls="navbarNav" 
+        aria-expanded="false" 
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+        <ul class="navbar-nav navbar-nav-center">
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="{% url 'home'%}">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'shop'%}">Shop</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Contact</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Signup</a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Right Section (Cart, Wishlist, User) -->
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'cart'%}"><i class="bi bi-cart"></i> Cart</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'wishlist'%}"><i class="bi bi-heart"></i> Wishlist</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'profile'%}"><i class="bi bi-person"></i> User</a>
+        </li>
+      </ul>
+
+    </div>
+  </nav>
+  <!-- Navbar End -->
+
+  <hr>
+
+    <!-- Cart Section -->
+    <div class="container cart-container">
+        
+        <div class="cart-header">
+            <h2 class="mb-4">CART</h2>
+        </div>
+
+        {% if is_empty %}
+        <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 400px;">
+            <h4>Your cart is empty !</h4>
+            <form method="GET" action="{% url 'shop' %}">  <!-- Replace 'shop' with your actual shop URL -->
+                <button type="submit" class="btn btn-order w-100 mt-3">SHOP NOW</button>
+            </form>
+        </div>
+    
+{% else %}
+
+        <div class="row">
+            <div class="col-lg-8 cart-items">
+                {% for item in cart_items %}
+                <div class="cart-item d-flex align-items-center">
+                    <img src="{{ item.product.images1.url }}" alt="Painting">
+                    <div class="item-details ms-3 flex-grow-1">
+                        <h5>{{ item.product.product_name }}</h5>
+                        <p>Frame Size: {{ item.variant.frame_size }}</p>
+                        <p class="price" data-price="{{ item.variant.price }}">₹ {{ item.variant.price }}</p>
+            
+                        <div class="quantity d-flex align-items-center mt-2">
+                            <button class="btn btn-outline-secondary btn-sm me-2 minus" type="button">-</button>
+                            <input 
+                                type="number" 
+                                value="{{ item.quantity }}" 
+                                min="1" 
+                                class="form-control form-control-sm quantity-input" 
+                                name="quantity_{{ item.variant.id }}" 
+                                data-price="{{ item.variant.price }}"
+                                data-stock="{{ item.variant.stock }}">
+                            <button class="btn btn-outline-secondary btn-sm ms-2 plus" type="button">+</button>
+                        </div>
+                    </div>
+            
+                    <a href="{% url 'remove_cart_item' item.variant.id %}" class="btn btn-danger btn-sm remove-item">Remove</a>
+                </div>
+                {% endfor %}
+            </div>
+    
+            <div class="col-lg-4">
+                <div class="summary">
+                    <form method="POST" action="{% url 'checkout_og' %}" id="checkout-form">
+                        {% csrf_token %}
+    
+                        <p>Total price: <span id="total-price"></span></p>
+                        <input type="hidden" name="total_price" id="total-price-input">
+    
+                        <button type="submit" class="btn btn-order w-100 mt-3">PROCEED TO CHECKOUT</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    
+
+
+
+
+    
+
+
+    <script>
+       // Function to update the total price based on quantity changes
+function updateTotalPrice() {
+    let total = 0;
+    document.querySelectorAll('.cart-item').forEach(item => {
+        const price = parseFloat(item.querySelector('.price').dataset.price);
+        const quantity = parseInt(item.querySelector('.quantity-input').value);
+        total += price * quantity; // Calculate total based on current quantities
+    });
+    return total; // Return the calculated total
+}
+
+// Function to display the total amount
+function displayTotalAmount() {
+    const totalAmount = updateTotalPrice(); // Get the updated total amount
+    document.getElementById('total-price').textContent = `₹ ${totalAmount}`; // Update total display
+    document.getElementById('total-price-input').value = totalAmount; // Update hidden input for form submission
+}
+
+// Handle plus button clicks
+document.querySelectorAll('.plus').forEach(button => {
+    button.addEventListener('click', function () {
+        const input = this.previousElementSibling; // Get the input element
+        let quantity = parseInt(input.value); // Get the current quantity
+        const stock = parseInt(input.getAttribute('data-stock')); // Get the stock value
+
+        // Check if quantity can be incremented
+        if (quantity < stock) {
+            input.value = quantity + 1; // Increment the quantity
+            displayTotalAmount(); // Update total amount after changing quantity
+        } else {
+            alert('Quantity cannot exceed available stock.'); // Alert if exceeding stock
+        }
+    });
+});
+
+// Handle minus button clicks
+document.querySelectorAll('.minus').forEach(button => {
+    button.addEventListener('click', function () {
+        const input = this.nextElementSibling; // Get the input element
+        let quantity = parseInt(input.value); // Get the current quantity
+
+        // Check if quantity can be decremented
+        if (quantity > 1) {
+            input.value = quantity - 1; // Decrement the quantity
+            displayTotalAmount(); // Update total amount after changing quantity
+        } else {
+            alert('Quantity cannot be less than 1.'); // Alert if trying to go below 1
+        }
+    });
+});
+
+// Prevent invalid input values
+document.querySelectorAll('.quantity-input').forEach(input => {
+    input.addEventListener('input', function () {
+        const stock = parseInt(this.getAttribute('data-stock'));
+        if (this.value < 1) {
+            alert('Quantity cannot be less than 1.');
+            this.value = 1; // Reset to 1
+        } else if (this.value > stock) {
+            alert('Quantity cannot exceed available stock.');
+            this.value = stock; // Reset to max stock
+        }
+        displayTotalAmount(); // Update total amount after input change
+    });
+});
+
+// Call this function to initialize the total amount display on page load
+displayTotalAmount();
+
+
+    // Function to show the popup message
+    function showPopup(message, type) {
+        const popup = document.getElementById('popup-message');
+        popup.textContent = message;
+        popup.className = `popup-message popup-${type} popup-show`;
+
+        // Hide the popup after 3 seconds
+        setTimeout(() => {
+            popup.className = 'popup-message';
+        }, 3000);
+    }
+
+    // Check for Django messages and display them
+    {% if messages %}
+        {% for message in messages %}
+            showPopup("{{ message }}", "{{ message.tags }}");
+        {% endfor %}
+    {% endif %}
+
+
+    </script>
+    
+<script 
+  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
+</script>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+
+</body>
+</html>
+
+
+
+
+cart details view
+
+
+
+def checkout_og(request):
+    if request.method == 'POST':
+        total_price = request.POST.get('total_price')
+        quantities = {
+            key.split('_')[1]: int(value)
+            for key, value in request.POST.items()
+            if key.startswith('quantity_')
+        }
+
+        print('QUANTITY:', quantities)
+
+        for variant_id, quantity in quantities.items():
+            variant = get_object_or_404(Variant, id=variant_id)
+
+            if quantity < 1:
+                messages.error(request, "Quantity cannot be less than 1.")
+                return redirect('cart')
+            
+            if quantity > 10:  # Check for maximum purchase limit
+                messages.error(request, "Purchase quantity cannot exceed 10.")
+                return redirect('cart')
+            
+            if quantity > variant.stock:
+                messages.error(request, f"Only {variant.stock} items available for {variant.product.product_name}.")
+                return redirect('cart')
+            
+            cart_item = get_object_or_404(Cart, user=request.user, variant_id=variant_id)
+            cart_item.quantity = quantity
+            print('QUANTITY:',quantity )
+
+            request.session['quantity'] = quantity
+            cart_item.save()
+            request.session['quantity'] = quantity
+        request.session['total_price'] = total_price
+        return redirect('checkout')
+    return redirect('cart')

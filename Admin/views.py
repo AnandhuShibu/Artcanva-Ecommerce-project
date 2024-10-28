@@ -184,7 +184,7 @@ def variant(request, product_id):
 def all_orders(request):
     orders = Order.objects.all().order_by('-id')
 
-    paginator = Paginator(orders, 10)
+    paginator = Paginator(orders, 8)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -197,6 +197,9 @@ def order_items(request,order_id):
     total_amount=order_id.total_amount
     order_items=Order_details.objects.filter(order=order_id)
     order_address=Address.objects.get(id=order_id.address.id)
+    print(order_address)
+    print(total_amount)
+    print(order_items)
     context={
         'order_items':order_items,
         'order_address':order_address,
@@ -213,6 +216,7 @@ def change_order_status(request, order_id):
         order.status = new_status
         order.save()
         return redirect('order_items', order_id=order_id)
+
 
 #----------------- COUPONS SECTION --------------#
 

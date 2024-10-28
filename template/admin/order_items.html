@@ -68,7 +68,7 @@
         /* Dropdown styling */
         .dropdown-container {
             position: absolute;
-           top: 269px;
+            top: 269px;
             right: 32px;
         }
 
@@ -83,8 +83,6 @@
 <body>
 
     <div class="content-wrapper">
-        
-
         <h1>ORDERED ITEMS</h1>
 
         <div class="order-info">
@@ -92,7 +90,7 @@
                 <h2>ORDERED TO</h2>
                 <p>
                     {{ order_address.fullname }}<br>{{ order_address.address }},
-                    {{ order_address.city }}<br>{{ order_address.district }}, 
+                    {{ order_address.city }}<br>{{ order_address.district }},
                     {{ order_address.pincode }},<br>Mobile: {{ order_address.mobile }}
                 </p>
             </div>
@@ -103,22 +101,29 @@
             </div>
         </div>
         <h1>{{ order_id.status }}</h1>
+        
         <!-- Dropdown placed at the top-right corner -->
         <div class="dropdown-container">
             <form method="POST" action="{% url 'change_order_status' order_id.id %}">
                 {% csrf_token %}
                 <div class="dropdown">
-                    <select name="order_status">
-                        <option value="Pending">Pending</option>
-                        <option value="Shipped">Shipped</option>
-                        <option value="Delivered">Delivered</option>
+                    <select name="order_status" id="orderStatus" onchange="updateDropdown()">
+                        {% if order_id.status == "Pending" %}
+                            <option value="Pending" selected>Pending</option>
+                            <option value="Shipped">Shipped</option>
+                            <option value="Delivered">Delivered</option>
+                        {% elif order_id.status == "Shipped" %}
+                            <option value="Shipped" selected>Shipped</option>
+                            <option value="Delivered">Delivered</option>
+                        {% else %}
+                            <option value="Delivered" selected>Delivered</option>
+                        {% endif %}
                     </select>
                 </div>
                 <br>
                 <button type="submit">Update Status</button>
                 <br>
             </form>
-            
             <br>
         </div>
 
@@ -144,12 +149,12 @@
                         </td>
                         
                         <td>{{ item.product.id }}</td>
-                        <td>{{item.product.product_name}}</td>
-                        <td>{{item.quantity}}</td>
+                        <td>{{ item.product.product_name }}</td>
+                        <td>{{ item.quantity }}</td>
                         <td>{{ item.variant.price }}</td>
-                        <td>{{item.product.art_category.art_type}}</td>
-                        <td>{{item.variant.frame_size}}</td>
-                        <td>Pending</td>
+                        <td>{{ item.product.art_category.art_type }}</td>
+                        <td>{{ item.variant.frame_size }}</td>
+                        <td>{{ order_id.status }}</td>
                     </tr>
                     {% endfor %}
                     <!-- Add more rows as needed -->
@@ -159,6 +164,36 @@
     </div>
 
 {% endblock %}
+
+<script>
+    function updateDropdown() {
+        const dropdown = document.getElementById("orderStatus");
+        const selectedValue = dropdown.value;
+
+        // Clear existing options
+        dropdown.innerHTML = "";
+
+        // Create new options based on selected value
+        if (selectedValue === "Pending") {
+            dropdown.innerHTML = `
+                <option value="Pending" selected>Pending</option>
+                <option value="Shipped">Shipped</option>
+                <option value="Delivered">Delivered</option>
+            `;
+        } else if (selectedValue === "Shipped") {
+            dropdown.innerHTML = `
+                <option value="Delivered" selected>Delivered</option>
+            `;
+        } else if (selectedValue === "Delivered") {
+            dropdown.innerHTML = `
+                <option value="Delivered" selected>Delivered</option>
+            `;
+        }
+
+        console.log("Selected value:", selectedValue); // Debugging line
+        console.log("Dropdown options updated:", dropdown.innerHTML); // Debugging line
+    }
+</script>
 
 </body>
 </html>

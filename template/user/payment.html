@@ -1,14 +1,40 @@
-<form action="{% url 'payment_verification' %}" method="POST">
-    {% csrf_token %}
-    <script
-        src="https://checkout.razorpay.com/v1/checkout.js"
-        data-key="{{ razorpay_key }}"
-        data-amount="{{ amount }}"
-        data-currency="INR"
-        data-order_id="{{ razorpay_order_id }}"
-        data-buttontext="Pay with Razorpay"
-        data-name="Your Company"
-        data-description="Purchase"
-        data-theme.color="#F37254">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Make Payment</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+    <h1>Complete Your Payment</h1>
+    <button id="rzp-button">Pay Now</button>
+
+    <script>
+        var options = {
+            "key": "{{ razorpay_key }}",  // Razorpay API Key
+            "amount": "{{ amount }}",  // Amount in paise
+            "currency": "INR",
+            "name": "Your E-commerce Website",
+            "description": "Order Payment",
+            "order_id": "{{ order_id }}",  // Razorpay Order ID
+            "handler": function (response) {
+                alert('Payment Successful!');
+                window.location.href = "/payment-success/?payment_id=" + response.razorpay_payment_id;
+            },
+            "prefill": {
+                "name": "{{ user.username }}",
+                "email": "{{ user.email }}"
+            },
+            "theme": {
+                "color": "#3399cc"
+            }
+        };
+        var rzp1 = new Razorpay(options);
+        document.getElementById('rzp-button').onclick = function (e) {
+            rzp1.open();
+            e.preventDefault();
+        }
     </script>
-</form>
+</body>
+</html>

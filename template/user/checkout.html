@@ -363,25 +363,30 @@
     <!-- Coupon and Payment Section -->
     <div class="col-lg-4">
       <div class="coupon-section mb-4">
-        <h5>Amount: ₹{{ total_price }}</h5>
-        
-        <br><br>
-        <select id="couponSelect" class="form-control">
-            <option value="" disabled selected>Select a coupon</option>
-            {% for coupon in coupons %}
-                <option value="{{ coupon.percentage }}">{{ coupon.coupon_code }} - {{ coupon.percentage }}% off</option>
-            {% endfor %}
-        </select>
-        <button type="button" class="btn btn-apply w-100" id="applyButton">APPLY</button>
-
-        
-
-        <h6 id="selectedCoupon" class="mt-2" >
-          Coupon Discount: <span id="couponInfo"></span>
-      </h6>
-       
-        <h5>Total Amount: ₹<span id="totalPrice">{{ total_price }}</span></h5>
-    </div>
+          <h5>Amount: ₹<span id="initialPrice">{{ total_price }}</span></h5>
+          
+          <br><br>
+          <select id="couponSelect" class="form-control">
+              <option value="" disabled selected>Select a coupon</option>
+              {% for coupon in coupons %}
+                  <option value="{{ coupon.percentage }}" data-code="{{ coupon.coupon_code }}">
+                      {{ coupon.coupon_code }} - {{ coupon.percentage }}% off
+                  </option>
+              {% endfor %}
+          </select>
+          <button type="button" class="btn btn-apply w-100" id="applyButton">APPLY</button>
+  
+          <h6 id="selectedCoupon" class="mt-2">
+              Coupon Discount: <span id="couponInfo">None</span>
+          </h6>
+  
+          <h5>Total Amount: ₹<span id="totalPrice">{{ total_price }}</span></h5>
+  
+          <input type="hidden" name="final_price" id="finalPriceInput">
+          <input type="hidden" name="selected_coupon_code" id="selectedCouponCodeInput">
+      </div>
+  
+  
         <div class="payment-method">
           <h5>Select Payment Method</h5>
       
@@ -418,7 +423,7 @@
       
         </div>
       <div class="text-end mt-3">
-      <button type="submit" class="btn btn-place-order">PLACE ORDER</button>
+      <button type="submit" class="btn btn-place-order" >PLACE ORDER</button>
       </div>
 
     </form>
@@ -530,35 +535,37 @@
     rel="stylesheet"
   >
 
-  
-    <script>
-    document.getElementById('applyButton').addEventListener('click', function() {
-        var couponSelect = document.getElementById('couponSelect');
-        var selectedCoupon = couponSelect.value;
-        var selectedCouponText = couponSelect.options[couponSelect.selectedIndex].text; // Get the text of the selected option
-        var totalPriceElement = document.getElementById('totalPrice');
-        var couponInfoElement = document.getElementById('couponInfo');
-        var selectedCouponDisplay = document.getElementById('selectedCoupon');
-        var originalPrice = parseFloat("{{ total_price }}");
+  <script>
+  document.getElementById('applyButton').addEventListener('click', function() {
+    var couponSelect = document.getElementById('couponSelect');
+    var selectedCoupon = couponSelect.value;  // Get selected coupon percentage
+    var selectedCouponText = couponSelect.options[couponSelect.selectedIndex].text; // Get selected coupon text
+    var totalPriceElement = document.getElementById('totalPrice');
+    var couponInfoElement = document.getElementById('couponInfo');
+    var finalPriceInput = document.getElementById('finalPriceInput');
+    var selectedCouponCodeInput = document.getElementById('selectedCouponCodeInput');
+    var originalPrice = parseFloat("{{ total_price }}");  // Original price from template context
 
-        if (selectedCoupon) {
-            // Calculate the new price based on the selected coupon discount
-            var discountPercentage = parseFloat(selectedCoupon);
-            var discountAmount = (discountPercentage / 100) * originalPrice;
-            var newPrice = originalPrice - discountAmount;
+    if (selectedCoupon) {
+        // Calculate the discount and new price
+        var discountPercentage = parseFloat(selectedCoupon);
+        var discountAmount = (discountPercentage / 100) * originalPrice;
+        var newPrice = originalPrice - discountAmount;
 
-            // Update the total price displayed
-            totalPriceElement.textContent = newPrice.toFixed(0);
+        // Update the total price on the page
+        totalPriceElement.textContent = newPrice.toFixed(0);
 
-            // Update and show the selected coupon information
-            couponInfoElement.textContent = ": ₹" + discountAmount.toFixed(2);
-            couponInfo.style.color = "green";
-            selectedCouponDisplay.style.display = "block"; // Show the coupon information
-        } else {
-            alert('Please select a coupon.');
-            selectedCouponDisplay.style.display = ""; // Hide the coupon information if no coupon is selected
-        }
-    });
+        // Display coupon discount information
+        couponInfoElement.textContent = `${discountPercentage}% off: ₹${discountAmount.toFixed(2)}`;
+        couponInfoElement.style.color = "green";
+
+        // Store new price and selected coupon code in hidden inputs
+        finalPriceInput.value = newPrice.toFixed(0);
+        selectedCouponCodeInput.value = couponSelect.options[couponSelect.selectedIndex].getAttribute('data-code');
+    } else {
+        alert('Please select a coupon.');
+    }
+});
 </script>
 
   <script>

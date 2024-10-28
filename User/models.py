@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from product_app.models import Product
 from variant_app.models import Variant
+from coupon_app.models import Coupons
 
 
 class Address(models.Model):
@@ -47,6 +48,7 @@ class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
     address = models.ForeignKey(Address, on_delete=models.CASCADE)
     deliver_date = models.DateTimeField(null=True, blank= True)
+    coupon = models.ForeignKey(Coupons, null=True, blank=True, on_delete=models.SET_NULL, related_name='orders')
     
 
 class Order_details(models.Model):
@@ -80,3 +82,17 @@ class Wishlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='wishlist_items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='wishlist_items')
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name='wishlist_items')
+
+
+class Wallet(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='wallet')
+    wallet_amount = models.IntegerField(default=0)
+
+
+class Wallet_Transaction(models.Model):
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE)
+    transaction_amount = models.IntegerField()
+    created_date = models.DateTimeField(auto_now_add=True)
+    type = models.CharField(max_length=50)
+
+    

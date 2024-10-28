@@ -433,6 +433,29 @@
       <div id="wallets" class="section">
         <h2>Wallets</h2>
         <p>Wallet balance: ₹0.00</p>
+
+        <h3 style="text-align: center;">Wallet Transactions</h3>
+
+        <table class="product-table">
+          <thead>
+              <tr>
+                  <th></th>
+                  <th>TRANSACTION AMOUNT</th>
+                  <th>TRANSACTION DATE</th>
+                  <th>CREDIT / DEBIT</th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for coupon in coupons %}
+              <tr>
+                  <td></td>
+                  <td>{{coupon.coupon_code}}</td>
+                  <td>{{coupon.percentage}} %</td>
+                  <td>{{coupon.expiry_date|date:"d-m-Y" }}</td>
+              </tr>
+              {% endfor %}
+          </tbody>
+       </table>
       </div>
     </div>
   </div>

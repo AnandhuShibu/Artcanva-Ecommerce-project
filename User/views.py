@@ -19,7 +19,6 @@ from product_app.models import Product
 from variant_app.models import Variant
 from category_app.models import Paint, Art
 from django.shortcuts import get_object_or_404
-# from django.db.models import OuterRef, Subquery
 from User.models import Address,Cart
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
@@ -28,9 +27,10 @@ from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from . models import Order,Order_details, Review, Wishlist
 from django.http import JsonResponse
-# from django.views.decorators.csrf import csrf_exempt
-
 from django.db import transaction
+
+from django.conf import settings
+from .models import Cart, Address, Order, Order_details
 
 # razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_SECRET_KEY))
 
@@ -501,43 +501,99 @@ from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from .models import Cart, Variant
 
+# def checkout_og(request):
+#     if request.method == 'POST':
+#         total_price = request.POST.get('total_price')
+#         quantities = {
+#             key.split('_')[1]: int(value)
+#             for key, value in request.POST.items()
+#             if key.startswith('quantity_')
+#         }
+
+#         print('QUANTITY:', quantities)
+
+#         for variant_id, quantity in quantities.items():
+#             variant = get_object_or_404(Variant, id=variant_id)
+
+#             if quantity < 1:
+#                 messages.error(request, "Quantity cannot be less than 1.")
+#                 return redirect('cart')
+            
+#             if quantity > 10:  # Check for maximum purchase limit
+#                 messages.error(request, "Purchase quantity cannot exceed 10.")
+#                 return redirect('cart')
+            
+#             if quantity > variant.stock:
+#                 messages.error(request, f"Only {variant.stock} items available for {variant.product.product_name}.")
+#                 return redirect('cart')
+            
+#             cart_item = get_object_or_404(Cart, user=request.user, variant_id=variant_id)
+#             cart_item.quantity = quantity
+#             print('QUANTITY:',quantity )
+
+#             request.session['quantity'] = quantity
+#             cart_item.save()
+#             request.session['quantity'] = quantity
+#         request.session['total_price'] = total_price
+#         return redirect('checkout')
+#     return redirect('cart')
+
+
+# ====================== sample of cart page ===========
+
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+
 def checkout_og(request):
     if request.method == 'POST':
         total_price = request.POST.get('total_price')
+        # Extract quantities from POST data
         quantities = {
             key.split('_')[1]: int(value)
             for key, value in request.POST.items()
             if key.startswith('quantity_')
         }
 
+        print('QUANTITY:', quantities)  # For debugging purposes
+
         for variant_id, quantity in quantities.items():
             variant = get_object_or_404(Variant, id=variant_id)
 
+            # Validate quantity
             if quantity < 1:
                 messages.error(request, "Quantity cannot be less than 1.")
                 return redirect('cart')
-            
-            # elif quantity > 10:  # Check for maximum purchase limit
-            #     messages.error(request, "Purchase quantity cannot exceed 10.")
-            #     return redirect('cart')
-            
+
+            if quantity > 10:
+                messages.error(request, "Purchase quantity cannot exceed 10.")
+                return redirect('cart')
+
             if quantity > variant.stock:
                 messages.error(request, f"Only {variant.stock} items available for {variant.product.product_name}.")
                 return redirect('cart')
 
+            # Update the cart item with new quantity
             cart_item = get_object_or_404(Cart, user=request.user, variant_id=variant_id)
             cart_item.quantity = quantity
             cart_item.save()
 
+            print('SAVED QUANTITY:', quantity)  # Debugging output
+
+        # Store quantities and total price in session if needed
         request.session['total_price'] = total_price
+
         return redirect('checkout')
+
     return redirect('cart')
+
+
 
 
 def checkout(request):
     if not request.user.is_authenticated:
         messages.info(request, "PLEASE LOGIN.")
         return redirect('login')
+    
     
     if request.method == 'POST':
         fullname = request.POST.get('fullname')
@@ -658,175 +714,171 @@ def remove_address(request,address_id):
 
 #================== PLACE ORDER SECTION ==================#
 
-def place_order(request):
-    cart_items=Cart.objects.filter(user=request.user)
-    if request.method == 'POST':
-        payment_method = request.POST.get('payment_method')
-        selected_address_id = request.POST.get('selected_address')
-        selected_address = Address.objects.get(id=selected_address_id)
-        ordered_items = Cart.objects.all()
-        total_price = int(request.session.get('total_price', 0)) * 100
-        new_price = request.POST.get('newPrice')
-        print(ordered_items)
-        print('new:',new_price)
+# def place_order(request):
+#     cart_items=Cart.objects.filter(user=request.user)
+#     if request.method == 'POST':
+#         payment_method = request.POST.get('payment_method')
+#         selected_address_id = request.POST.get('selected_address')
+#         selected_address = Address.objects.get(id=selected_address_id)
+#         ordered_items = Cart.objects.all()
+#         total_price = int(request.session.get('total_price', 0)) * 100
+#         coupon_discount_price = request.POST.get('final_price', None)
+
+#         if coupon_discount_price:
+#             final_amount = coupon_discount_price
+#         else:
+#             final_amount = total_price
+
+#         print('Last amount:', final_amount)
         
- 
-        order=Order.objects.create(
-            user=request.user,
-            total_amount=total_price,
-            payment_method=payment_method,
-            address=selected_address
-        )
-        for item in cart_items:
-            Order_details.objects.create(
-                order=order,
-                product=item.product,
-                quantity=item.quantity,
-                variant=item.variant
-            )
-            item.variant.stock -= item.quantity
-            item.variant.save()
+#         order=Order.objects.create(
+#             user=request.user,
+#             total_amount=total_price,
+#             payment_method=payment_method,
+#             address=selected_address
+#         )
+#         for item in cart_items:
+#             Order_details.objects.create(
+#                 order=order,
+#                 product=item.product,
+#                 quantity=item.quantity,
+#                 variant=item.variant
+#             )
+#             item.variant.stock -= item.quantity
+#             item.variant.save()
         
-        cart_items=Cart.objects.filter(user=request.user)
-        cart_items.delete()
+#         cart_items=Cart.objects.filter(user=request.user)
+#         cart_items.delete()
        
-        return redirect('order_placed')
+#         return redirect('order_placed')
             
 
 #============================ SAMPLE ===============================
 
 
-# from django.views.decorators.csrf import csrf_exempt
 
-# # Initialize Razorpay client
-# client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_SECRET_KEY))
+def place_order(request):
+    cart_items = Cart.objects.filter(user=request.user)
+    if request.method == 'POST':
+        payment_method = request.POST.get('payment_method')
+        selected_address_id = request.POST.get('selected_address')
+        selected_address = Address.objects.get(id=selected_address_id)
+        total_price = int(request.session.get('total_price', 0)) * 100  # Convert to paise
+        coupon_discount_price = request.POST.get('final_price', None)
+        ##getting selected coupon code
+        selected_coupon_code = request.POST.get('selected_coupon_code', None) 
 
-# def place_order(request):
-#     print('firsttttttttttttttttt')
-#     cart_items = Cart.objects.filter(user=request.user)
-    
-#     if request.method == 'POST':
-#         payment_method = request.POST.get('payment_method')
-#         selected_address_id = request.POST.get('selected_address')
-#         selected_address = Address.objects.get(id=selected_address_id)
-#         total_price = int(request.session.get('total_price', 0)) * 100  # Amount in paisa
+        print(selected_coupon_code)
+        print(coupon_discount_price)
+
+        coupon = None
+        if selected_coupon_code:
+            ##getting selected coupon ID
+            coupon = get_object_or_404(Coupons, coupon_code=selected_coupon_code)
+        print(coupon)
+
+
         
-#         # Check if the payment method is COD or Razorpay
-#         if payment_method == 'COD':
-#             # Handle Cash on Delivery
-#             order = Order.objects.create(
-#                 user=request.user,
-#                 total_amount=total_price,
-#                 payment_method=payment_method,
-#                 address=selected_address,
-#                 payment_status='Pending'  # Mark as unpaid initially
-#             )
+        if coupon_discount_price:
+            final_amount = int(float(coupon_discount_price) * 100)  # Convert to paise
+        else:
+            final_amount = total_price
 
-#             for item in cart_items:
-#                 Order_details.objects.create(
-#                     order=order,
-#                     product=item.product,
-#                     quantity=item.quantity,
-#                     variant=item.variant
-#                 )
-#                 item.variant.stock -= item.quantity
-#                 item.variant.save()
+        print('Final amount:', final_amount)
 
-#             # Clear the cart after creating the order
-#             cart_items.delete()
+        if payment_method == 'COD':
+            order = Order.objects.create(
+                user=request.user,
+                total_amount=final_amount / 100,
+                payment_method=payment_method,
+                address=selected_address,
+                coupon = coupon
+            )
 
-#             # Redirect to order placed confirmation page
-#             return redirect('order_placed')
+            for item in cart_items:
+                Order_details.objects.create(
+                    order=order,
+                    product=item.product,
+                    quantity=item.quantity,
+                    variant=item.variant
+                )
+                item.variant.stock -= item.quantity
+                item.variant.save()
 
-#         elif payment_method == 'Razorpay':
-#             # Handle Razorpay payment
-#             razorpay_order = client.order.create({
-#                 'amount': total_price,
-#                 'currency': 'INR',
-#                 'payment_capture': '1'
-#             })
-#             print('aaaaaaaaaaaaaaaaa')
+            # Clear cart items
+            cart_items.delete()
 
-#             order = Order.objects.create(
-#                 user=request.user,
-#                 total_amount=total_price,
-#                 payment_method=payment_method,
-#                 address=selected_address,
-#                 payment_status='Paid'  # Save Razorpay order ID
-#             )
+            return redirect('order_placed')
 
-#             for item in cart_items:
-#                 Order_details.objects.create(
-#                     order=order,
-#                     product=item.product,
-#                     quantity=item.quantity,
-#                     variant=item.variant
-#                 )
-#                 item.variant.stock -= item.quantity
-#                 item.variant.save()
+        elif payment_method == 'Razorpay':
 
-#             # Clear the cart after creating the order
-#             cart_items.delete()
+            order = Order.objects.create(
+                user=request.user,
+                total_amount=final_amount / 100, 
+                payment_method=payment_method,
+                address=selected_address,
+                coupon = coupon
+            )
 
-#             # Redirect to Razorpay payment page
-#             return render(request, 'user/payment.html', {
-#                 'order': order,
-#                 'razorpay_order_id': razorpay_order['id'],
-#                 'razorpay_key': settings.RAZORPAY_KEY_ID,
-#                 'amount': total_price
-#             })
-#         return redirect('order_placed')
-           
+            # Save order details
+            for item in cart_items:
+                Order_details.objects.create(
+                    order=order,
+                    product=item.product,
+                    quantity=item.quantity,
+                    variant=item.variant
+                )
+                item.variant.stock -= item.quantity
+                item.variant.save()
 
-# @csrf_exempt
-# def payment_verification(request):
-    
-#     print('bbbbbbbbbbbbbbbbbb')
-#     if request.method == 'POST':
-#         data = request.POST
-#         razorpay_order_id = data.get('razorpay_order_id')
-#         razorpay_payment_id = data.get('razorpay_payment_id')
-#         razorpay_signature = data.get('razorpay_signature')
-
-#         try:
-#             client.utility.verify_payment_signature({
-#                 'razorpay_order_id': razorpay_order_id,
-#                 'razorpay_payment_id': razorpay_payment_id,
-#                 'razorpay_signature': razorpay_signature
-#             })
-            
-#             # Mark order as paid after successful verification
-#             order = Order.objects.filter(user=request.user, total_amount=data['amount']).last()  # Adjust logic as necessary
-#             if order:
-#                 order.payment_status = 'Paid'  # Update payment status
-#                 order.save()
-#             return redirect('order_placed')
-        
-#         except razorpay.errors.SignatureVerificationError:
-#             # Redirect to payment failure page if verification fails
-#             return redirect('payment_failed')
-
-#     return redirect('home')
+            # Clear cart items
+            cart_items.delete()
 
 
-# def order_placed(request):
-#     return render(request, 'order_placed.html')
+            client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_SECRET_KEY))
 
-# def payment_failed(request):
-#     print('ccccccccccccccccccccc')
-#     return render(request, 'payment_failed.html')
+            # Create Razorpay Order
+            razorpay_order = client.order.create({
+                'amount': final_amount,  # Amount in paise
+                'currency': 'INR',
+                'payment_capture': '1'  # Auto-capture after payment
+            })
+
+            # Render payment page with Razorpay order ID and key
+            return render(request, 'user/payment.html', {
+                'order_id': razorpay_order['id'],
+                'amount': final_amount,
+                'razorpay_key': settings.RAZORPAY_KEY_ID,
+                'user': request.user,
+            })
+
+
+
+from django.http import HttpResponse
+
+def payment_success(request):
+    payment_id = request.GET.get('payment_id')
+    # You can add logic here to update the order status or show a confirmation message
+    return redirect('order_placed')
 
 
 #==================== ORDERS SECTION ==================#
 
 def orders(request):
-    orders=Order.objects.filter(user=request.user)
+    orders=Order.objects.filter(user=request.user).order_by('-id')
     no_user_orders_found = not orders.exists()
-    return render(request, 'user/orders.html', {'orders':orders, 'no_user_orders_found': no_user_orders_found})
+
+    paginator = Paginator(orders, 8)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'user/orders.html', {'page_obj':page_obj, 'no_user_orders_found': no_user_orders_found})
 
 def order_details(request, order_id):
     orders = get_object_or_404(Order, id=order_id)
     order_items=Order_details.objects.filter(order = orders)
+    quantity = request.POST.get('quantity')
+    print(quantity)
     return render(request, 'user/order_details.html', {'order_items':order_items, 'orders':orders})
 
 def order_placed(request):
@@ -896,3 +948,8 @@ def remove_wishlist_item(request, variant_id):
     return redirect('wishlist')
 
 
+#==================== ORDER CANCEL =================#
+
+def order_cancel(request):
+
+    return render(request,'user/error.html')

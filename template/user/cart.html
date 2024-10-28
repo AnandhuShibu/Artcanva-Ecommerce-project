@@ -222,9 +222,9 @@
     <!-- Cart Section -->
     <div class="container cart-container">
         
-<div class="cart-header">
-    <h2 class="mb-4">CART</h2>
-</div>
+            <div class="cart-header">
+                <h2 class="mb-4">CART</h2>
+            </div>
 
         {% if is_empty %}
         <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 400px;">
@@ -234,51 +234,61 @@
             </form>
         </div>
     
-{% else %}
+         {% else %}
 
         <div class="row">
             <div class="col-lg-8 cart-items">
-                {% for item in cart_items %}
-                <div class="cart-item d-flex align-items-center">
-                    <img src="{{ item.product.images1.url }}" alt="Painting">
-                    <div class="item-details ms-3 flex-grow-1">
-                        <h5>{{ item.product.product_name }}</h5>
-                        <p>Frame Size: {{ item.variant.frame_size }}</p>
-                        <p class="price" data-price="{{ item.variant.price }}">₹ {{ item.variant.price }}</p>
+
+            <form method="POST" action="{% url 'checkout_og' %}" id="checkout-form">
+                {% csrf_token %}
             
-                        <div class="quantity d-flex align-items-center mt-2">
-                            <button class="btn btn-outline-secondary btn-sm me-2 minus" type="button">-</button>
-                            <input 
-                                type="number" 
-                                value="{{ item.quantity }}" 
-                                min="1" 
-                                class="form-control form-control-sm quantity-input" 
-                                name="quantity_{{ item.variant.id }}" 
-                                data-price="{{ item.variant.price }}"
-                                data-stock="{{ item.variant.stock }}">
-                            <button class="btn btn-outline-secondary btn-sm ms-2 plus" type="button">+</button>
+                
+                    {% for item in cart_items %}
+                    <div class="cart-item d-flex align-items-center">
+                        <img src="{{ item.product.images1.url }}" alt="Painting">
+                        <div class="item-details ms-3 flex-grow-1">
+                            <h5>{{ item.product.product_name }}</h5>
+                            <p>Frame Size: {{ item.variant.frame_size }}</p>
+                            <p class="price" data-price="{{ item.variant.price }}">₹ {{ item.variant.price }}</p>
+            
+                            <div class="quantity d-flex align-items-center mt-2">
+                                <button class="btn btn-outline-secondary btn-sm me-2 minus" type="button">-</button>
+                                <input 
+                                    type="number" 
+                                    value="{{ item.quantity }}" 
+                                    min="1" 
+                                    class="form-control form-control-sm quantity-input" 
+                                    name="quantity_{{ item.variant.id }}" 
+                                    data-price="{{ item.variant.price }}"
+                                    data-stock="{{ item.variant.stock }}">
+                                <button class="btn btn-outline-secondary btn-sm ms-2 plus" type="button">+</button>
+                            </div>
                         </div>
-                    </div>
             
-                    <a href="{% url 'remove_cart_item' item.variant.id %}" class="btn btn-danger btn-sm remove-item">Remove</a>
+                        <a href="{% url 'remove_cart_item' item.variant.id %}" class="btn btn-danger btn-sm remove-item">Remove</a>
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
-            </div>
-    
+
+                
             <div class="col-lg-4">
+
+
                 <div class="summary">
-                    <form method="POST" action="{% url 'checkout_og' %}" id="checkout-form">
-                        {% csrf_token %}
-    
                         <p>Total price: <span id="total-price"></span></p>
                         <input type="hidden" name="total_price" id="total-price-input">
-    
                         <button type="submit" class="btn btn-order w-100 mt-3">PROCEED TO CHECKOUT</button>
-                    </form>
                 </div>
+
+
+
+
             </div>
+            </form>
         </div>
+
     </div>
+    
     {% endif %}
 
     
@@ -286,7 +296,7 @@
 
 
     <script>
-       // Function to update the total price based on quantity changes
+      // Function to update the total price based on quantity changes
 function updateTotalPrice() {
     let total = 0;
     document.querySelectorAll('.cart-item').forEach(item => {
@@ -311,7 +321,6 @@ document.querySelectorAll('.plus').forEach(button => {
         let quantity = parseInt(input.value); // Get the current quantity
         const stock = parseInt(input.getAttribute('data-stock')); // Get the stock value
 
-        // Check if quantity can be incremented
         if (quantity < stock) {
             input.value = quantity + 1; // Increment the quantity
             displayTotalAmount(); // Update total amount after changing quantity
@@ -327,7 +336,6 @@ document.querySelectorAll('.minus').forEach(button => {
         const input = this.nextElementSibling; // Get the input element
         let quantity = parseInt(input.value); // Get the current quantity
 
-        // Check if quantity can be decremented
         if (quantity > 1) {
             input.value = quantity - 1; // Decrement the quantity
             displayTotalAmount(); // Update total amount after changing quantity
@@ -352,8 +360,34 @@ document.querySelectorAll('.quantity-input').forEach(input => {
     });
 });
 
-// Call this function to initialize the total amount display on page load
+// Add hidden input fields for quantities before form submission
+document.getElementById('checkout-form').addEventListener('submit', function (event) {
+    const form = this;
+
+    // Remove any existing hidden quantity inputs to avoid duplicates
+    form.querySelectorAll('.hidden-quantity-input').forEach(input => input.remove());
+
+    // Add hidden input fields for each product's quantity
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        const variantId = input.name.split('_')[1]; // Extract variant ID from input name
+        const quantity = input.value;
+
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = `quantity_${variantId}`; // Create field like quantity_<id>
+        hiddenInput.value = quantity;
+        hiddenInput.classList.add('hidden-quantity-input'); // Add class to track these inputs
+
+        form.appendChild(hiddenInput); // Append the hidden input to the form
+    });
+
+    // Display total amount before proceeding
+    displayTotalAmount();
+});
+
+// Initialize the total amount display on page load
 displayTotalAmount();
+
 
 
     // Function to show the popup message
