@@ -13,7 +13,6 @@ from django.contrib import messages
 from django.db.models import Q
 from django.core.mail import send_mail
 import razorpay
-
 from coupon_app . models import Coupons
 from product_app.models import Product
 from variant_app.models import Variant
@@ -28,14 +27,14 @@ from django.core.exceptions import ValidationError
 from . models import Order,Order_details, Review, Wishlist
 from django.http import JsonResponse
 from django.db import transaction
-
 from django.conf import settings
 from .models import Cart, Address, Order, Order_details, Wallet, Wallet_Transaction
 
-# razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_SECRET_KEY))
+
 
 
 #============= USER SIGNUP ============#
+
 
 def signup(request):
     if request.method == 'POST':
@@ -69,7 +68,9 @@ def signup(request):
     return render(request, 'user/signup.html')
 
 
-#============= USER OTP SECTION =============#
+
+#=============== USER OTP SECTION =============#
+
 
 def create_otp(length=4):
     digits = string.digits
@@ -120,7 +121,7 @@ def otp(request):
     })
 
 
-#============== USER LOGIN ===============#
+#======================== USER LOGIN =============================#
 
 @never_cache 
 def login(request):
@@ -151,14 +152,15 @@ def resend_otp(request):
     messages.success(request, 'A new OTP has been sent to your email.')
     return redirect('otp')
 
-#=============== USER LOGOUT ==============#
+
+#======================= USER LOGOUT =========================#
 
 def user_logout(request):
     logout(request)
     return redirect('home')
 
 
-#=============== RESET PASSWORD ==================#
+#======================= RESET PASSWORD =========================#
 
 def email_verify(request):
     if request.method == 'POST':
@@ -227,7 +229,7 @@ def new_password(request):
     return render(request,'user/newpassword.html')
 
 
-#================= HOME SECTION =====================#
+#========================= HOME SECTION ===========================#
 
 def home(request):
     arrivals = Product.objects.filter(product_status = True).order_by('-id')[:3]
@@ -239,20 +241,15 @@ def home(request):
     return render(request,'user/home.html', context)
 
 
-#================= SHOP SECTION ===============#
+#========================= SHOP SECTION =========================#
 
 def shop(request):
-    search_query = request.GET.get('q', '').strip()  # Get search query, default to an empty string
-
-    # Default empty selections
+    search_query = request.GET.get('q', '').strip()
     selected_categories = request.POST.getlist('categories') if request.method == 'POST' else []
     selected_size = request.POST.getlist('size') if request.method == 'POST' else []
     price_order = request.POST.get('price_order') if request.method == 'POST' else None
-
-    # Fetch all products initially
     products = Product.objects.all()
 
-    # Apply filters based on user selection
     if selected_categories:
         products = products.filter(art_category__id__in=selected_categories)
 
@@ -265,26 +262,20 @@ def shop(request):
         elif price_order == 'desc':
             products = products.order_by('-variants__price')
 
-    # Apply search filter if a search query is provided
     if search_query:
         products = products.filter(product_name__icontains=search_query)
 
-    # Pagination: always apply pagination regardless of request method
-    paginator = Paginator(products, 9)  # Show 10 items per page
-    page_number = request.GET.get('page')  # Get the current page number
-    page_obj = paginator.get_page(page_number)  # Get the corresponding page
+    paginator = Paginator(products, 9)  
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
-    # Check if no products are found
     no_products_found = not products.exists()
-
-    # Fetch additional data
     unique_frame_sizes = Variant.objects.order_by('frame_size').distinct()
     paints = Paint.objects.all()
     arts = Art.objects.all()
 
-    # Prepare context for template rendering
     context = {
-        'products': page_obj.object_list,  # Use paginated products for display
+        'products': page_obj.object_list,
         'paints': paints,
         'arts': arts,
         'variants': unique_frame_sizes,
@@ -292,17 +283,13 @@ def shop(request):
         'selected_size': selected_size,
         'no_products_found': no_products_found,
         'search_query': search_query,
-        'page_obj': page_obj,  # Pass the page object to the template
+        'page_obj': page_obj,
     }
 
-    # Render the template with context
     return render(request, 'user/shop.html', context)
 
 
-#================= SINGLE PRODUCT SECTION ===============#
-
-from django.shortcuts import render, get_object_or_404
-from .models import Product, Variant, Cart
+#========================== SINGLE PRODUCT SECTION ==========================#
 
 def single(request, product_id, variant_id):
     product = get_object_or_404(Product, id=product_id)
@@ -318,8 +305,11 @@ def single(request, product_id, variant_id):
         'product': product,
         'variant': variant,
         'sizes': sizes,
-        'in_cart': in_cart,  # Pass the flag to the template
+        'in_cart': in_cart,
     })
+
+
+#====================== DEMO VIEW FUNCTIONS ===================#
 
 def jasir(request):
     return render(request, 'user/jasir.html')
@@ -328,7 +318,7 @@ def change(request):
     return render(request, 'user/password_verify.html')
 
 
-#================= USER PROFILE SECTION =================#
+#======================= USER PROFILE SECTION =====================#
 
 def profile(request):
     if not request.user.is_authenticated:
@@ -385,7 +375,6 @@ def profile(request):
         username = request.user.username
         email = request.user.email
         password = request.user.password
-    print(password)
     coupons = Coupons.objects.all()
     wallet, created = Wallet.objects.get_or_create(user=request.user, defaults={'wallet_amount': 0})
     wallet_transaction = Wallet_Transaction.objects.filter(user=request.user)
@@ -399,7 +388,6 @@ def profile(request):
         'wallet_transaction': wallet_transaction
     }
 
-    print(wallet)
     return render(request,'user/profile.html', context)
 
 
@@ -437,7 +425,7 @@ def remove_address_profile(request,address_id):
     return redirect('profile')
 
 
-#============== CHANGE PASSWORD SECTION =============#
+#======================= CHANGE PASSWORD SECTION ===================#
 
 def password_verify(request):
     if request.method == 'POST':
@@ -466,7 +454,7 @@ def password_change(request):
     return render(request, 'user/password_change.html')
 
 
-#=================== CART SECTION ===================#
+#========================== CART SECTION ======================#
 
 def cart(request):
     if not request.user.is_authenticated:
@@ -475,9 +463,6 @@ def cart(request):
 
     cart_items = Cart.objects.filter(user=request.user).order_by('-id')
     is_empty = not cart_items.exists()
-
-    
-
 
     return render(request,'user/cart.html', {'cart_items': cart_items, 'is_empty': is_empty})
 
@@ -502,11 +487,11 @@ def remove_cart_item(request, variant_id):
     return redirect('cart')
 
 
-#====================== CHECK OUT SECTION ===================#
+#========================== CHECK OUT SECTION ======================#
 
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
-from .models import Cart, Variant
+# from .models import Cart, Variant
 
 # def checkout_og(request):
 #     if request.method == 'POST':
@@ -552,6 +537,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 
 def checkout_og(request):
+    print('CHECKOUT OG')
     if request.method == 'POST':
         total_price = request.POST.get('total_price')
         # Extract quantities from POST data
@@ -576,7 +562,7 @@ def checkout_og(request):
                 return redirect('cart')
 
             if quantity > variant.stock:
-                messages.error(request, f"Only {variant.stock} items available for {variant.product.product_name}.")
+                messages.error(request, f"Only {variant.stock} stock available for {variant.product.product_name}.")
                 return redirect('cart')
 
             # Update the cart item with new quantity
@@ -589,6 +575,8 @@ def checkout_og(request):
         # Store quantities and total price in session if needed
         request.session['total_price'] = total_price
 
+
+
         return redirect('checkout')
 
     return redirect('cart')
@@ -597,9 +585,18 @@ def checkout_og(request):
 
 
 def checkout(request):
+
+    print('CHECK OUT ENTERING')
+
     if not request.user.is_authenticated:
         messages.info(request, "PLEASE LOGIN.")
         return redirect('login')
+
+
+    stock_error = validate_stock(request.user)
+    if stock_error:
+        messages.error(request, stock_error)
+        return redirect('cart')
     
     
     if request.method == 'POST':
@@ -630,6 +627,13 @@ def checkout(request):
         if not address or len(address) < 5:
             errors.append("Address must be at least 5 characters long.")
 
+        
+
+        stock_error = validate_stock(request.user)
+        if stock_error:
+            messages.error(request, stock_error)
+            return redirect('cart')
+        
         if errors:
             for error in errors:
                 messages.error(request, error)
@@ -664,6 +668,17 @@ def checkout(request):
 
     
     return render(request,'user/checkout.html', context)
+
+def validate_stock(user):
+    """Checks if any product in the user's cart is out of stock."""
+    cart_items = Cart.objects.filter(user=user)
+    for item in cart_items:
+        variant = get_object_or_404(Variant, id=item.variant_id)
+
+        if item.quantity > variant.stock:
+            return f"Only {variant.stock} stock available for {variant.product.product_name}."
+    return None
+
 
 def edit_address_chechout(request):
     if request.method == 'POST':
@@ -724,48 +739,6 @@ def remove_address(request,address_id):
 
 
 #================== PLACE ORDER SECTION ==================#
-
-# def place_order(request):
-#     cart_items=Cart.objects.filter(user=request.user)
-#     if request.method == 'POST':
-#         payment_method = request.POST.get('payment_method')
-#         selected_address_id = request.POST.get('selected_address')
-#         selected_address = Address.objects.get(id=selected_address_id)
-#         ordered_items = Cart.objects.all()
-#         total_price = int(request.session.get('total_price', 0)) * 100
-#         coupon_discount_price = request.POST.get('final_price', None)
-
-#         if coupon_discount_price:
-#             final_amount = coupon_discount_price
-#         else:
-#             final_amount = total_price
-
-#         print('Last amount:', final_amount)
-        
-#         order=Order.objects.create(
-#             user=request.user,
-#             total_amount=total_price,
-#             payment_method=payment_method,
-#             address=selected_address
-#         )
-#         for item in cart_items:
-#             Order_details.objects.create(
-#                 order=order,
-#                 product=item.product,
-#                 quantity=item.quantity,
-#                 variant=item.variant
-#             )
-#             item.variant.stock -= item.quantity
-#             item.variant.save()
-        
-#         cart_items=Cart.objects.filter(user=request.user)
-#         cart_items.delete()
-       
-#         return redirect('order_placed')
-            
-
-#============================ SAMPLE ===============================
-
 
 
 def place_order(request):
@@ -882,6 +855,8 @@ def place_order(request):
                 item.variant.stock -= item.quantity
                 item.variant.save()
 
+
+            
             wallet, created = Wallet.objects.get_or_create(user=request.user)
             wallet.wallet_amount -= order.total_amount  # Increment the wallet amount
             wallet.save()
@@ -890,7 +865,7 @@ def place_order(request):
             user = request.user,
             transaction_amount = order.total_amount,
             type = 'Debit'
-        )
+            )
         
             # Clear cart items
             cart_items.delete()
@@ -900,7 +875,7 @@ def place_order(request):
 
 
 
-from django.http import HttpResponse
+# from django.http import HttpResponse
 
 def payment_success(request):
     payment_id = request.GET.get('payment_id')

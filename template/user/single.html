@@ -402,13 +402,9 @@
           {% elif in_cart %}
           <a href="{% url 'cart' %}"><button class="go-to-cart">Go to cart</button></a>
           {% else %}
-              <a href="{% url 'addcart' product.id variant.id %}">
-                  <button class="add-to-cart">Add to Cart</button>
-                  
-              </a>
+              <a href="{% url 'addcart' product.id variant.id %}"><button class="add-to-cart">Add to Cart</button></a>
               
           {% endif %}
-
           <a href=""><button class="add-to-wishlist">Add to Wishlist</button></a>
       </div>
 
