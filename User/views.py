@@ -30,7 +30,7 @@ from django.http import JsonResponse
 from django.db import transaction
 
 from django.conf import settings
-from .models import Cart, Address, Order, Order_details
+from .models import Cart, Address, Order, Order_details, Wallet, Wallet_Transaction
 
 # razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_SECRET_KEY))
 
@@ -387,12 +387,19 @@ def profile(request):
         password = request.user.password
     print(password)
     coupons = Coupons.objects.all()
+    wallet, created = Wallet.objects.get_or_create(user=request.user, defaults={'wallet_amount': 0})
+    wallet_transaction = Wallet_Transaction.objects.filter(user=request.user)
+
     context = {
         'informations':informations,
         'username': username,
         'email': email,
-        'coupons': coupons
+        'coupons': coupons,
+        'wallet': wallet,
+        'wallet_transaction': wallet_transaction
     }
+
+    print(wallet)
     return render(request,'user/profile.html', context)
 
 
@@ -644,11 +651,15 @@ def checkout(request):
     total_price = request.session.get('total_price', 0)
     cart_items=Cart.objects.filter(user=request.user)
     coupons = Coupons.objects.all()
+    wallet=Wallet.objects.get(user=request.user)
+    wallet_balance=wallet.wallet_amount
     context = {
         'all_address': all_address,
         'total_price': total_price,
         'cart_items': cart_items,
+        'wallet_balance':wallet_balance,
         'coupons': coupons
+
     }
 
     
@@ -851,6 +862,41 @@ def place_order(request):
                 'razorpay_key': settings.RAZORPAY_KEY_ID,
                 'user': request.user,
             })
+        
+        elif payment_method == 'Wallets':
+            order = Order.objects.create(
+                user=request.user,
+                total_amount=final_amount / 100,
+                payment_method=payment_method,
+                address=selected_address,
+                coupon = coupon
+            )
+
+            for item in cart_items:
+                Order_details.objects.create(
+                    order=order,
+                    product=item.product,
+                    quantity=item.quantity,
+                    variant=item.variant
+                )
+                item.variant.stock -= item.quantity
+                item.variant.save()
+
+            wallet, created = Wallet.objects.get_or_create(user=request.user)
+            wallet.wallet_amount -= order.total_amount  # Increment the wallet amount
+            wallet.save()
+
+            trasanction = Wallet_Transaction.objects.create(
+            user = request.user,
+            transaction_amount = order.total_amount,
+            type = 'Debit'
+        )
+        
+            # Clear cart items
+            cart_items.delete()
+
+            return redirect('order_placed')
+
 
 
 
@@ -950,6 +996,29 @@ def remove_wishlist_item(request, variant_id):
 
 #==================== ORDER CANCEL =================#
 
-def order_cancel(request):
+def order_cancel(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    
+    if order.status == 'Cancelled':
+        messages.warning(request, "Order is already cancelled.")
+        return redirect('order_details', order_id=order_id)
+    
+    order.status='Cancelled'
+    order.save()
 
-    return render(request,'user/error.html')
+    if order.payment_method in ['Razorpay', 'Wallets']:
+        wallet, created = Wallet.objects.get_or_create(user=request.user, defaults={'wallet_amount': 0})
+        wallet.wallet_amount += order.total_amount  # Increment the wallet amount
+        wallet.save()
+      
+        trasanction = Wallet_Transaction.objects.create(
+            user = request.user,
+            transaction_amount = order.total_amount,
+            type = 'Credit'
+        )
+   
+    order.save()
+    
+    return redirect('order_details',order_id=order_id)
+
+    

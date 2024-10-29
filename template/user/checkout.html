@@ -377,7 +377,7 @@
           <button type="button" class="btn btn-apply w-100" id="applyButton">APPLY</button>
   
           <h6 id="selectedCoupon" class="mt-2">
-              Coupon Discount: <span id="couponInfo">None</span>
+              Coupon Discount: <span id="couponInfo"></span>
           </h6>
   
           <h5>Total Amount: ₹<span id="totalPrice">{{ total_price }}</span></h5>
@@ -409,6 +409,7 @@
               name="payment_method" 
               value="Wallets">
             <label class="form-check-label" for="wallets">Wallets</label>
+            <input type="hidden" id="walletBalance" value="{{ wallet_balance }}">
           </div>
       
           <div class="form-check mt-2">
@@ -566,6 +567,18 @@
         alert('Please select a coupon.');
     }
 });
+</script>
+
+<script>
+  document.getElementById('wallets').addEventListener('change', function () {
+    const walletBalance = parseFloat(document.getElementById('walletBalance').value);
+    const totalPrice = parseFloat(document.getElementById('totalPrice').innerText);
+
+    if (walletBalance < totalPrice) {
+      alert('Insufficient wallet balance! Please select another payment method.');
+      this.checked = false; // Uncheck the wallet option
+    }
+  });
 </script>
 
   <script>

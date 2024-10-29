@@ -90,7 +90,7 @@ class Wallet(models.Model):
 
 
 class Wallet_Transaction(models.Model):
-    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     transaction_amount = models.IntegerField()
     created_date = models.DateTimeField(auto_now_add=True)
     type = models.CharField(max_length=50)

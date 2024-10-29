@@ -159,24 +159,55 @@ def paint(request):
 def variant(request, product_id):
     if not request.user.is_authenticated or not request.user.is_superuser:  
         return redirect('login_admin')
-    products = get_object_or_404(Product, id = product_id)
-    variants=Variant.objects.filter(product=products)
     
+    products = get_object_or_404(Product, id=product_id)
+    variants = Variant.objects.filter(product=products).order_by('-id')
+
     if request.method == 'POST':
-        stock = request.POST.get('stock')
-        print(stock)
-        price = request.POST.get('price')
+        # Check if it's an edit or a new variant
+        variant_id = request.POST.get('variant_id')
+        
         size = request.POST.get('size')
+        price = request.POST.get('price')
+        stock = request.POST.get('stock')
 
-        Variant.objects.create(
-            frame_size=size,
-            stock=stock,
-            price=price,
-            product=products
-        )
+        if variant_id:  # If variant_id exists, update the variant
+            variant = get_object_or_404(Variant, id=variant_id)
+            variant.frame_size = size
+            variant.price = price
+            variant.stock = stock
+            variant.save()
+        else: 
+            existing_variant = Variant.objects.filter(product=products, frame_size=size).first()
+            if existing_variant:
+                # Handle the case where the variant already exists
+                # You can return an error message to the template or use messages framework
+                return render(request, 'admin/variant.html', {
+                    'page_obj': variants,
+                    'error_message': "!"
+                })
+            
+             # Otherwise, create a new variant
+            Variant.objects.create(
+                frame_size=size,
+                stock=stock,
+                price=price,
+                product=products
+            )
+        
         return redirect('variant', product_id=products.id)
+    
 
-    return render(request,'admin/variant.html', {'variants' : variants})
+    paginator = Paginator(variants, 8)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+
+
+    return render(request, 'admin/variant.html', {'page_obj': page_obj})
+
+
+
 
 
 #-------------------- ORDERS SECTION -----------------#

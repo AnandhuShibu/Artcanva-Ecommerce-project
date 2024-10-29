@@ -201,6 +201,31 @@
             background-color: #007bff;
             color: white;
         }
+
+        /* Popup styles */
+        .popup-message {
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 5px;
+            z-index: 1000;
+            transition: top 0.5s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-family: Arial, sans-serif;
+        }
+        .popup-error {
+            background-color: #f44336;
+        }
+        .popup-warning {
+            background-color: #ff9800;
+        }
+        .popup-show {
+            top: 20px;
+        }
         
           
           
@@ -209,7 +234,7 @@
 <body>
 
 <!-- Navbar -->
-
+<div id="popup-message" class="popup-message"></div>
     <!-- Navbar Start -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
@@ -442,6 +467,26 @@
   priceRange.addEventListener('input', () => {
     priceValue.textContent = priceRange.value;
   });
+
+  // Function to show the popup message
+  function showPopup(message, type) {
+    const popup = document.getElementById('popup-message');
+    popup.textContent = message;
+    popup.className = `popup-message popup-${type} popup-show`;
+
+    // Hide the popup after 3 seconds
+    setTimeout(() => {
+        popup.className = 'popup-message';
+    }, 3000);
+}
+
+// Check for Django messages and display them
+{% if messages %}
+    {% for message in messages %}
+        showPopup("{{ message }}", "{{ message.tags }}");
+    {% endfor %}
+{% endif %}
+
 </script>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 </body>

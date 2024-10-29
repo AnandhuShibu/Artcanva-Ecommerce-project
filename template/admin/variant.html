@@ -174,11 +174,58 @@
             background-color: #009970;
         }
 
+        .pagination-container {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .pagination {
+            list-style: none;
+            padding: 0;
+            display: inline-block;
+        }
+        
+        .pagination li {
+            display: inline;
+            margin: 0 5px;
+        }
+        
+        .pagination a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        .pagination a:hover {
+            background-color: #007bff;
+            color: white;
+        }
+
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
+
 </head>
 <body>
+    
 
     <div class="container">
+
+        {% if error_message %}
+            <script>
+                swal({
+                    title: "Error!",
+                    text: "{{ error_message }}",
+                    type: "error",
+                    confirmButtonText: "Okay"
+                });
+            </script>
+        {% endif %}
         <!-- Main content -->
         <main>
             <div class="header">
@@ -200,7 +247,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for variant in variants %}
+                    {% for variant in page_obj %}
                     <tr>
                         <td></td>
                         <td>{{ variant.id }}</td>
@@ -221,26 +268,45 @@
                    
                 </tbody>
             </table>
+
+            <div class="pagination-container">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li><a href="?page=1">&laquo; First</a></li>
+                        <li><a href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+            
+                    <li class="current-page">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</li>
+            
+                    {% if page_obj.has_next %}
+                        <li><a href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                        <li><a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+
         </main>
     </div>
 
     <div id="veriantModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <form id="variantForm" method="POST">
+    
+            <form id="variantForm" method="POST" onsubmit="return validateForm()">
                 {% csrf_token %} 
+                <input type="hidden" id="variant-id" name="variant_id"> <!-- Hidden input for variant ID -->
                 <div class="modal-header">
                     <h2 id="modal-title">Add Product Variant</h2>
                 </div>
                 <div class="modal-body">
                     <label for="size">Size (inches):</label>
-                    <input type="text" name="size" placeholder="Enter size" required>
-    
+                    <input type="text" id="size" name="size" placeholder="Enter size" required>
+            
                     <label for="price">Price:</label>
-                    <input type="number" name="price" placeholder="Enter Price" required>
-    
+                    <input type="number" id="price" name="price" placeholder="Enter Price" min="0" required>
+            
                     <label for="stock">Stock:</label>
-                    <input type="number" name="stock" placeholder="Enter stock" required>
+                    <input type="number" id="stock" name="stock" placeholder="Enter stock" min="0" required>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="save-btn" id="modal-save-btn">SAVE</button>
@@ -250,6 +316,23 @@
     </div>
     
     <script>
+
+        function validateForm() {
+            var price = document.getElementById("price").value;
+            var stock = document.getElementById("stock").value;
+    
+            // Check if price and stock are not negative and are numeric
+            if (price < 0) {
+                alert("Price cannot be negative.");
+                return false;
+            }
+            if (stock < 0) {
+                alert("Stock cannot be negative.");
+                return false;
+            }
+    
+            return true; // Allow form submission
+        }
       
         var modal = document.getElementById("veriantModal");
         var btn = document.getElementById("openModalBtn");
@@ -276,17 +359,31 @@
             editBtn.onclick = function() {
                 var row = editBtn.closest("tr");
                 var variantId = row.cells[1].textContent;
-                var size = row.cells[2].textContent;
+                var size = row.cells[2].textContent; 
                 var price = row.cells[3].textContent;
                 var stock = row.cells[4].textContent;
+        
                 modal.style.display = "block";
-                document.getElementById("variant-id").value = variantId;
+                document.getElementById("variant-id").value = variantId; 
                 document.getElementById("size").value = size;
-                document.getElementById("price").value = price;
-                document.getElementById("stock").value = stock;
+                document.getElementById("price").value = price; 
+                document.getElementById("stock").value = stock; 
             };
         });
+        
     </script>
+
+    {% if error_message %}
+    <script>
+        swal({
+            title: "Size already exists",
+            text: "{{ error_message }}",
+            type: "error",
+            confirmButtonText: "Okay"
+        });
+    </script>
+{% endif %}
+
 </body>
 </html>
 
