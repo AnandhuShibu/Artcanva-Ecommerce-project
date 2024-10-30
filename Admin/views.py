@@ -340,3 +340,6 @@ def add_coupon(request):
         return redirect('coupon')
     
     return render(request, 'admin/coupons.html')
+
+def sale(request):
+    return render(request, 'admin/sale.html')

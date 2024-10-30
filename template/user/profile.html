@@ -442,6 +442,7 @@
                   <th></th>
                   <th>TRANSACTION AMOUNT</th>
                   <th>TRANSACTION DATE</th>
+                  <th>TRANSACTION MODE</th>
                   <th>CREDIT / DEBIT</th>
               </tr>
           </thead>
@@ -451,6 +452,7 @@
                   <td></td>
                   <td style="font-size: 18px;">₹ {{transaction.transaction_amount}}</td>
                   <td style="font-size: 18px;">{{transaction.created_date|date:"d-m-Y" }}</td>
+                  <td style="font-size: 18px;">{{ transaction.transaction_mode }}</td>
                   <td>
                     <span style="color: {% if transaction.type == 'Debit' %}red{% else %}green{% endif %};
                           font-size: 20px;">

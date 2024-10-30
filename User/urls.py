@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 from .views import user_logout
 
+from .views import sales_report, export_sales_report
 # from .views import place_order, razorpay_checkout
 
 urlpatterns = [
@@ -41,4 +42,6 @@ urlpatterns = [
     path('place-order/', views.place_order, name='place_order'),
     path('payment-success/', views.payment_success, name='payment_success'),
     path('order_cancel/<int:order_id>', views.order_cancel, name= 'order_cancel'),
+    path('sales-report/', sales_report, name='sales_report'),
+    path('export-sales-report/', export_sales_report, name='export_sales_report'),
     ]

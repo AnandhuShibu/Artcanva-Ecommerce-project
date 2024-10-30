@@ -20,9 +20,7 @@ urlpatterns = [
     path('change_order_status/<int:order_id>/', views.change_order_status, name='change_order_status'),
     path('add_coupon/', views.add_coupon, name='add_coupon'),
     path('remove_coupon/<int:coupon_id>', views.remove_coupon, name='remove_coupon'),
-    
-    
-    
+    path('sale/',views.sale, name='sale'),
     
 
 ]

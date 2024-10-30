@@ -94,5 +94,6 @@ class Wallet_Transaction(models.Model):
     transaction_amount = models.IntegerField()
     created_date = models.DateTimeField(auto_now_add=True)
     type = models.CharField(max_length=50)
+    transaction_mode = models.CharField(max_length=50)
 
     

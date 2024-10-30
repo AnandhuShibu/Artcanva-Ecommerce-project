@@ -4,191 +4,197 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Add Product</title>
+
+  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Cropper.js CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet">
+
   <style>
     body {
       background-color: #f0f4f8;
       font-family: 'Arial', sans-serif;
     }
+
     .form-container {
       max-width: 800px;
       margin: 50px auto;
       background-color: #fff;
-      padding: 25px;  /* Reduced padding to decrease height */
+      padding: 25px;
       border-radius: 12px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
+
     .form-header {
       text-align: center;
-      margin-bottom: 20px; /* Reduced margin */
+      margin-bottom: 20px;
     }
-    .form-header h2 {
-      color: #4a4a4a;
-      font-size: 22px; /* Slightly smaller font size */
-      font-weight: bold;
-    }
-    .btn-custom {
-      background-color: #6c63ff;
-      color: white;
-      font-size: 16px;
-      font-weight: bold;
-      padding: 10px 20px;
-      border-radius: 5px;
-      transition: background-color 0.3s ease;
-    }
-    .btn-custom:hover {
-      background-color: #574b90;
-    }
-    .form-control, .form-select {
-      border-radius: 8px;
-      height: 40px;  /* Reduced input height */
-    }
-    textarea.form-control {
-      height: 100px;  /* Reduced height of textarea */
-    }
-    .sweet-alert {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1000;
-      width: 300px;
-      height: 30px;
-      border-radius: 10px;
-      padding: 20px;
-      border: none;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); 
-      background: linear-gradient(145deg, #f0f4f8, #e0e7ee); 
-      text-align: center;
-      animation: slideDown 0.5s ease;
-  }
-  
-  /* Adding slide-down animation */
-  @keyframes slideDown {
-      from {
-          opacity: 0;
-          transform: translate(-50%, -20px);
-      }
-      to {
-          opacity: 1;
-          transform: translate(-50%, 0); 
-      }
-  }
-  
-  .message-box {
-      width: 100%;
-      height: 100%;
+
+    .preview-container {
       display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-  }
-  
-  .alert-info {
-      color: #007bff;
-      font-weight: bold;
-  }
-  
-  .alert-button {
-      margin-top: 20px; /* Space above button */
-      padding: 10px 20px; /* Padding for button */
-      border: none; /* Remove border */
-      border-radius: 5px; /* Rounded corners for button */
-      background-color: #007bff; /* Button color */
-      color: white; /* Button text color */
-      cursor: pointer; /* Change cursor to pointer */
-      transition: background-color 0.3s ease; /* Transition for hover effect */
-  }
-  
-  .alert-button:hover {
-      background-color: #0056b3; /* Darker button on hover */
-  }
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .preview-container img {
+      max-width: 150px;
+      max-height: 150px;
+      border-radius: 8px;
+      object-fit: cover;
+      cursor: pointer;
+    }
+
+    #crop-modal img {
+      width: 100%;
+    }
   </style>
 </head>
 <body>
-            {% if messages %}
-            <div class="sweet-alert">
-                <div class="alert alert-info message-box" role="alert">
-                {% for message in messages %}
-                    <p>{{ message }}</p>
-                 {% endfor %}
-                </div>
-            </div>
-            {% endif %}
+
   <div class="form-container">
     <div class="form-header">
       <h2>Add New Product</h2>
     </div>
-    <form method="POST" enctype="multipart/form-data" action = {% url 'add_product'%}>
+    <form method="POST" enctype="multipart/form-data" action="{% url 'add_product' %}">
       {% csrf_token %}
-      <!-- Product Info Fields -->
+
       <div class="mb-3">
         <label for="product-name" class="form-label">Product Name</label>
-        <input type="text" class="form-control" name = 'product_name' id="product-name" placeholder="Enter product name">
+        <input type="text" class="form-control" name="product_name" id="product-name" required>
       </div>
+
       <div class="mb-3">
         <label for="paint-type" class="form-label">Paint Type</label>
-        <select class="form-select" id="paint-type" name = 'paint_type'>
+        <select class="form-select" id="paint-type" name="paint_type" required>
           <option selected>Select Paint Type</option>
           {% for paint in paints %}
-          <option value="{{paint.id}}">{{paint.paint_type}}</option>
-          {% endfor%}
-        </select>
-      </div>
-      <div class="mb-3">
-        <label for="category" class="form-label">Category</label>
-        <select class="form-select" id="category" name = 'category_name'>
-          <option selected>Select Category</option>
-          {% for art in arts %}
-          <option value="{{art.id}}">{{art.art_type}}</option>
+            <option value="{{ paint.id }}">{{ paint.paint_type }}</option>
           {% endfor %}
         </select>
       </div>
+
       <div class="mb-3">
-        <label for="description"  class="form-label">Description</label>
-        <textarea class="form-control" name='description' id="description" placeholder="Enter product description"></textarea>
+        <label for="category" class="form-label">Category</label>
+        <select class="form-select" id="category" name="category_name" required>
+          <option selected>Select Category</option>
+          {% for art in arts %}
+            <option value="{{ art.id }}">{{ art.art_type }}</option>
+          {% endfor %}
+        </select>
       </div>
+
+      <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea class="form-control" name="description" id="description" rows="3"></textarea>
+      </div>
+
+      <!-- Image Upload Fields with Preview and Crop -->
       <div class="mb-3">
         <label for="image1" class="form-label">Product Image 1</label>
-        <input type="file" class="form-control" id="image1" name="image1" accept="image/*">
-        <small class="form-text text-muted">Only images are allowed (e.g., PNG, JPG).</small>
+        <input type="file" class="form-control image-input" id="image1" name="image1" accept="image/*">
+        <div class="preview-container" id="preview-container1"></div>
       </div>
+
       <div class="mb-3">
         <label for="image2" class="form-label">Product Image 2</label>
-        <input type="file" class="form-control" id="image2" name="image2" accept="image/*">
-        <small class="form-text text-muted">Only images are allowed (e.g., PNG, JPG).</small>
+        <input type="file" class="form-control image-input" id="image2" name="image2" accept="image/*">
+        <div class="preview-container" id="preview-container2"></div>
       </div>
+
       <div class="mb-3">
         <label for="image3" class="form-label">Product Image 3</label>
-        <input type="file" class="form-control" id="image3" name="image3" accept="image/*">
-        <small class="form-text text-muted">Only images are allowed (e.g., PNG, JPG).</small>
+        <input type="file" class="form-control image-input" id="image3" name="image3" accept="image/*">
+        <div class="preview-container" id="preview-container3"></div>
       </div>
-      
 
-      <!-- Submit Button -->
       <div class="text-center">
-        <button type="submit" class="btn btn-custom">Add Product</button>
+        <button type="submit" class="btn btn-primary">Add Product</button>
       </div>
     </form>
   </div>
 
+  <!-- Cropper Modal -->
+  <div class="modal fade" id="crop-modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body">
+          <img id="crop-image" alt="Crop Image">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" id="crop-save" class="btn btn-primary">Save Crop</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
-  document.querySelectorAll('input[type="file"]').forEach(input => {
-    input.addEventListener('change', function (event) {
-      const file = event.target.files[0];
-      if (file) {
-        const validImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
-        if (!validImageTypes.includes(file.type)) {
-          alert('Only image files (JPEG, PNG, GIF) are allowed!');
-          event.target.value = ''; // Clear the input field
-        }
-      }
-    });
-  });
-  
-</script>
+  <!-- Cropper.js JS -->
+  <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
 
+  <script>
+    let cropper;
+    let currentInput;
+
+    document.querySelectorAll('.image-input').forEach((input, index) => {
+      input.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file && ['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.addEventListener('click', () => openCropper(e.target.result, input));
+            document.getElementById(`preview-container${index + 1}`).innerHTML = '';
+            document.getElementById(`preview-container${index + 1}`).appendChild(img);
+          };
+          reader.readAsDataURL(file);
+        } else {
+          alert('Only JPEG, PNG, or GIF images are allowed!');
+          input.value = '';
+        }
+      });
+    });
+
+    function openCropper(imageSrc, input) {
+      currentInput = input;
+      const cropImage = document.getElementById('crop-image');
+      cropImage.src = imageSrc;
+
+      const cropModal = new bootstrap.Modal(document.getElementById('crop-modal'));
+      cropModal.show();
+
+      cropModal._element.addEventListener('shown.bs.modal', () => {
+        cropper = new Cropper(cropImage, { aspectRatio: 1 });
+      });
+
+      cropModal._element.addEventListener('hidden.bs.modal', () => {
+        cropper.destroy();
+        cropper = null;
+      });
+    }
+
+    document.getElementById('crop-save').addEventListener('click', () => {
+      const canvas = cropper.getCroppedCanvas();
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const img = document.createElement('img');
+        img.src = url;
+
+        const index = Array.from(document.querySelectorAll('.image-input')).indexOf(currentInput);
+        document.getElementById(`preview-container${index + 1}`).innerHTML = '';
+        document.getElementById(`preview-container${index + 1}`).appendChild(img);
+
+        const dt = new DataTransfer();
+        dt.items.add(new File([blob], 'cropped-image.png'));
+        currentInput.files = dt.files;
+
+        bootstrap.Modal.getInstance(document.getElementById('crop-modal')).hide();
+      });
+    });
+  </script>
 </body>
-</html>  
+</html>

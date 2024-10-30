@@ -88,6 +88,7 @@
                     <th>Order ID</th>
                     <th>Total Amount</th>
                     <th>Order Date</th>
+                    <th>Payment method</th>
                     <th>Status</th>
                     <th></th>
                     
@@ -109,7 +110,9 @@
                     <td>{{ order.id }}</td>
                     <td>₹ {{ order.total_amount }}</td>
                     <td>{{ order.order_date|date:"d-m-y"}}</td>
+                    <td>{{ order.payment_method }}</td>
                     <td>{{ order.status }}</td>
+                    
                     <td><a href="{% url 'order_details' order.id %}">view</a></td>
                 </tr>
 

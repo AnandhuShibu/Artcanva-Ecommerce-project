@@ -248,7 +248,7 @@ def shop(request):
     selected_categories = request.POST.getlist('categories') if request.method == 'POST' else []
     selected_size = request.POST.getlist('size') if request.method == 'POST' else []
     price_order = request.POST.get('price_order') if request.method == 'POST' else None
-    products = Product.objects.all()
+    products = Product.objects.filter(product_status=True)
 
     if selected_categories:
         products = products.filter(art_category__id__in=selected_categories)
@@ -271,8 +271,8 @@ def shop(request):
 
     no_products_found = not products.exists()
     unique_frame_sizes = Variant.objects.order_by('frame_size').distinct()
-    paints = Paint.objects.all()
-    arts = Art.objects.all()
+    paints = Paint.objects.filter(paint_type_status=True)
+    arts = Art.objects.filter(art_type_status=True)
 
     context = {
         'products': page_obj.object_list,
@@ -377,7 +377,7 @@ def profile(request):
         password = request.user.password
     coupons = Coupons.objects.all()
     wallet, created = Wallet.objects.get_or_create(user=request.user, defaults={'wallet_amount': 0})
-    wallet_transaction = Wallet_Transaction.objects.filter(user=request.user)
+    wallet_transaction = Wallet_Transaction.objects.filter(user=request.user).order_by('-id')
 
     context = {
         'informations':informations,
@@ -489,70 +489,19 @@ def remove_cart_item(request, variant_id):
 
 #========================== CHECK OUT SECTION ======================#
 
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib import messages
-# from .models import Cart, Variant
-
-# def checkout_og(request):
-#     if request.method == 'POST':
-#         total_price = request.POST.get('total_price')
-#         quantities = {
-#             key.split('_')[1]: int(value)
-#             for key, value in request.POST.items()
-#             if key.startswith('quantity_')
-#         }
-
-#         print('QUANTITY:', quantities)
-
-#         for variant_id, quantity in quantities.items():
-#             variant = get_object_or_404(Variant, id=variant_id)
-
-#             if quantity < 1:
-#                 messages.error(request, "Quantity cannot be less than 1.")
-#                 return redirect('cart')
-            
-#             if quantity > 10:  # Check for maximum purchase limit
-#                 messages.error(request, "Purchase quantity cannot exceed 10.")
-#                 return redirect('cart')
-            
-#             if quantity > variant.stock:
-#                 messages.error(request, f"Only {variant.stock} items available for {variant.product.product_name}.")
-#                 return redirect('cart')
-            
-#             cart_item = get_object_or_404(Cart, user=request.user, variant_id=variant_id)
-#             cart_item.quantity = quantity
-#             print('QUANTITY:',quantity )
-
-#             request.session['quantity'] = quantity
-#             cart_item.save()
-#             request.session['quantity'] = quantity
-#         request.session['total_price'] = total_price
-#         return redirect('checkout')
-#     return redirect('cart')
-
-
-# ====================== sample of cart page ===========
-
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib import messages
-
 def checkout_og(request):
-    print('CHECKOUT OG')
+    print('CHECKOUT OG')              ########### print
     if request.method == 'POST':
         total_price = request.POST.get('total_price')
-        # Extract quantities from POST data
         quantities = {
             key.split('_')[1]: int(value)
             for key, value in request.POST.items()
             if key.startswith('quantity_')
         }
 
-        print('QUANTITY:', quantities)  # For debugging purposes
-
         for variant_id, quantity in quantities.items():
             variant = get_object_or_404(Variant, id=variant_id)
 
-            # Validate quantity
             if quantity < 1:
                 messages.error(request, "Quantity cannot be less than 1.")
                 return redirect('cart')
@@ -562,42 +511,38 @@ def checkout_og(request):
                 return redirect('cart')
 
             if quantity > variant.stock:
-                messages.error(request, f"Only {variant.stock} stock available for {variant.product.product_name}.")
+                messages.error(request, f"{variant.product.product_name} is Out of stock !")
                 return redirect('cart')
 
-            # Update the cart item with new quantity
             cart_item = get_object_or_404(Cart, user=request.user, variant_id=variant_id)
             cart_item.quantity = quantity
             cart_item.save()
 
             print('SAVED QUANTITY:', quantity)  # Debugging output
 
-        # Store quantities and total price in session if needed
         request.session['total_price'] = total_price
-
-
 
         return redirect('checkout')
 
     return redirect('cart')
 
 
-
-
 def checkout(request):
+    em = Cart.objects.filter(user = request.user)
+    if not em:
+        return redirect('home') 
+    
 
     print('CHECK OUT ENTERING')
 
     if not request.user.is_authenticated:
         messages.info(request, "PLEASE LOGIN.")
         return redirect('login')
-
-
+    
     stock_error = validate_stock(request.user)
     if stock_error:
         messages.error(request, stock_error)
         return redirect('cart')
-    
     
     if request.method == 'POST':
         fullname = request.POST.get('fullname')
@@ -626,8 +571,6 @@ def checkout(request):
 
         if not address or len(address) < 5:
             errors.append("Address must be at least 5 characters long.")
-
-        
 
         stock_error = validate_stock(request.user)
         if stock_error:
@@ -663,22 +606,18 @@ def checkout(request):
         'cart_items': cart_items,
         'wallet_balance':wallet_balance,
         'coupons': coupons
-
     }
 
-    
     return render(request,'user/checkout.html', context)
 
 def validate_stock(user):
-    """Checks if any product in the user's cart is out of stock."""
     cart_items = Cart.objects.filter(user=user)
     for item in cart_items:
         variant = get_object_or_404(Variant, id=item.variant_id)
 
         if item.quantity > variant.stock:
-            return f"Only {variant.stock} stock available for {variant.product.product_name}."
+            return f"{variant.product.product_name} is Out of stock !"
     return None
-
 
 def edit_address_chechout(request):
     if request.method == 'POST':
@@ -740,9 +679,10 @@ def remove_address(request,address_id):
 
 #================== PLACE ORDER SECTION ==================#
 
-
 def place_order(request):
     cart_items = Cart.objects.filter(user=request.user)
+    if not cart_items:
+        return redirect('home') 
     if request.method == 'POST':
         payment_method = request.POST.get('payment_method')
         selected_address_id = request.POST.get('selected_address')
@@ -752,23 +692,29 @@ def place_order(request):
         ##getting selected coupon code
         selected_coupon_code = request.POST.get('selected_coupon_code', None) 
 
-        print(selected_coupon_code)
-        print(coupon_discount_price)
-
         coupon = None
         if selected_coupon_code:
             ##getting selected coupon ID
             coupon = get_object_or_404(Coupons, coupon_code=selected_coupon_code)
-        print(coupon)
-
-
-        
+       
         if coupon_discount_price:
             final_amount = int(float(coupon_discount_price) * 100)  # Convert to paise
         else:
             final_amount = total_price
 
-        print('Final amount:', final_amount)
+        # Validate if the selected address exists and belongs to the user
+        try:
+            selected_address = Address.objects.get(id=selected_address_id, user_id=request.user)
+        except Address.DoesNotExist:
+            messages.error(request, "Invalid address selection.")
+            return redirect('checkout')
+
+        # Check stock before placing the order
+        stock_error = validate_stock(request.user)
+        if stock_error:
+            messages.error(request, stock_error)
+            return redirect('cart')
+        
 
         if payment_method == 'COD':
             order = Order.objects.create(
@@ -789,7 +735,6 @@ def place_order(request):
                 item.variant.stock -= item.quantity
                 item.variant.save()
 
-            # Clear cart items
             cart_items.delete()
 
             return redirect('order_placed')
@@ -864,7 +809,8 @@ def place_order(request):
             trasanction = Wallet_Transaction.objects.create(
             user = request.user,
             transaction_amount = order.total_amount,
-            type = 'Debit'
+            type = 'Debit',
+            transaction_mode = order.payment_method
             )
         
             # Clear cart items
@@ -907,9 +853,6 @@ def order_placed(request):
 
 
 #================ RATINGS AND REVIEWS ==========#
-
-
-
 
 
 # @csrf_exempt  # For simplicity, but consider using CSRF tokens in production
@@ -989,11 +932,84 @@ def order_cancel(request, order_id):
         trasanction = Wallet_Transaction.objects.create(
             user = request.user,
             transaction_amount = order.total_amount,
-            type = 'Credit'
+            type = 'Credit',
+            transaction_mode = order.payment_method     
         )
    
     order.save()
+
+    # transaction_reason
+    # transaction_purpose
+    # credit_or_debit_reason
+    # transaction_description
+    # reason_for_transaction
     
     return redirect('order_details',order_id=order_id)
+
+
+#====================  SALES REPORT SECTION ===================#
+
+from django.shortcuts import render
+from django.db.models import Sum, Count, Q
+from .models import Order
+
+def sales_report(request):
+    # Total Revenue (only successful payments)
+    total_revenue = Order.objects.filter(payment_status='Success').aggregate(
+        total_sales=Sum('total_amount')
+    )['total_sales'] or 0
+
+    # Total Orders by Status
+    orders_by_status = Order.objects.values('status').annotate(
+        count=Count('id')
+    ).order_by('status')
+
+    # Total Orders by Payment Status
+    payment_status_count = Order.objects.values('payment_status').annotate(
+        count=Count('id')
+    ).order_by('payment_status')
+
+    # Orders placed in the current month
+    from datetime import datetime
+    current_month = datetime.now().month
+    monthly_orders = Order.objects.filter(order_date__month=current_month).count()
+
+    # Orders with Coupons Applied
+    coupon_usage = Order.objects.filter(coupon__isnull=False).count()
+
+    context = {
+        'total_revenue': total_revenue,
+        'orders_by_status': orders_by_status,
+        'payment_status_count': payment_status_count,
+        'monthly_orders': monthly_orders,
+        'coupon_usage': coupon_usage,
+    }
+    return render(request, 'admin/sale.html', context)
+
+import csv
+from django.http import HttpResponse
+
+def export_sales_report(request):
+    # Prepare the CSV response
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="sales_report.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Order ID', 'User', 'Total Amount', 'Status', 'Payment Status', 'Order Date', 'Coupon Applied'])
+
+    orders = Order.objects.all()
+    for order in orders:
+        writer.writerow([
+            order.id, 
+            order.user.username, 
+            order.total_amount, 
+            order.status, 
+            order.payment_status, 
+            order.order_date, 
+            order.coupon.coupon_code if order.coupon else 'No'
+        ])
+
+    return response
+
 
     
