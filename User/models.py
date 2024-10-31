@@ -74,8 +74,6 @@ class Review(models.Model):
     review = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.product.product_name} - {self.rating} Stars"
 
 
 class Wishlist(models.Model):
@@ -95,5 +93,6 @@ class Wallet_Transaction(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     type = models.CharField(max_length=50)
     transaction_mode = models.CharField(max_length=50)
+
 
     

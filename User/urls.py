@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import user_logout
+from .views import user_logout, submit_review
 
 from .views import sales_report, export_sales_report
 # from .views import place_order, razorpay_checkout
@@ -13,6 +13,7 @@ urlpatterns = [
     path('resend_otp/',views.resend_otp, name='resend_otp'),
     path('shop',views.shop, name='shop'),
     path('jasir',views.jasir, name='jasir'),
+    path('error',views.error, name='error'),
     path('email/',views.email_verify,name='email_varify'),
     path('resend/',views.resend_otp_password, name='resend'),
     path('passwordotp/',views.password_otp,name='password_otp'),
@@ -44,4 +45,6 @@ urlpatterns = [
     path('order_cancel/<int:order_id>', views.order_cancel, name= 'order_cancel'),
     path('sales-report/', sales_report, name='sales_report'),
     path('export-sales-report/', export_sales_report, name='export_sales_report'),
+    path('submit-review/<int:order_id>/<int:product_id>', submit_review, name='submit_review'),
+   
     ]

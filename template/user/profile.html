@@ -398,8 +398,6 @@
         <button class="btn" onclick="openModal()">Add New Address</button>
       </div>
 
-
-
       <div id="coupons" class="section">
         <h2>Coupons</h2>
         <p></p>
@@ -410,17 +408,33 @@
                   <th>COUPON CODE</th>
                   <th>PERCENTAGE %</th>
                   <th>EXPIRY DATE</th>
+                  <th>COUPON STATUS</th>
               </tr>
           </thead>
           <tbody>
+              {% if no_coupon_found %}
+                    <tr>
+                        <td colspan="6" class="text-center" style="text-align: center; color: red; font-weight: bold;">
+                            No Coupons found !
+                        </td>
+                    </tr>
+              {% else %}
               {% for coupon in coupons %}
               <tr>
                   <td></td>
                   <td>{{coupon.coupon_code}}</td>
                   <td>{{coupon.percentage}} %</td>
                   <td>{{coupon.expiry_date|date:"d-m-Y" }}</td>
+                  <td>
+                    {% if coupon.is_used %}
+                        COUPON USED
+                    {% else %}
+                        NOT USED
+                    {% endif %}
+                  </td>
               </tr>
               {% endfor %}
+            {% endif %}
               
           </tbody>
           
@@ -447,6 +461,13 @@
               </tr>
           </thead>
           <tbody>
+            {% if no_wallet_found %}
+                    <tr>
+                        <td colspan="6" class="text-center" style="text-align: center; color: red; font-weight: bold;">
+                            No such Transactions !
+                        </td>
+                    </tr>
+              {% else %}
               {% for transaction in wallet_transaction %}
               <tr>
                   <td></td>
@@ -461,6 +482,7 @@
                   </td>
               </tr>
               {% endfor %}
+              {% endif %}
           </tbody>
        </table>
       </div>

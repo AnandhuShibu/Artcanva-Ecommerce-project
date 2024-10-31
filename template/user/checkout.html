@@ -367,12 +367,17 @@
           
           <br><br>
           <select id="couponSelect" class="form-control">
+
+            {% if coupons %}
               <option value="" disabled selected>Select a coupon</option>
               {% for coupon in coupons %}
                   <option value="{{ coupon.percentage }}" data-code="{{ coupon.coupon_code }}">
                       {{ coupon.coupon_code }} - {{ coupon.percentage }}% off
                   </option>
               {% endfor %}
+              {% else %}
+              <option value="" disabled selected>No coupons available</option>
+            {% endif %}
           </select>
           <button type="button" class="btn btn-apply w-100" id="applyButton">APPLY</button>
   

@@ -356,6 +356,10 @@ document.querySelectorAll('.quantity-input').forEach(input => {
             alert('Quantity cannot exceed available stock.');
             this.value = stock; // Reset to max stock
         }
+        else if (this.value > 10) {
+            alert('Maximum purchase Quantity exceed ');
+            this.value = 10; // Reset to max stock
+        }
         displayTotalAmount(); // Update total amount after input change
     });
 });

@@ -13,7 +13,7 @@ from django.contrib import messages
 from django.db.models import Q
 from django.core.mail import send_mail
 import razorpay
-from coupon_app . models import Coupons
+from coupon_app . models import Coupons, Coupon_user
 from product_app.models import Product
 from variant_app.models import Variant
 from category_app.models import Paint, Art
@@ -314,6 +314,11 @@ def single(request, product_id, variant_id):
 def jasir(request):
     return render(request, 'user/jasir.html')
 
+def error(request):
+    return render(request, 'user/error.html')
+
+
+
 def change(request):
     return render(request, 'user/password_verify.html')
 
@@ -376,8 +381,13 @@ def profile(request):
         email = request.user.email
         password = request.user.password
     coupons = Coupons.objects.all()
+    used_coupon_ids = Coupon_user.objects.filter(user=request.user).values_list('coupon_used_id', flat=True)
+    for coupon in coupons:
+        coupon.is_used = coupon.id in used_coupon_ids
+    no_coupon_found = not coupons.exists()
     wallet, created = Wallet.objects.get_or_create(user=request.user, defaults={'wallet_amount': 0})
     wallet_transaction = Wallet_Transaction.objects.filter(user=request.user).order_by('-id')
+    no_wallet_found = not wallet_transaction.exists()
 
     context = {
         'informations':informations,
@@ -385,7 +395,9 @@ def profile(request):
         'email': email,
         'coupons': coupons,
         'wallet': wallet,
-        'wallet_transaction': wallet_transaction
+        'wallet_transaction': wallet_transaction,
+        'no_coupon_found': no_coupon_found,
+        'no_wallet_found': no_wallet_found
     }
 
     return render(request,'user/profile.html', context)
@@ -531,7 +543,8 @@ def checkout(request):
     em = Cart.objects.filter(user = request.user)
     if not em:
         return redirect('home') 
-    
+    print('cart:'  ,em)
+
 
     print('CHECK OUT ENTERING')
 
@@ -597,7 +610,13 @@ def checkout(request):
     all_address = Address.objects.filter(user_id_id = request.user)
     total_price = request.session.get('total_price', 0)
     cart_items=Cart.objects.filter(user=request.user)
-    coupons = Coupons.objects.all()
+    # Assuming `user` is the current user
+    used_coupon_ids = Coupon_user.objects.filter(user=request.user).values_list('coupon_used_id', flat=True)
+
+    # Get only unused coupons for the specific user
+    coupons = Coupons.objects.exclude(id__in=used_coupon_ids)
+
+    # coupons = Coupons.objects.all()
     wallet=Wallet.objects.get(user=request.user)
     wallet_balance=wallet.wallet_amount
     context = {
@@ -691,11 +710,17 @@ def place_order(request):
         coupon_discount_price = request.POST.get('final_price', None)
         ##getting selected coupon code
         selected_coupon_code = request.POST.get('selected_coupon_code', None) 
-
+        print('HELLO firts : ',selected_coupon_code)
         coupon = None
         if selected_coupon_code:
             ##getting selected coupon ID
             coupon = get_object_or_404(Coupons, coupon_code=selected_coupon_code)
+            Coupon_user.objects.create(
+                user = request.user,
+                coupon_used = coupon
+            )
+        
+            print('HELLO : ',coupon)
        
         if coupon_discount_price:
             final_amount = int(float(coupon_discount_price) * 100)  # Convert to paise
@@ -854,19 +879,36 @@ def order_placed(request):
 
 #================ RATINGS AND REVIEWS ==========#
 
+from django.shortcuts import render, redirect
+from django.contrib import messages
 
-# @csrf_exempt  # For simplicity, but consider using CSRF tokens in production
-def submit_review(request):
+def submit_review(request,product_id, order_id):
+
+    print('review called')
     if request.method == 'POST':
-        product_id = request.POST.get('productId')
         rating = request.POST.get('rating')
-        review = request.POST.get('review')
+        review_text = request.POST.get('reviewtext')
+        product = get_object_or_404(Product, id=product_id)
+        
+        Review.objects.create(
+            review=review_text,
+            rating=rating,
+            product=product,
+            user=request.user
+        )
 
-        # Save the review to your database
-        Review.objects.create(product_id=product_id, rating=rating, review=review)
+        
 
-        return JsonResponse({'message': 'Review submitted successfully!'}, status=200)
-    return JsonResponse({'error': 'Invalid request method.'}, status=400)
+        # Here you can save the rating and review to your database
+        # For example, using a model named Review:
+        # Review.objects.create(rating=rating, review_text=review_text)
+
+        # Add a success message to be displayed
+        messages.success(request, 'Thank you for your review!')
+
+        # Redirect to a success page or the product page
+        return redirect('order_details',order_id)  # Replace 'product_detail' with your desired URL name
+
 
 
 #==================== WISHLIST SECTION ================#
@@ -938,6 +980,7 @@ def order_cancel(request, order_id):
    
     order.save()
 
+# NAMES FOR THE FIELDS
     # transaction_reason
     # transaction_purpose
     # credit_or_debit_reason

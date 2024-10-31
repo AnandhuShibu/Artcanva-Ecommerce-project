@@ -1,2 +1,19 @@
 <h2>AN ERROR OCCURED</h2>
 
+<!-- rate_product.html -->
+<h2>Rate {{ product.name }}</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit Rating</button>
+</form>
+
+<h3>Average Rating: </h3>
+
+<h3>User Reviews</h3>
+<ul>
+    {% for rating in product.ratings.all %}
+        <li><strong>{{ rating.user.username }}</strong>: {{ rating.rating }} stars<br>{{ rating.review }}</li>
+    {% endfor %}
+</ul>

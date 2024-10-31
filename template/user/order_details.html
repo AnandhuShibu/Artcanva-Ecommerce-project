@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Art Canva - Order Page</title>
+    <title>Art Canva - Order Details</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <style>
         body {
@@ -118,7 +118,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 10px;
         }
         .order-details {
             padding: 15px;
@@ -168,7 +168,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 10px;
         }
         @media (max-width: 768px) {
             .container {
@@ -198,7 +198,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 10px;
             margin-top: 40px; /* Adds some space above the button */
             width: 100%; 
         }
@@ -207,63 +207,6 @@
             background-color: #45a049; /* Darker green on hover */
         }
 
-        /* Modal Styles */
-        .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1000; /* Sit on top */
-            left: 0;
-            top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity */
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto; /* 15% from the top and centered */
-            padding: 20px;
-            border: 1px solid #888;
-            width: 40%; /* Decrease the width to make it smaller */
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-        }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-        .modal textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            margin-top: 10px;
-            font-size: 14px;
-            resize: vertical;
-        }
-        .modal button {
-            background-color: #4CAF50; /* Green */
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            margin-top: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .modal button:hover {
-            background-color: #45a049; /* Darker green */
-        }
         .cancel{
             padding-top:11px
         }
@@ -282,20 +225,73 @@
             .cancel-btn:hover{
                 background-color: #687289;
             }
-       
-
-
-/* Star Rating Styles */
-.stars {
-    margin-bottom: 10px;
-    color: #f0c040;
-    font-size: 30px; /* Increase the size of stars for better visibility */
-    cursor: pointer; /* Change cursor to pointer for star ratings */
-}
-
-.star:hover {
-    color: #f0a500; /* Change color on hover for better feedback */
-}
+            /* Modal Background */
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 1001;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+            }
+            
+            /* Modal Content */
+            .modal-content {
+                background-color: #fff;
+                margin: 15% auto;
+                padding: 20px;
+                border: 1px solid #888;
+                border-radius: 10px;
+                width: 400px;
+                max-width: 90%;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                text-align: center;
+                font-family: 'Roboto', sans-serif;
+            }
+            
+            /* Close Button */
+            .close-btn {
+                color: #aaa;
+                float: right;
+                font-size: 24px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+            
+            .close-btn:hover {
+                color: #000;
+            }
+            
+            /* Input Fields */
+            .modal-content input[type="number"], .modal-content textarea {
+                width: 90%;
+                padding: 10px;
+                margin-top: 10px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                font-size: 14px;
+                color: #333;
+            }
+            
+            /* Submit Button */
+            .submit-btn {
+                background-color: #DEAD6F;
+                color: white;
+                padding: 12px 20px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 16px;
+                margin-top: 15px;
+                width: 100%;
+            }
+            
+            .submit-btn:hover {
+                background-color: #c6955c;
+            }
+            
 
 /* Popup styles */
 .popup-message {
@@ -383,17 +379,6 @@
                 </a>
             {% endif %}
         </div>
-
-        
-        
-
-        {% comment %} <div class="order-review">
-            <h2>Rate This Product</h2>
-            <div class="stars">★★★★★</div>
-            <h2>Review This Product</h2>
-            <textarea rows="4" placeholder="Description..."></textarea>
-            <button>Submit</button>
-        </div> {% endcomment %}
     </div>
 
     <!-- Product section below -->
@@ -411,113 +396,75 @@
         
         <div class="order-actions">
            
-            <a href=""><button class="cancel-btn">REMOVE ITEM</button></a>
+            <a href=""><button class="cancel-btn">CANCEL ITEM</button></a>
             <br>
-            {% comment %} <button class="review-btn" onclick="openModal()">ADD REVIEW</button> <!-- Updated Button --> {% endcomment %}
+            <button class="review-btn">ADD REVIEW</button> <!-- Updated Button -->
         </div>
+        <!-- Review Modal -->
+
+    <form id="reviewForm" action="{% url 'submit_review' orders.id item.product.id  %}" method="POST">
+        {% csrf_token %}
+        <div id="reviewModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn">&times;</span>
+                <h3>Rate This Product</h3>
+                <input type="number" name='rating' id="rating" placeholder="Enter your star rating out of five..." min="1" max="5">
+                <h3>Review This Product</h3>
+                <textarea id="reviewText" name='reviewtext' placeholder="Write your review here..."></textarea>
+                <button type= "submit" id="submitReview" class="submit-btn">SUBMIT</button>
+            </div>
+    </div>
+    </form>
         
     </div>
     {% endfor %}
 </div>
 
-<!-- Review Modal -->
-<div id="reviewModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeModal()">&times;</span>
-        <h2>Add Your Review</h2>
-        <div class="stars">
-            <span class="star" onclick="setRating(1)">&#9733;</span>
-            <span class="star" onclick="setRating(2)">&#9733;</span>
-            <span class="star" onclick="setRating(3)">&#9733;</span>
-            <span class="star" onclick="setRating(4)">&#9733;</span>
-            <span class="star" onclick="setRating(5)">&#9733;</span>
-        </div>
-        <textarea id="reviewText" rows="4" placeholder="Description..."></textarea>
-        <button onclick="submitReview()">Submit Review</button>
-    </div>
-</div>
+
+
 
 <!-- FontAwesome Icons -->
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-
 <script>
-    // Function to open the modal
-    function openModal() {
-        document.getElementById("reviewModal").style.display = "block";
-    }
+    // JavaScript to handle the modal functionality
+document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("reviewModal");
+    const openModalButtons = document.querySelectorAll(".review-btn");
+    const closeModalButton = document.querySelector(".close-btn");
+    const submitButton = document.getElementById("submitReview");
 
-    // Function to close the modal
-    function closeModal() {
-        document.getElementById("reviewModal").style.display = "none";
-    }
-
-    // Function to set rating
-    function setRating(stars) {
-        const starsElements = document.querySelectorAll(".star");
-        starsElements.forEach((star, index) => {
-            star.style.color = index < stars ? "#f0c040" : "#000000"; // Change color based on rating
-        });
-    }
-
-    // Function to submit the review
-    function submitReview() {
-        // Handle review submission logic (e.g., send data to server)
-        alert("Review submitted! Thank you for your feedback.");
-        closeModal();
-    }
-
-    // Close the modal when clicking outside of it
-    window.onclick = function(event) {
-        const modal = document.getElementById("reviewModal");
-        if (event.target === modal) {
-            closeModal();
-        }
-    }
-
-    let currentRating = 0;
-
-// Function to set rating
-function setRating(stars) {
-    currentRating = stars;
-    const starsElements = document.querySelectorAll(".star");
-    starsElements.forEach((star, index) => {
-        star.style.color = index < stars ? "#f0c040" : "#ccc";
+    // Open modal when any "ADD REVIEW" button is clicked
+    openModalButtons.forEach(button => {
+        button.onclick = () => {
+            modal.style.display = "block";
+        };
     });
-}
 
-// Function to submit the review
-function submitReview() {
-    const reviewText = document.getElementById("reviewText").value;
-
-    if (currentRating === 0) {
-        alert("Please provide a star rating.");
-        return;
-    }
-
-    // Send data to backend
-    const reviewData = {
-        rating: currentRating,
-        review: reviewText,
-        productId: 123, // Replace with actual product ID
+    // Close modal when the close button is clicked
+    closeModalButton.onclick = () => {
+        modal.style.display = "none";
     };
 
-    // Use a simple form submission
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '/api/reviews'; // Update with your backend endpoint
+    // Close modal when clicking outside of the modal content
+    window.onclick = (event) => {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    };
 
-    // Append hidden input fields for review data
-    for (const key in reviewData) {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = key;
-        input.value = reviewData[key];
-        form.appendChild(input);
-    }
-
-    document.body.appendChild(form);
-    form.submit(); // Submit the form
-}
+    // Submit review action
+    submitButton.onclick = () => {
+        const rating = document.getElementById("rating").value;
+        const reviewText = document.getElementById("reviewText").value;
+        
+        if (rating && reviewText) {
+            alert(`Thank you for your review!\nRating: ${rating}\nReview: ${reviewText}`);
+            modal.style.display = "none"; // Close the modal after submission
+        } else {
+            alert("Please fill out both fields.");
+        }
+    };
+});
 
 </script>
 
@@ -541,6 +488,7 @@ function submitReview() {
         {% endfor %}
     {% endif %}
 </script>
+
 
 </body>
 </html>
