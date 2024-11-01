@@ -1,19 +1,137 @@
-<h2>AN ERROR OCCURED</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Report</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .card-summary {
+            text-align: center;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .card-summary h4 {
+            font-size: 18px;
+            margin: 0;
+            color: #555;
+        }
+        .card-summary p {
+            font-size: 24px;
+            margin: 0;
+            font-weight: bold;
+            color: #333;
+        }
+        .btn-export {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
 
-<!-- rate_product.html -->
-<h2>Rate {{ product.name }}</h2>
+<div class="container my-4">
+    <h2 class="mb-4">Sales Report</h2>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Submit Rating</button>
-</form>
+    <!-- Filter and Export Buttons -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="input-group">
+            <select class="form-select">
+                <option>All</option>
+                <!-- Add more options as needed -->
+            </select>
+            <input type="text" class="form-control" placeholder="dd-mm-yyyy">
+            <input type="text" class="form-control" placeholder="dd-mm-yyyy">
+            <button class="btn btn-primary" type="button">Filter</button>
+        </div>
+        <div>
+            <button class="btn btn-outline-secondary btn-export">Export as PDF</button>
+            <button class="btn btn-outline-secondary btn-export">Export as Excel</button>
+        </div>
+    </div>
 
-<h3>Average Rating: </h3>
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card-summary">
+                <h4>Overall Sales Count</h4>
+                <p>18</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card-summary">
+                <h4>Overall Amount</h4>
+                <p>₹118825.00</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card-summary">
+                <h4>Overall Discount</h4>
+                <p>₹0</p>
+            </div>
+        </div>
+    </div>
 
-<h3>User Reviews</h3>
-<ul>
-    {% for rating in product.ratings.all %}
-        <li><strong>{{ rating.user.username }}</strong>: {{ rating.rating }} stars<br>{{ rating.review }}</li>
-    {% endfor %}
-</ul>
+    <!-- Sales Report Table -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>User Name</th>
+                <th>Total Amount</th>
+                <th>Ordered at</th>
+                <th>Delivered at</th>
+                <th>Payment Method</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>649</td>
+                <td>jasir</td>
+                <td>₹2100.00</td>
+                <td>2024-10-16</td>
+                <td>2024-10-21</td>
+                <td>cash_on_delivery</td>
+            </tr>
+            <tr>
+                <td>647</td>
+                <td>admin</td>
+                <td>₹3675.00</td>
+                <td>2024-10-13</td>
+                <td>2024-10-13</td>
+                <td>cash_on_delivery</td>
+            </tr>
+            <tr>
+                <td>632</td>
+                <td>aanandu</td>
+                <td>₹2075.00</td>
+                <td>2024-10-01</td>
+                <td>2024-10-01</td>
+                <td>cash_on_delivery</td>
+            </tr>
+            <tr>
+                <td>611</td>
+                <td>aanandu</td>
+                <td>₹13650.00</td>
+                <td>2024-10-01</td>
+                <td>2024-10-01</td>
+                <td>cash_on_delivery</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            <li class="page-item"><a class="page-link" href="#">First</a></li>
+            <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+            <li class="page-item"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">Next</a></li>
+            <li class="page-item"><a class="page-link" href="#">Last</a></li>
+        </ul>
+    </nav>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

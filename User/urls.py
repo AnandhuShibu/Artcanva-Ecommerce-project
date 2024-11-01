@@ -43,8 +43,10 @@ urlpatterns = [
     path('place-order/', views.place_order, name='place_order'),
     path('payment-success/', views.payment_success, name='payment_success'),
     path('order_cancel/<int:order_id>', views.order_cancel, name= 'order_cancel'),
+    # path('single_order_cancel/<int:order_id>/<int:product_id>/<int:variant_id>', views.single_order_cancel, name= 'single_order_cancel'),
+
     path('sales-report/', sales_report, name='sales_report'),
     path('export-sales-report/', export_sales_report, name='export_sales_report'),
-    path('submit-review/<int:order_id>/<int:product_id>', submit_review, name='submit_review'),
-   
+    path('submit-review/<int:order_id>/<int:product_id>/<int:variant_id>', submit_review, name='submit_review'),
+    path('download-invoice/<int:order_id>/', views.download_invoice, name='download_invoice'),
     ]

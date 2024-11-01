@@ -208,7 +208,8 @@
         }
 
         .cancel{
-            padding-top:11px
+            padding-top:11px;
+            margin-left: 84px;
         }
 
       
@@ -291,6 +292,21 @@
             .submit-btn:hover {
                 background-color: #c6955c;
             }
+            .download-invoice-btn {
+                background-color: #4CAF50;
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 16px;
+                margin-top: 10px;
+            }
+            
+            .download-invoice-btn:hover {
+                background-color: #45a049;
+            }
+            
             
 
 /* Popup styles */
@@ -366,7 +382,7 @@
         
 
         
-        <h4> TOTAL AMOUNT: ₹{{orders.total_amount}}</h4>
+        <h4 style="padding-left: 50px;"> TOTAL AMOUNT: ₹{{orders.total_amount}}</h4>
         <br>
         <div class="cancel">
             {% if orders.status == 'Cancelled' %}
@@ -377,6 +393,7 @@
                 <a href="{% url 'order_cancel' orders.id %}">
                     <button class="cancel-btn">CANCEL ORDER</button>
                 </a>
+                <button class="download-invoice-btn" onclick="downloadInvoice()">DOWNLOAD INVOICE</button>
             {% endif %}
         </div>
     </div>
@@ -395,14 +412,14 @@
 
         
         <div class="order-actions">
-           
+            
             <a href=""><button class="cancel-btn">CANCEL ITEM</button></a>
             <br>
             <button class="review-btn">ADD REVIEW</button> <!-- Updated Button -->
         </div>
         <!-- Review Modal -->
 
-    <form id="reviewForm" action="{% url 'submit_review' orders.id item.product.id  %}" method="POST">
+    <form id="reviewForm" action="{% url 'submit_review' orders.id item.product.id item.variant.id %}" method="POST">
         {% csrf_token %}
         <div id="reviewModal" class="modal">
             <div class="modal-content">
@@ -465,6 +482,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 });
+
+function downloadInvoice() {
+    const orderId = "{{ orders.id }}";
+    window.location.href = `/download-invoice/${orderId}/`;
+}
 
 </script>
 

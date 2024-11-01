@@ -390,7 +390,10 @@
               <a href="{% url 'single' product.id product.variants.first.id %}"><img src="{{product.images1.url}}" class="card-img-top" alt="Loading"></a>
               <div class="card-body">
                 <h6 class="card-title">{{product.product_name}}</h6>
-                <div class="rating">★★★★☆</div>
+
+               
+               
+                
                 {% comment %} <p class="card-text">{{produ}}</p> {% endcomment %}
                 <a href="{% url 'add_wishlist' product.id product.variants.first.id %}"><button class="add-wishlist" title="Add to Wishlist"><i class="fas fa-heart"></i></button></a>
               </div>

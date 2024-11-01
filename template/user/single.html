@@ -288,6 +288,53 @@
             top: 20px;
         }
         
+  
+      .reviews-section h3 {
+          font-size: 1.5em;
+          margin-bottom: 15px;
+          color: #333;
+      }
+  
+      .review-item {
+          background-color: #ffffff;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          padding: 10px;
+          margin-bottom: 3px;
+          
+      }
+  
+      .review-item p {
+          margin: 5px 0;
+      }
+  
+      .review-item strong {
+          font-size: 1.1em;
+          color: #555;
+      }
+  
+      .review-rating {
+          color: #f7ba20 /* Gold color for stars */
+      }
+  
+      .view-more-reviews {
+          background-color: #007bff;
+          color: #fff;
+          border: none;
+          padding: 5px 7px;
+          font-size: 1em;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: background-color 0.3s;
+      }
+  
+      .view-more-reviews:hover {
+          background-color: #0056b3;
+      }
+      #no{
+        font-size: larger;
+        margin-left: 190px;
+      }
     </style>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMKtkz0p5sy4R8l1L4/fC1RfwD1kLwL4RbfE8" crossorigin="anonymous">
@@ -359,12 +406,10 @@
             <img src="{{ product.images3.url }}" alt="Thumbnail 2" onclick="changeImage(this)">
         </div>
     </div>
+
+    
     <div class="product-details">
         <h2 class="product-title">{{ product.product_name }}</h2>
-        <div class="rating">
-            ⭐⭐⭐⭐⭐ (7/10)
-        </div>
-
         <div class="price">
             ₹{{variant.price}}
         </div>
@@ -384,17 +429,7 @@
             <p></p>
         </div>
 
-        {% comment %} <div class="product-actions">
-            
-            {% if variant.stock == 0 %}
-            <h3>OUT OF STOCK</h3>
-            
-            {% elif variant.stock > 0 %}
-            <a href="{% url 'addcart' product.id variant.id %}"><button class="add-to-cart">Add to cart</button></a>
-            
-            {% endif %}
-        </div> {% endcomment %}
-
+        
 
         <div class="product-actions">
           {% if variant.stock == 0 %}
@@ -414,25 +449,64 @@
         <p class="short-description">
             <strong>About this product</strong><br>
             <h6>{{ product.description }}</h6><br>
-            <h6>PAINT TYPE : {{ product.paint_category.paint_type }}</h6><br>
+            <h6>PAINT TYPE : {{ product.paint_category.paint_type }}</h6>
             <h6>ART TYPE : {{ product.art_category.art_type }}</h6><br>
         </p>
-        <h3>REVIEWS</h3>
-        <p>good product</p>
-    </div>
+
+        
+        <h4>REVIEWS</h4>
+        {% if reviews %}
+        <div class="reviews-section">
+            {% for review in reviews|slice:":3" %}
+            <div class="review-item">
+              
+                
+                <p>{{ review.review }}- <span class="review-rating">⭐ {{ review.rating }}/5</span></p>
+                <p>{{ review.user.username }} -- / {{ review.created_at|date:"d-m-y"}}</p>
+            </div>
+            {% endfor %}
     
+            {% if reviews|length > 3 %}
+            <button onclick="toggleReviews()" class="view-more-reviews">View More Reviews</button>
+            <div id="additional-reviews" style="display: none;">
+                {% for review in reviews|slice:"3:" %}
+                <div class="review-item">
+                  
+                  <p>{{ review.review }}- <span class="review-rating">⭐ {{ review.rating }}/5</span></p>
+                  <p>{{ review.user.username }} - / {{ review.created_at|date:"d-m-y"}}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% else %}
+        <h5 id = "no">No reviews</h5>
+        {% endif %}
+
+        
+    </div>
+
+
 </div>
+
+
 
 
 <div class="related-products">
     <h3>Related Products</h3>
     <div class="related-product-list">
+      {% for related in related_product %}
         <div class="related-product">
-            <img src="{% static 'images/abc.jpg' %}"alt="Related Product 1">
-            
+            <img src="{{related.images1.url}}"alt="Related Product 1">
+            <h6>{{related.product_name}}</h6>
         </div>
+        {% endfor %}
+
     </div>
 </div>
+
+
+
 
   <!-- Footer Section Start -->
 <footer class="bg-dark text-white mt-5 pt-4">
@@ -562,5 +636,18 @@
           {% endfor %}
       {% endif %}
     </script>
+    <script>
+      function toggleReviews() {
+          var reviews = document.getElementById("additional-reviews");
+          var button = document.querySelector(".view-more-reviews");
+          if (reviews.style.display === "none") {
+              reviews.style.display = "block";
+              button.textContent = "View Less Reviews";
+          } else {
+              reviews.style.display = "none";
+              button.textContent = "View More Reviews";
+          }
+      }
+      </script>
 </body>
 </html>

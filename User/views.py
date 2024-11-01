@@ -274,6 +274,8 @@ def shop(request):
     paints = Paint.objects.filter(paint_type_status=True)
     arts = Art.objects.filter(art_type_status=True)
 
+
+
     context = {
         'products': page_obj.object_list,
         'paints': paints,
@@ -295,9 +297,9 @@ def single(request, product_id, variant_id):
     product = get_object_or_404(Product, id=product_id)
     variant = get_object_or_404(Variant, id=variant_id)
     sizes = Variant.objects.filter(product=product)
-
+    related_product = Product.objects.filter(art_category=product.art_category).exclude(id=product.id)[:3]
     in_cart = None
-
+    reviews = Review.objects.filter(variant = variant)[:2]
     if request.user.is_authenticated:
         in_cart = Cart.objects.filter(user=request.user, variant=variant).exists()
 
@@ -306,6 +308,8 @@ def single(request, product_id, variant_id):
         'variant': variant,
         'sizes': sizes,
         'in_cart': in_cart,
+        'reviews': reviews,
+        'related_product':related_product
     })
 
 
@@ -882,18 +886,20 @@ def order_placed(request):
 from django.shortcuts import render, redirect
 from django.contrib import messages
 
-def submit_review(request,product_id, order_id):
+def submit_review(request,product_id, order_id, variant_id):
 
     print('review called')
     if request.method == 'POST':
         rating = request.POST.get('rating')
         review_text = request.POST.get('reviewtext')
         product = get_object_or_404(Product, id=product_id)
+        variant = get_object_or_404(Variant, id=variant_id)
         
         Review.objects.create(
             review=review_text,
             rating=rating,
             product=product,
+            variant=variant,
             user=request.user
         )
 
@@ -980,14 +986,39 @@ def order_cancel(request, order_id):
    
     order.save()
 
-# NAMES FOR THE FIELDS
-    # transaction_reason
-    # transaction_purpose
-    # credit_or_debit_reason
-    # transaction_description
-    # reason_for_transaction
-    
     return redirect('order_details',order_id=order_id)
+
+#==================== SINGLE ORDER SECTION =================#
+
+# def single_order_cancel(request, order_id,):
+#     order = get_object_or_404(Order, id=order_id)
+
+    
+#     if order.status == 'Cancelled':
+#         messages.warning(request, "Order is already cancelled.")
+#         return redirect('order_details', order_id=order_id)
+    
+#     order.status='Cancelled'
+#     order.save()
+
+
+
+#     if order.payment_method in ['Razorpay', 'Wallets']:
+#         wallet, created = Wallet.objects.get_or_create(user=request.user, defaults={'wallet_amount': 0})
+#         wallet.wallet_amount += order.total_amount  # Increment the wallet amount
+#         wallet.save()
+      
+#         trasanction = Wallet_Transaction.objects.create(
+#             user = request.user,
+#             transaction_amount = order.total_amount,
+#             type = 'Credit',
+#             transaction_mode = order.payment_method     
+#         )
+   
+#     order.save()
+
+#     return redirect('order_details',order_id=order_id)
+
 
 
 #====================  SALES REPORT SECTION ===================#
@@ -1055,4 +1086,96 @@ def export_sales_report(request):
     return response
 
 
+from reportlab.lib.pagesizes import A4 # type: ignore
+from reportlab.lib import colors # type: ignore
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle # type: ignore
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle # type: ignore
+from django.http import HttpResponse
+from .models import Order, Order_details  # Import your models
+
+def download_invoice(request, order_id):
+    try:
+        # Retrieve the order
+        order = Order.objects.get(id=order_id)
+        
+        # Retrieve order items
+        order_items = Order_details.objects.filter(order=order)
+
+        # Create PDF response
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="invoice_{order_id}.pdf"'
+        
+        # Create a SimpleDocTemplate
+        pdf = SimpleDocTemplate(
+            response,
+            pagesize=A4,
+            title="Order invoice",  # Set your desired title here
+           
+        )
+        
+        # Create a list to hold the elements for the PDF
+        elements = []
+
+        # Add the header
+        styles = getSampleStyleSheet()
+        header_style = ParagraphStyle(
+            name='CenteredHeader',
+            fontSize=20,
+            alignment=1,  # Center alignment
+            spaceAfter=12  # Space after the header
+        )
+        header = Paragraph("ORDER INVOICE", header_style)
+        elements.append(header)
+
+        # Add space between header and table
+        elements.append(Paragraph("<br/>", styles['Normal']))
+        
+        # Create the data for the table
+        table_data = [
+            ["Product Name", "Quantity"],  # Table header
+        ]
+
+        # Populate table data
+        for item in order_items:
+            product_name = item.product.product_name  # Assuming `product` has a `name` field
+            quantity = item.quantity
+            table_data.append([product_name, quantity])
+        
+        # Define column widths (adjust as needed)
+        column_widths = [250, 150]  # Width for Product Name and Quantity
+        
+        # Create the table with specified widths
+        table = Table(table_data, colWidths=column_widths)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),  # Header background color
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),  # Header text color
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),  # Center align all cells
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),  # Header font
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),  # Padding for header
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),  # Background for table data
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),  # Grid lines
+            ('ROWHEIGHT', (0, 0), (-1, -1), 40),  # Set row height
+        ]))
+
+        # Add the table to the elements
+        elements.append(table)
+
+        # Add total amount
+        elements.append(Paragraph(f"<br/>Total Amount: Rs {order.total_amount}", styles['Normal']))
+
+        if order.coupon:
+            coupon_code = order.coupon.coupon_code  # Assuming Coupons model has a 'description' field
+            elements.append(Paragraph(f"<br/>Coupon Used: {coupon_code}", styles['Normal']))
+            elements.append(Paragraph(f"Coupon percentage: {order.coupon.percentage} % ", styles['Normal']))  # Assuming discount_amount is in Coupons model
+
+
+        # Build the PDF
+        pdf.build(elements)
+        
+        return response
     
+    except Order.DoesNotExist:
+        return HttpResponse("Order not found.", status=404)
+
+
+

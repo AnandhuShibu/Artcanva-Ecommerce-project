@@ -235,7 +235,7 @@
             <h5 class="card-title">{{arrival.product_name}}</h5>
             <p class="card-text">{{arrival.}}</p>
             {% comment %} <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> {% endcomment %}
-            <a href="single" ><button type="button" class="btn btn-primary btn-sm">View</button></a>
+            <a href="{% url 'single' arrival.id arrival.variants.first.id %}" ><button type="button" class="btn btn-primary btn-sm">View</button></a>
           </div>
         </div>
       </div>
