@@ -29,7 +29,7 @@ from django.http import JsonResponse
 from django.db import transaction
 from django.conf import settings
 from .models import Cart, Address, Order, Order_details, Wallet, Wallet_Transaction
-
+from decimal import Decimal
 
 
 
@@ -299,18 +299,52 @@ def single(request, product_id, variant_id):
     sizes = Variant.objects.filter(product=product)
     related_product = Product.objects.filter(art_category=product.art_category).exclude(id=product.id)[:3]
     in_cart = None
+    in_wishlist = None
     reviews = Review.objects.filter(variant = variant)[:2]
     if request.user.is_authenticated:
         in_cart = Cart.objects.filter(user=request.user, variant=variant).exists()
+    if request.user.is_authenticated:
+        in_wishlist = Wishlist.objects.filter(user=request.user, variant=variant).exists()
+
+    print(related_product)
+    print(product.art_category.art_type_offer)
+
+    offer_price = product.art_category.art_type_offer
+    variant_amount = variant.price
+    
+    offer_amount = None
+    
+   
+    if offer_price > 1:
+        offer_amount = variant_amount * (Decimal(1) - (Decimal(offer_price) / Decimal(100)))
+        print('LAST AMOUNT:', offer_amount)
+    else:
+        print('LOWER')
 
     return render(request, 'user/single.html', {
         'product': product,
         'variant': variant,
         'sizes': sizes,
         'in_cart': in_cart,
+        'in_wishlist': in_wishlist,
         'reviews': reviews,
-        'related_product':related_product
+        'related_product':related_product,
+        'variant_amount': variant_amount,
+        'offer_amount': offer_amount
     })
+
+
+def add_wishlist_single(request, product_id, variant_id):
+    if not request.user.is_authenticated:
+        messages.info(request, "Please log in to add items to your wishlist.")
+        return redirect('login')
+    
+    product = get_object_or_404(Product, id=product_id)
+    variant = get_object_or_404(Variant, id=variant_id)
+    Wishlist.objects.create(product=product, user=request.user, variant=variant)
+    messages.success(request, "Item has been added to your wishlist.")
+    
+    return redirect('single', product_id=product.id, variant_id=variant.id)
 
 
 #====================== DEMO VIEW FUNCTIONS ===================#
@@ -709,7 +743,7 @@ def place_order(request):
     if request.method == 'POST':
         payment_method = request.POST.get('payment_method')
         selected_address_id = request.POST.get('selected_address')
-        selected_address = Address.objects.get(id=selected_address_id)
+        # selected_address = Address.objects.get(id=selected_address_id)
         total_price = int(request.session.get('total_price', 0)) * 100  # Convert to paise
         coupon_discount_price = request.POST.get('final_price', None)
         ##getting selected coupon code
@@ -732,10 +766,16 @@ def place_order(request):
             final_amount = total_price
 
         # Validate if the selected address exists and belongs to the user
+      # Ensure `selected_address_id` is valid
+        if not selected_address_id:
+            messages.error(request, "Please select a valid address.")
+            return redirect('checkout')
+        
+        # Validate if the selected address exists and belongs to the user
         try:
-            selected_address = Address.objects.get(id=selected_address_id, user_id=request.user)
+            selected_address = Address.objects.get(id=selected_address_id)
         except Address.DoesNotExist:
-            messages.error(request, "Invalid address selection.")
+            messages.error(request, "The selected address is invalid or does not belong to you.")
             return redirect('checkout')
 
         # Check stock before placing the order
@@ -919,9 +959,6 @@ def submit_review(request,product_id, order_id, variant_id):
 
 #==================== WISHLIST SECTION ================#
 
-# def wishlist(request):
-#     return render(request,'user/wishlist.html')
-
 
 def wishlist(request):
     if not request.user.is_authenticated:
@@ -953,10 +990,27 @@ def add_wishlist(request,product_id, variant_id):
     Wishlist.objects.create(product=product_id, user=request.user, variant=variant_id)
     return redirect('wishlist')
 
+
 def remove_wishlist_item(request, variant_id):
     print("hhhgh")
     wishlist_items = Wishlist.objects.get(variant=variant_id, user=request.user)
     wishlist_items.delete()    
+    return redirect('wishlist')
+
+def add_cart_wishlist(request,product_id, variant_id):
+    if not request.user.is_authenticated:
+        messages.info(request, "Please log in to add items to your cart.")
+        return redirect('login')
+    
+    product_id = get_object_or_404(Product, id=product_id)
+    variant_id = get_object_or_404(Variant,id = variant_id)
+    cart_item_exists = Cart.objects.filter(variant=variant_id, user=request.user).exists()
+    if cart_item_exists:
+        messages.warning(request, "This item is already in your cart.")
+        return redirect('wishlist')
+    
+    Cart.objects.create(product=product_id, user=request.user, variant=variant_id)
+    messages.success(request, "Item added to Cart")
     return redirect('wishlist')
 
 

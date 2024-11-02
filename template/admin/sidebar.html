@@ -162,7 +162,8 @@
                 <h3>ADMIN</h3>
             </div>
             <ul>
-                <li><a href="{% url 'sales_report' %}">Dashboard</a></li>
+                <li><a href="">Dashboard</a></li>
+                <li><a href="{% url 'sales' %}">Sales</a></li>
                 <li><a href="{% url 'users' %}">Users</a></li>
                 <li><a href="{% url 'product' %}">Products</a></li>
                 <li><a href="{% url 'all_orders' %}">Orders</a></li>
@@ -175,7 +176,8 @@
                     </div>
                 </li>
                 <li><a href="{% url 'coupon' %}">Coupons</a></li>
-                <li><a href="#">Discounts</a></li>
+                <li><a href="{% url 'offer' %}">Offers</a></li>
+                
                 <li></li>
                 <li></li>
                 <form action="{% url 'logout' %}" method="POST" style="display:inline;">

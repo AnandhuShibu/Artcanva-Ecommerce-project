@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Offer</title>
+    <style>
+        /* Basic styles for the body */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f4f8; /* Light gray background */
+        }
+
+        /* Centering the form container */
+        .form-container {
+            border: 1px solid #ccc;
+            border-radius: 15px;
+            width: 350px; /* Set a fixed width for the form */
+            background-color: #fff; /* White background for the form */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+            padding: 20px;
+            transition: transform 0.3s; /* Smooth scale effect on hover */
+        }
+
+        /* Hover effect on form container */
+        .form-container:hover {
+            transform: scale(1.02); /* Slightly enlarge on hover */
+        }
+
+        h1 {
+            color: #333;
+            text-align: center; /* Center the heading text */
+            margin-bottom: 20px; /* Space below the heading */
+        }
+
+        label {
+            font-weight: bold;
+            display: block; /* Block display for proper spacing */
+            margin: 10px 0 5px; /* Space around label */
+        }
+
+        /* Style for inputs and select */
+        input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            transition: border-color 0.3s; /* Transition for border color */
+            box-sizing: border-box; /* Include padding and border in element's total width and height */
+        }
+
+        input[type="number"]:focus, select:focus {
+            border-color: #00b894; /* Change border color on focus */
+            outline: none; /* Remove default outline */
+        }
+
+        .submit-btn {
+            background-color: #00b894;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.3s; /* Smooth background change */
+        }
+
+        .submit-btn:hover {
+            background-color: #009970; /* Darker shade on hover */
+        }
+
+        /* Add responsive design */
+        @media (max-width: 400px) {
+            .form-container {
+                width: 90%; /* Make the form responsive */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Add New Offer</h1>
+
+        <form action="{% url 'add_offer' %}" method="POST">
+            {% csrf_token %}
+            
+            <label for="coupon_code">Select Art Category</label>
+            <select class="form-select" id="category" name="category_name" required>
+                <option selected>Select Category</option>
+                {% for art in arts %}
+                  <option value="{{ art.id }}">{{ art.art_type }}</option>
+                {% endfor %}
+              </select>
+
+            <label for="percentage">Percentage</label>
+            <input type="number" name="percentage" id="percentage" placeholder="Percentage" min="0" max="100" required>
+            
+            <button type="submit" class="submit-btn">Submit</button>
+        </form>
+    </div>
+</body>
+</html>

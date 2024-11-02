@@ -296,11 +296,6 @@ def edit_coupon(request):
     return redirect('coupon')
 
 
-
-
-
-
-
 def add_coupon(request):
     print('hai jaseeeeeeeeeeeeer')
     if not request.user.is_authenticated or not request.user.is_superuser:
@@ -345,3 +340,53 @@ def add_coupon(request):
 
 def sale(request):
     return render(request, 'admin/sale.html')
+
+
+
+def offer(request):
+    offer = Art.objects.all()
+    paginator = Paginator(offer, 6)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'admin/offer.html', {'page_obj': page_obj})
+
+
+def add_offer_page(request):
+    if not request.user.is_authenticated or not request.user.is_superuser: 
+        return redirect('login_admin')
+    art = Art.objects.filter(art_type_status=True)
+
+    context = {
+        'arts': art  # Pass arts to the template
+    }
+    return render(request, 'admin/add_offer.html', context)
+
+
+def add_offer(request):
+    if request.method == 'POST':
+        category_name_id = request.POST.get('category_name')
+        offer_percentage = request.POST.get('percentage')
+        if offer_percentage and category_name_id:
+            try:
+                offer_percentage = int(offer_percentage)
+
+                try:
+                    art_instance = Art.objects.get(id=category_name_id) 
+                    art_instance.art_type_offer = offer_percentage 
+                    art_instance.save() 
+                except Art.DoesNotExist:
+                    print("Art instance not found for ID:", category_name_id)
+
+            except ValueError:
+                print("Invalid percentage value.")
+        return redirect('offer')
+    return render(request, 'admin/offer.html')
+
+
+
+def sales(request):
+
+    return render(request, 'admin/sales.html')
+
+

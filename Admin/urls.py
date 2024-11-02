@@ -12,6 +12,10 @@ urlpatterns = [
     path('order_items/<int:order_id>/',views.order_items, name='order_items'),
     path('art/',views.art, name='art'),
     path('coupon/',views.coupon, name='coupon'),
+    path('sales/',views.sales, name='sales'),
+    path('offer/',views.offer, name='offer'),
+    path('add_offer/',views.add_offer, name='add_offer'),
+    path('add_offer_page/', views.add_offer_page, name='add_offer_page'), 
     path('paint/',views.paint, name='paint'),
     path('variant/<int:product_id>/',views.variant, name='variant'),
     path('product/',views.product, name='product'),
@@ -20,8 +24,7 @@ urlpatterns = [
     path('change_order_status/<int:order_id>/', views.change_order_status, name='change_order_status'),
     path('add_coupon/', views.add_coupon, name='add_coupon'),
     path('remove_coupon/<int:coupon_id>', views.remove_coupon, name='remove_coupon'),
-    path('sale/',views.sale, name='sale'),
+   
     
-
 ]
 

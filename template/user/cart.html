@@ -209,7 +209,7 @@
           <a class="nav-link" href="{% url 'wishlist'%}"><i class="bi bi-heart"></i> Wishlist</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'profile'%}"><i class="bi bi-person"></i> User</a>
+          <a class="nav-link" href="{% url 'profile'%}"><i class="bi bi-person"></i> Profile</a>
         </li>
       </ul>
 
@@ -250,11 +250,10 @@
                             <h5>{{ item.product.product_name }}</h5>
                             <p>Frame Size: {{ item.variant.frame_size }}</p>
                             <p class="price" data-price="{{ item.variant.price }}">₹ {{ item.variant.price }}</p>
-            
                             <div class="quantity d-flex align-items-center mt-2">
                                 <button class="btn btn-outline-secondary btn-sm me-2 minus" type="button">-</button>
                                 <input 
-                                    type="number" 
+                                    type="number"
                                     value="{{ item.quantity }}" 
                                     min="1" 
                                     class="form-control form-control-sm quantity-input" 

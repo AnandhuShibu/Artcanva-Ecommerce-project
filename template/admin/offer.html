@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Art Canva Dashboard</title>
+    <title>offers</title>
     <style>
         main {
             flex-grow: 1;
@@ -280,7 +280,7 @@
     <div class="container">
         <main>
             <div class="header">
-                <h1>COUPONS</h1>
+                <h1>OFFERS</h1>
                 <form method="GET" action="{% url 'coupon' %}" class="d-flex justify-content-center">
                     <input 
                       class="form-control custom-search-input me-2 w-50" 
@@ -292,7 +292,7 @@
                     >
                     <button class="btn btn-outline-success custom-search-button" type="submit">Search</button>
                   </form>
-                <button id="addCouponBtn" class="add-btn">ADD NEW COUPON</button>
+                <a href="{% url 'add_offer_page' %}"><button  class="add-btn">ADD NEW OFFER</button></a>
             </div>
 
             {% if messages %}
@@ -308,10 +308,9 @@
             <table class="product-table">
                 <thead>
                     <tr>
-                        <th>COUPON ID</th>
-                        <th>COUPON CODE</th>
-                        <th>PERCENTAGE</th>
-                        <th>EXPAIRY DATE</th>
+                        <th>OFFER ID</th>
+                        <th>ART CATEGORY</th>
+                        <th>OFFER %</th>
                         <th>ACTIONS</th>
                     </tr>
                 </thead>
@@ -319,19 +318,19 @@
                     {% if no_coupon_found %}
                     <tr>
                         <td colspan="6" class="text-center" style="text-align: center; color: red; font-weight: bold;">
-                            No Coupons found !
+                            No offers found !
                         </td>
                     </tr>
                 {% else %}
-                    {% for coupon in page_obj%}
+                    {% for offer in page_obj%}
                     <tr>
-                        <td>{{coupon.id}}</td>
-                        <td>{{coupon.coupon_code}}</td>
-                        <td>{{coupon.percentage}}<span>%</span></td>
-                        <td>{{coupon.expiry_date}}</td>
+                        <td>{{offer.id}}</td>
+                        <td>{{offer.art_type}}</td>
+                        <td>{{offer.art_type_offer}}<span>%</span></td>
+                      
                         <td>
                             <button class="action-btn edit-btn">EDIT</button>
-                            <a href="{% url 'remove_coupon' coupon.id %}"><button class="deactivate-btn">DELETE</button></a>
+                            <a href=""><button class="deactivate-btn">DELETE</button></a>
                     
                         </td>
                     </tr>
@@ -362,20 +361,30 @@
 
 
 
-    <form action="{% url 'add_coupon' %}" method='POST'>
+    {% comment %} <form action="{% url 'add_offer' %}" method="POST">
         {% csrf_token %}
-    <div id="addCouponModal" class="modal">
-        
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Add New Coupon</h2>
-            <input type="text" name='coupon_code' placeholder="Coupon code" required>
-            <input type="number" name='percentage' placeholder="Percentage" min="0" max="100" required>
-            <input type="date" name='expiry_date' required>
-            <button type="submit" class="modal-btn">Submit</button>
+        <div id="addCouponModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Add New Offer</h2>
+    
+                <!-- Dropdown for selecting art category -->
+                <label for="coupon_code" style="font-weight: bold;">Select Art Category</label>
+                <select name="coupon_code" id="coupon_code" required style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px;">
+                    <option value="" disabled selected>Select an Art category</option>
+                    {% for art in arts %}
+                        <option value="{{ art.id }}">{{ art.art_type }}</option>
+                    {% endfor %}
+                </select>
+    
+                <input type="number" name="percentage" placeholder="Percentage" min="0" max="100" required style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px;">
+                <button type="submit" class="modal-btn" style="padding: 10px 20px; border: none; background-color: #00b894; color: white; border-radius: 4px; cursor: pointer;">Submit</button>
+            </div>
         </div>
-    </form>
-    </div>
+    </form> {% endcomment %}
+    
+    
+    
     
     
     <form action="{% url 'edit_art' %}" method = 'POST'>

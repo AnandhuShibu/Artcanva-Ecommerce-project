@@ -20,6 +20,9 @@ urlpatterns = [
     path('newpassword',views.new_password,name='new_password'),
     path('cart/',views.cart,name='cart'),
     path('addcart/<int:product_id>/<int:variant_id>/',views.add_cart,name='addcart'),
+    path('add_wishlist_single/<int:product_id>/<int:variant_id>/',views.add_wishlist_single,name='add_wishlist_single'),
+
+    
     path('profile',views.profile,name='profile'),
     path('single/<int:product_id>/<int:variant_id>/',views.single, name='single'),
     path('remove_cart_item/<int:variant_id>',views.remove_cart_item, name='remove_cart_item'),
@@ -40,6 +43,9 @@ urlpatterns = [
     path('wishlist/',views.wishlist, name='wishlist'),
     path('add_wishlist/<int:product_id>/<int:variant_id>',views.add_wishlist, name='add_wishlist'),
     path('remove_wishlist_item/<int:variant_id>', views.remove_wishlist_item, name='remove_wishlist_item'),
+    path('add_cart_wishlist/<int:product_id>/<int:variant_id>',views.add_cart_wishlist, name='add_cart_wishlist'),
+
+    
     path('place-order/', views.place_order, name='place_order'),
     path('payment-success/', views.payment_success, name='payment_success'),
     path('order_cancel/<int:order_id>', views.order_cancel, name= 'order_cancel'),
