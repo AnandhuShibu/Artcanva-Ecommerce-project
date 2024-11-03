@@ -13,40 +13,35 @@
     body{
       background-color:#ffffe4
     }
-    /* Custom navbar height */
-    .navbar {
-      height: 80px; /* Adjust the height as needed */
-      
 
+    .navbar {
+      height: 80px;
     }
 
     .logo {
-      font-size: 1.8rem; /* Increase logo size */
-      color: #000000; /* Logo color */
-      font-weight: bold; /* Make the logo bold */
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-      letter-spacing: 1px; /* Increase letter spacing */
+      font-size: 1.8rem;
+      color: #000000; 
+      font-weight: bold; 
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); 
+      letter-spacing: 1px; 
       text-decoration: none;
   }
   
     .navbar-nav .nav-link {
-      font-size: 1.3rem; /* Optional: Increase font size for links */
+      font-size: 1.3rem; 
       color:#000000
     }
 
-
-
     .navbar-nav .nav-item {
-      margin: 0 15px; /* Add horizontal margin between links */
-  }
-  
+      margin: 0 15px; 
+    }
   
     .navbar-toggler {
-      padding: 0.5rem; /* Adjust padding for the toggler button */
+      padding: 0.5rem;
     }
-    /* Carousel and video setup for full-screen view */
+
     .carousel-item {
-      height: 80vh; /* Full height of the screen */
+      height: 80vh;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -54,104 +49,103 @@
     }
 
     video {
-      width: 100vw; /* Full width of the viewport */
-      height: auto; /* Full height of the viewport */
-      object-fit: cover; /* Crop and scale video to fill the area */
+      width: 100vw; 
+      height: auto; 
+      object-fit: cover; 
     }
 
     .popular-products {
-      margin-top: 50px; /* Space above the heading */
-      text-align: left; /* Center the heading */
+      margin-top: 50px; 
+      text-align: left; 
     }
 
     .new-arrivals {
-      margin-top: 50px; /* Space above the heading */
-      text-align: center; /* Align the heading to the left */
-  }
-  
-  .new-arrivals-heading {
-      font-size: 2.5rem; /* Increase font size for attractiveness */
-      color: #5B534F; /* Change this to your preferred color */
-      font-weight: bold; /* Make the heading bold */
-      margin-bottom: 10px; /* Space below the heading */
-  }
-  .new-arrivals p {
-      font-size: 1.25rem; /* Slightly larger font size for the paragraph */
-      color: #6c757d; /* Change to a softer text color */
-  }
+      margin-top: 50px; 
+      text-align: center;
+    }
+
+    .new-arrivals-heading {
+        font-size: 2.5rem;
+        color: #5B534F; 
+        font-weight: bold; 
+        margin-bottom: 10px;
+    }
+
+    .new-arrivals p {
+        font-size: 1.25rem; 
+        color: #6c757d; 
+    }
     .card {
-     
-      width: 90%; /* Set a specific width for the card */
-      margin: 0 auto; /* Center the card in its column */
+      
+      width: 90%; 
+      margin: 0 auto;
     }
 
     .small-card {
-      width: 80%; /* Set a specific width for smaller cards */
-      margin: 0 auto; /* Center the smaller cards in their column */
+      width: 80%;
+      margin: 0 auto;
     }
 
     #card_image_arrival{
       height:310px ;
-      }
-     
+    }
+      
 
-      #card_image_popular{
+    #card_image_popular{
         height:243px ;
-        }
-       
+      }
+        
     .quotes-section {
-      background-color: #f8f9fa; /* Light background color */
-      padding: 30px; /* Padding around the section */
+      background-color: #f8f9fa;
+      padding: 30px;
       background-color:#ffffe4
-  }
-  
-  .quotes-section h3 {
-      color: #343a40; /* Dark color for the heading */
-  }
-  
-  .quotes-section blockquote {
-     
-      padding-left: 15px; /* Padding inside the blockquote */
-      margin-bottom: 20px; /* Space between quotes */
-      font-style: italic; /* Italic text style for quotes */
-      color: #6c757d; /* Softer text color */
-  }
-  .slow-underline {
-    position: relative;
-    color: inherit; /* Keep the link color the same */
-    text-decoration: none;
-    overflow: hidden;
-    display: inline-block;
-  }
+    }
 
-  /* Create the underline effect */
-  .slow-underline::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 90%;
-    height: 1px; /* Thickness of the underline */
-    background-color: currentColor; /* Same color as text */
-    transform: scaleX(0); /* Initially hidden */
-    transition: transform 0.4s ease-in-out; /* Smooth animation */
-    transform-origin: left; /* Start animation from the left */
-  }
+    .quotes-section h3 {
+        color: #343a40; 
+    }
 
-  /* On hover, reveal the underline */
-  .slow-underline:hover::after {
-    transform: scaleX(1); /* Expand to full width */
-  }
-  .view{
-    text-decoration:none;
-  }
+    .quotes-section blockquote {
+        padding-left: 15px; 
+        margin-bottom: 20px;
+        font-style: italic;
+        color: #6c757d;
+    }
+
+    .slow-underline {
+      position: relative;
+      color: inherit;
+      text-decoration: none;
+      overflow: hidden;
+      display: inline-block;
+    }
+
+    .slow-underline::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 90%;
+      height: 1px;
+      background-color: currentColor;
+      transform: scaleX(0); 
+      transition: transform 0.4s ease-in-out;
+      transform-origin: left; 
+    }
+
+    .slow-underline:hover::after {
+      transform: scaleX(1);
+    }
+
+    .view{
+      text-decoration:none;
+    }
 
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMKtkz0p5sy4R8l1L4/fC1RfwD1kLwL4RbfE8" crossorigin="anonymous">
 </head>
 <body>
 
-<!-- Navbar Start -->
   <nav class="navbar navbar-expand-lg navbar-dark ">
     <div class="container-fluid">
 
@@ -238,7 +232,6 @@
           <div class="card-body">
             <h5 class="card-title">{{arrival.product_name}}</h5>
             <p class="card-text">{{arrival.}}</p>
-            {% comment %} <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> {% endcomment %}
             <a href="{% url 'single' arrival.id arrival.variants.first.id %}" ><button type="button" class="btn btn-primary btn-sm">View</button></a>
           </div>
         </div>
@@ -264,7 +257,6 @@
           <div class="card-body">
             <h6 class="card-title">{{popular.product_name}}</h6>
             <a href="" class="view">VIEW></a>
-            {% comment %} <a href="#" class="btn btn-primary">View</a> {% endcomment %}
           </div>
         </div>
       </div>

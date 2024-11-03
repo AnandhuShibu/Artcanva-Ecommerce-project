@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
+
         .content-wrapper {
             flex: 1;
             padding: 30px;
@@ -65,7 +66,6 @@
             background-color: #f0f0f0;
         }
 
-        /* Dropdown styling */
         .dropdown-container {
             position: absolute;
             top: 269px;
@@ -80,11 +80,10 @@
         }
     </style>
 </head>
-<body>
 
+<body>
     <div class="content-wrapper">
         <h1>ORDERED ITEMS</h1>
-
         <div class="order-info">
             <div class="info-box">
                 <h2>ORDERED TO</h2>
@@ -94,16 +93,14 @@
                     {{ order_address.pincode }},<br>Mobile: {{ order_address.mobile }}
                 </p>
             </div>
-
             <div class="info-box">
                 <h2>TOTAL AMOUNT</h2>
                 <p>{{ total_amount }}</p>
             </div>
         </div>
         <h1>{{ order_id.status }}</h1>
-        
-        <!-- Dropdown placed at the top-right corner -->
         <div class="dropdown-container">
+
             <form method="POST" action="{% url 'change_order_status' order_id.id %}">
                 {% csrf_token %}
                 <div class="dropdown">
@@ -147,7 +144,6 @@
                         <td>
                             <img src="{{ item.product.images1.url }}" alt="Product Image" style="width: 100px; height: 100px; object-fit: cover;">
                         </td>
-                        
                         <td>{{ item.product.id }}</td>
                         <td>{{ item.product.product_name }}</td>
                         <td>{{ item.quantity }}</td>
@@ -157,7 +153,6 @@
                         <td>{{ order_id.status }}</td>
                     </tr>
                     {% endfor %}
-                    <!-- Add more rows as needed -->
                 </tbody>
             </table>
         </div>

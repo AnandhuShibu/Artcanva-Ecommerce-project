@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>offers</title>
     <style>
+
         main {
             flex-grow: 1;
             padding: 30px;
@@ -94,7 +95,6 @@
             cursor: pointer;
             font-size: 14px;
             transition: background-color 0.3s ease;
-
         }
 
         .action-btn {
@@ -113,7 +113,6 @@
             background-color: #b21719;
         }
 
-        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -190,7 +189,6 @@
             animation: slideDown 0.5s ease;
         }
         
-        /* Adding slide-down animation */
         @keyframes slideDown {
             from {
                 opacity: 0;
@@ -218,17 +216,17 @@
         
         .alert-button {
             margin-top: 20px;
-            padding: 10px 20px; /* Padding for button */
-            border: none; /* Remove border */
-            border-radius: 5px; /* Rounded corners for button */
-            background-color: #007bff; /* Button color */
-            color: white; /* Button text color */
-            cursor: pointer; /* Change cursor to pointer */
-            transition: background-color 0.3s ease; /* Transition for hover effect */
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white; 
+            cursor: pointer; 
+            transition: background-color 0.3s ease;
         }
         
         .alert-button:hover {
-            background-color: #0056b3; /* Darker button on hover */
+            background-color: #0056b3;
         }
 
         .pagination-container {
@@ -327,11 +325,8 @@
                         <td>{{offer.id}}</td>
                         <td>{{offer.art_type}}</td>
                         <td>{{offer.art_type_offer}}<span>%</span></td>
-                      
                         <td>
-                            
                             <a href="{% url 'remove_offer' offer.id %}"><button class="deactivate-btn">DELETE</button></a>
-                    
                         </td>
                     </tr>
                     {% endfor %}
@@ -345,9 +340,7 @@
                         <li><a href="?page=1">&laquo; First</a></li>
                         <li><a href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
                     {% endif %}
-            
                     <li class="current-page">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</li>
-            
                     {% if page_obj.has_next %}
                         <li><a href="?page={{ page_obj.next_page_number }}">Next</a></li>
                         <li><a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
@@ -358,35 +351,6 @@
     </div>
 
 
-
-
-
-    {% comment %} <form action="{% url 'add_offer' %}" method="POST">
-        {% csrf_token %}
-        <div id="addCouponModal" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2>Add New Offer</h2>
-    
-                <!-- Dropdown for selecting art category -->
-                <label for="coupon_code" style="font-weight: bold;">Select Art Category</label>
-                <select name="coupon_code" id="coupon_code" required style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px;">
-                    <option value="" disabled selected>Select an Art category</option>
-                    {% for art in arts %}
-                        <option value="{{ art.id }}">{{ art.art_type }}</option>
-                    {% endfor %}
-                </select>
-    
-                <input type="number" name="percentage" placeholder="Percentage" min="0" max="100" required style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px;">
-                <button type="submit" class="modal-btn" style="padding: 10px 20px; border: none; background-color: #00b894; color: white; border-radius: 4px; cursor: pointer;">Submit</button>
-            </div>
-        </div>
-    </form> {% endcomment %}
-    
-    
-    
-    
-    
     <form action="{% url 'edit_art' %}" method = 'POST'>
     {% csrf_token %}
     <div id="editCouponModal" class="modal">
@@ -397,11 +361,11 @@
             <input id="coupon_code" name="edit_coupon" type="text" placeholder="" required>
             <input id="editArtType" name="percentage" type="text" placeholder="Type of Art" required>
             <input id="editArtType" name="art_type" type="text" placeholder="Type of Art" required>
-
             <button type="submit" class="modal-btn">Save Changes</button>
         </div>
     </div>
     </form>
+
     
     <script>
         // Add Art Modal

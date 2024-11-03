@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 
   <style>
+
     body {
       background-color: #ffffe4;
       font-family: 'Poppins', sans-serif;
@@ -90,9 +91,9 @@
     .btn-place-order {
       background-color: #DEAD6F;
       color: white;
-      padding: 12px 24px; /* Increased padding for more length */
+      padding: 12px 24px;
       border-radius: 5px;
-      width: 375px; /* Set a specific width for the button */
+      width: 375px; 
     }
 
     .btn-place-order:hover {
@@ -100,16 +101,6 @@
       color: white;
     }
 
-
-
-    {% comment %} .modal-header {
-      background-color: #007bff;
-      color: white;
-    } {% endcomment %}
-
-
-
-    /* Modal Styles */
     .editmodal {
       display: none;
       position: fixed;
@@ -155,100 +146,95 @@
         margin-top: 15px;
       }
     }
-    /* Custom navbar height */
+   
     .navbar {
         height: 80px; /* Adjust the height as needed */
-        
-
     }
 
     .logo {
-        font-size: 1.8rem; /* Increase logo size */
-        color: #000000; /* Logo color */
-        font-weight: bold; /* Make the logo bold */
-        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-        letter-spacing: 1px; /* Increase letter spacing */
+        font-size: 1.8rem; 
+        color: #000000; 
+        font-weight: bold; 
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        letter-spacing: 1px; 
         text-decoration: none;
     }
     
     .navbar-nav .nav-link {
-        font-size: 1.3rem; /* Optional: Increase font size for links */
+        font-size: 1.3rem; 
         color:#000000
-        }
-
-
+    }
 
     .navbar-nav .nav-item {
-        margin: 0 15px; /* Add horizontal margin between links */
+        margin: 0 15px;
     }
     
     .navbar-nav .nav-link {
-        padding: 10px; /* Optional: Adjust padding for links */
+        padding: 10px; 
     }
     
     .navbar-toggler {
-        padding: 0.5rem; /* Adjust padding for the toggler button */
+        padding: 0.5rem; 
         }
+
     hr {
         border: none;
         height: 1px;
         background-color: #000000;
         margin: 0;
-        }
-        .add {
-          background-color: #4CAF50; /* Green background */
-          color: white; /* White text */
-          border: none; /* Remove border */
-          padding: 12px 24px; /* Add padding */
-          text-align: center; /* Center text */
-          font-size: 16px; /* Set font size */
-          font-weight: bold; /* Bold text */
-          border-radius: 8px; /* Rounded corners */
-          cursor: pointer; /* Pointer on hover */
-          transition: background-color 0.3s ease, transform 0.2s ease; /* Add transition effects */
-      }
-      
-      .add:hover {
-          background-color: #45a049; /* Darker green on hover */
-          transform: scale(1.05); /* Slight zoom effect */
-      }
+    }
+    .add {
+        background-color: #4CAF50; 
+        color: white; 
+        border: none; 
+        padding: 12px 24px; 
+        text-align: center; 
+        font-size: 16px;
+        font-weight: bold; 
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    
+    .add:hover {
+        background-color: #45a049;
+        transform: scale(1.05); 
+    }
 
-      .popup-message {
-        position: fixed;
-        top: -100px;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: #FFDE21; /* Green color for success */
-        color: #000000;
-        padding: 20px 35px;
-        border-radius: 6px;
-        z-index: 1000;
-        transition: top 0.5s ease-in-out;
-        box-shadow: 0 5px 7px rgba(0, 0, 0, 0.1);
-        font-family: Arial, sans-serif;
-      }
-      .popup-error {
-          background-color: #f44336;
-      }
-      .popup-warning {
-          background-color: #ff9800;
-      }
-      .popup-show {
-          top: 25px;
-      }
+    .popup-message {
+      position: fixed;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #FFDE21; 
+      color: #000000;
+      padding: 20px 35px;
+      border-radius: 6px;
+      z-index: 1000;
+      transition: top 0.5s ease-in-out;
+      box-shadow: 0 5px 7px rgba(0, 0, 0, 0.1);
+      font-family: Arial, sans-serif;
+    }
+    .popup-error {
+        background-color: #f44336;
+    }
+    .popup-warning {
+        background-color: #ff9800;
+    }
+    .popup-show {
+        top: 25px;
+    }
   </style>
 </head>
 <body>
+
   <div id="popup-message" class="popup-message"></div>
 
-    <!-- Navbar Start -->
   <nav class="navbar navbar-expand-lg navbar-dark ">
     <div class="container-fluid">
 
-      <!-- Left Logo Section -->
       <a class="logo" href="#">ART CANVA</a>
 
-      <!-- Center Links -->
       <button 
         class="navbar-toggler" 
         type="button" 
@@ -296,7 +282,6 @@
 
   <hr>
 
-
 <div class="container position-relative">
   <h4>Select Delivery Address</h4>
   <div class="row">
@@ -304,10 +289,8 @@
     <div class="col-lg-8">
 
       <form action="{% url 'place_order' %}" method="POST">
-        {% csrf_token %}
-        
+      {% csrf_token %}
       <div class="address-list">
-
         {% for address in all_address %}
         <div class="address-card">
           <div>
@@ -339,7 +322,6 @@
       <button type="button" class="btn btn-add-address w-100" data-bs-toggle="modal" data-bs-target="#addAddressModal">
         ADD ADDRESS
       </button>
-
 
       <div class="address-list">
         
@@ -387,15 +369,11 @@
           </h6>
   
           <h5>Total Amount: ₹<span id="totalPrice">{{ total_price }}</span></h5>
-  
           <input type="hidden" name="final_price" id="finalPriceInput">
           <input type="hidden" name="selected_coupon_code" id="selectedCouponCodeInput">
       </div>
-  
-  
         <div class="payment-method">
           <h5>Select Payment Method</h5>
-      
           <div class="form-check mt-2">
             <input 
               type="radio" 
@@ -434,12 +412,8 @@
       </div>
 
     </form>
-      
     </div>
   </div>
-
-  <!-- Place Order Button -->
- 
 </div>
 
 <!-- Add Address Modal -->

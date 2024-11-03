@@ -4,12 +4,10 @@ from . models import Product
 from category_app.models import Paint, Art
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
-
-
-
-#=================== ADD PRODUCT ========================
-
 from django.core.exceptions import ValidationError
+
+
+#======================= ADD PRODUCT ========================#
 
 def add_product(request):
     if request.method == 'POST':
@@ -21,7 +19,6 @@ def add_product(request):
         image2 = request.FILES.get('image2')
         image3 = request.FILES.get('image3')
 
-        # Backend validation to ensure files are images
         def validate_image(file):
             valid_mime_types = ['image/jpeg', 'image/png', 'image/gif']
             if file and file.content_type not in valid_mime_types:
@@ -51,8 +48,7 @@ def add_product(request):
     return render(request, 'admin/product.html')
 
 
-
-#================= PRODUCT STATUS =================#
+#===================== PRODUCT STATUS ====================#
 
 def product_status(request, product_id):
     product = get_object_or_404(Product, id=product_id)
@@ -64,8 +60,7 @@ def product_status(request, product_id):
     return redirect('product')
 
 
-#================== EDIT PRODUCT =================#
-
+#======================= EDIT PRODUCT ==================#
 
 def edit_product(request, product_id):
     """Handle the product edit."""
@@ -81,8 +76,7 @@ def edit_product(request, product_id):
         product.save()
 
         return redirect('product_list')
-
-    # Return product data as JSON for the modal
+    
     data = {
         'product_name': product.product_name,
         'art_type': product.art_category.art_type,

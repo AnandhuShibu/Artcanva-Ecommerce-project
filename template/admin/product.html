@@ -8,8 +8,6 @@
     <title>Art Canva Dashboard</title>
     <style>
         
-
-
         main {
             flex-grow: 1;
             padding: 30px;
@@ -121,12 +119,8 @@
             transition: background-color 0.3s ease;
             decoration : none
             text-color:#ffffff
-
         }
-
-        
-        
-        /* Modal Styles */
+      
         .modal {
             display: none;
             position: fixed;
@@ -204,8 +198,7 @@
         }
         
         select.input-field {
-            /* Ensures that select has the same height and look as input */
-            appearance: none; /* Removes default arrow styling */
+            appearance: none; 
             -webkit-appearance: none;
             -moz-appearance: none;
             background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="5" viewBox="0 0 10 5"><path fill="none" stroke="gray" stroke-width="1" d="M0 0l5 5 5-5"/></svg>');
@@ -216,119 +209,117 @@
         
         select.input-field:focus {
             outline: none;
-            border-color: #007bff; /* Highlight border on focus */
+            border-color: #007bff;
         }
         
-        /* Optionally add a custom style for the dropdown arrow */
-        /* Modal Styles */
-    .modal {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(4px); /* Blur background */
-        transition: opacity 0.3s ease;
-    }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px); /* Blur background */
+            transition: opacity 0.3s ease;
+        }
 
-    .modal-content {
-        background-color: white;
-        margin: 5% auto;
-        padding: 30px;
-        width: 40%;
-        border-radius: 12px;
-        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-        animation: fadeIn 0.5s ease;
-    }
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            width: 40%;
+            border-radius: 12px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.5s ease;
+        }
 
-    .close-edit {
-        color: #aaa;
-        float: right;
-        font-size: 24px;
-        font-weight: bold;
-        cursor: pointer;
-    }
+        .close-edit {
+            color: #aaa;
+            float: right;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
 
-    .close-edit:hover {
-        color: black;
-    }
+        .close-edit:hover {
+            color: black;
+        }
 
-    .modal input, .modal select {
-        width: 100%;
-        padding: 12px;
-        margin: 10px 0;
-        border-radius: 5px;
-        border: 1px solid #ccc;
-        font-size: 16px;
-        background-color: #f8f8f8;
-    }
+        .modal input, .modal select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            background-color: #f8f8f8;
+        }
 
-    .modal-btn {
-        width: 100%;
-        padding: 12px;
-        background-color: #00b894;
-        color: white;
-        font-size: 18px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
+        .modal-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #00b894;
+            color: white;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
 
-    .modal-btn:hover {
-        background-color: #009970;
-    }
+        .modal-btn:hover {
+            background-color: #009970;
+        }
 
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
 
-    .pagination-container {
-        text-align: center;
-        margin-top: 20px;
-        margin-bottom: 20px;
-    }
-    
-    .pagination {
-        list-style: none;
-        padding: 0;
-        display: inline-block;
-    }
-    
-    .pagination li {
-        display: inline;
-        margin: 0 5px;
-    }
-    
-    .pagination a {
-        text-decoration: none;
-        color: #007bff;
-        font-weight: bold;
-        padding: 8px 12px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        transition: background-color 0.3s, color 0.3s;
-    }
-    
-    .pagination a:hover {
-        background-color: #007bff;
-        color: white;
-    }
-    .btn {
-        padding: 9px 10px;
-        margin-right: -7px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 14px;
-        transition: background-color 0.3s ease;
-    }
+        .pagination-container {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .pagination {
+            list-style: none;
+            padding: 0;
+            display: inline-block;
+        }
+        
+        .pagination li {
+            display: inline;
+            margin: 0 5px;
+        }
+        
+        .pagination a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        .pagination a:hover {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn {
+            padding: 9px 10px;
+            margin-right: -7px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
 
     </style>
 </head>
@@ -339,7 +330,6 @@
             <div class="header">
                 <h1>Products</h1>
 
-                
                 <form method="GET" action="{% url 'product' %}" class="d-flex justify-content-center">
                     <input 
                       class="form-control custom-search-input me-2 w-50" 
@@ -352,12 +342,9 @@
                     <button class="btn btn-outline-success custom-search-button" type="submit">Search</button>
                   </form>
 
-
                 <a href="{% url 'productadd' %}"><button class="add-btn">ADD NEW PRODUCT</button></a>
             </div>
-
             <table class="product-table">
-               
                 <thead>
                     <tr>
                         <th></th>
@@ -377,7 +364,6 @@
                         </td>
                     </tr>
                 {% else %}
-
                     <tr>
                         {% for product in page_obj %}
                         <td></td>
@@ -415,11 +401,7 @@
                     {% endif %}
                 </ul>
             </div>
-            
         </main>
-
-        
-
     </div>
 
     <!-- Edit Product Modal -->

@@ -115,7 +115,6 @@
             cursor: pointer;
             font-size: 14px;
             transition: background-color 0.3s ease;
-
         }
 
         .btn {
@@ -161,6 +160,7 @@
             background-color: #007bff;
             color: white;
         }
+
     </style>
 </head>
 <body>
@@ -168,6 +168,7 @@
         <main>
             <div class="header">
                 <h1>ORDERS</h1>
+
                 <form method="GET" action="" class="d-flex justify-content-center">
                     <input 
                       class="form-control custom-search-input me-2 w-50" 
@@ -175,12 +176,9 @@
                       name="q" 
                       placeholder="Search products..." 
                       value="{{ search_query }}" 
-                      aria-label="Search"
-                    >
+                      aria-label="Search">
                     <button class="btn btn-outline-success custom-search-button" type="submit">Search</button>
                   </form>
-
-
 
             </div>
             <table class="product-table">
@@ -211,9 +209,7 @@
                             <td>Not Yet</td>
                         {% endif %}
                         <td>{{order.payment_method}} </td>
-                        
                         <td>{{order.status}}</td>
-                        
                         <td>
                             <a href="{% url 'order_items' order.id %}"><button class="action-btn">VIEW</button></a>
                         </td>
@@ -227,16 +223,13 @@
                         <li><a href="?page=1">&laquo; First</a></li>
                         <li><a href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
                     {% endif %}
-            
                     <li class="current-page">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</li>
-            
                     {% if page_obj.has_next %}
                         <li><a href="?page={{ page_obj.next_page_number }}">Next</a></li>
                         <li><a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
                     {% endif %}
                 </ul>
             </div>
-
         </main>
     </div>
 </body>

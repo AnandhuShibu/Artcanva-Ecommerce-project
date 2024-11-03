@@ -41,8 +41,6 @@
             font-size: 19px;
         }
 
-      
-
         .summary {
             background-color: #fafafa;
             padding: 20px;
@@ -67,94 +65,88 @@
             color: white;
         }
 
-        /* Adjust quantity input field width */
         .quantity input {
-            width: 60px; /* Smaller width for a compact look */
+            width: 60px;
             text-align: center;
         }
 
-        /* Limit the height of the cart items section for better scrolling */
         .cart-items {
             max-height: 500px;
             overflow-y: auto;
-            padding-right: 15px; /* Prevents the scroll bar from overlapping content */
+            padding-right: 15px;
         }
-        /* Custom navbar height */
-        .navbar {
-            height: 80px; /* Adjust the height as needed */
-            
 
+        .navbar {
+            height: 80px; 
         }
 
         .logo {
-            font-size: 1.8rem; /* Increase logo size */
-            color: #000000; /* Logo color */
-            font-weight: bold; /* Make the logo bold */
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-            letter-spacing: 1px; /* Increase letter spacing */
+            font-size: 1.8rem; 
+            color: #000000; 
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); 
+            letter-spacing: 1px; 
             text-decoration: none;
         }
         
         .navbar-nav .nav-link {
-            font-size: 1.3rem; /* Optional: Increase font size for links */
+            font-size: 1.3rem;
             color:#000000
             }
 
-
-
         .navbar-nav .nav-item {
-            margin: 0 15px; /* Add horizontal margin between links */
+            margin: 0 15px; 
         }
         
         .navbar-nav .nav-link {
-            padding: 10px; /* Optional: Adjust padding for links */
+            padding: 10px;
         }
         
         .navbar-toggler {
-            padding: 0.5rem; /* Adjust padding for the toggler button */
-            }
+            padding: 0.5rem;
+        }
+
         hr {
             border: none;
             height: 1px;
             background-color: #000000;
             margin: 0;
-            }
+        }
 
-            .popup-message {
-                position: fixed;
-                top: -100px;
-                left: 50%;
-                transform: translateX(-50%);
-                background-color: #FFDE21;
-                color: White;
-                padding: 20px 35px;
-                border-radius: 6px;
-                z-index: 1000;
-                transition: top 0.5s ease-in-out;
-                box-shadow: 0 5px 7px rgba(0, 0, 0, 0.1);
-                font-family: Arial, sans-serif;
-            }
-            .popup-error {
-                background-color: #f44336;
-            }
-            .popup-warning {
-                background-color: #ff9800;
-            }
-            .popup-show {
-                top: 25px;
-            }
+        .popup-message {
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #FFDE21;
+            color: White;
+            padding: 20px 35px;
+            border-radius: 6px;
+            z-index: 1000;
+            transition: top 0.5s ease-in-out;
+            box-shadow: 0 5px 7px rgba(0, 0, 0, 0.1);
+            font-family: Arial, sans-serif;
+        }
 
-            .cart-header {
-                text-align: center; /* Centers the text horizontally */
-                margin-top: 20px; /* Optional: Adds some space from the top */
-            }
-        
-            .cart-header h2 {
-                font-weight: 600;
-                margin-bottom: 20px; /* Keeps consistent spacing with mb-4 */
-            }
+        .popup-error {
+            background-color: #f44336;
+        }
+        .popup-warning {
+            background-color: #ff9800;
+        }
+        .popup-show {
+            top: 25px;
+        }
 
-            
+        .cart-header {
+            text-align: center; 
+            margin-top: 20px; 
+        }
+    
+        .cart-header h2 {
+            font-weight: 600;
+            margin-bottom: 20px; 
+        }
 
     </style>
 </head>
@@ -175,8 +167,7 @@
         data-bs-target="#navbarNav" 
         aria-controls="navbarNav" 
         aria-expanded="false" 
-        aria-label="Toggle navigation"
-      >
+        aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
@@ -229,26 +220,19 @@
                 <button type="submit" class="btn btn-order w-100 mt-3">SHOP NOW</button>
             </form>
         </div>
-    
-         {% else %}
-
+        {% else %}
         <div class="row">
             <div class="col-lg-8 cart-items">
 
             <form method="POST" action="{% url 'checkout_og' %}" id="checkout-form">
-                {% csrf_token %}
-            
-                
+                {% csrf_token %} 
                 {% for entry in cart_items_with_offer_price %}
                 <div class="cart-item d-flex align-items-center">
                     <img src="{{ entry.item.product.images1.url }}" alt="Painting">
                     <div class="item-details ms-3 flex-grow-1">
                         <h5>{{ entry.item.product.product_name }}</h5>
                         <p>Frame Size: {{ entry.item.variant.frame_size }}</p>
-            
-                        <!-- Display the offer price here -->
                         <p class="price" data-price="{{ entry.offer_price }}">₹ {{ entry.offer_price }}</p>
-            
                         <div class="quantity d-flex align-items-center mt-2">
                             <button class="btn btn-outline-secondary btn-sm me-2 minus" type="button">-</button>
                             <input 
@@ -265,33 +249,22 @@
                     
                     <a href="{% url 'remove_cart_item' entry.item.variant.id %}" class="btn btn-danger btn-sm remove-item">Remove</a>
                 </div>
-            {% endfor %}
+                {% endfor %}
             
-            {% if is_empty %}
-                <p>Your cart is empty.</p>
-            {% endif %}
-            
+                {% if is_empty %}
+                    <p>Your cart is empty.</p>
+                {% endif %}
                 </div>
-
-                
-            <div class="col-lg-4">
-
-
+                <div class="col-lg-4">
                 <div class="summary">
                         <p>Total price: <span id="total-price"></span></p>
                         <input type="hidden" name="total_price" id="total-price-input">
                         <button type="submit" class="btn btn-order w-100 mt-3">PROCEED TO CHECKOUT</button>
                 </div>
-
-
-
-
-            </div>
+                </div>
             </form>
         </div>
-
     </div>
-    
     {% endif %}
 
     
@@ -299,36 +272,36 @@
 
 
     <script>
-      // Function to update the total price based on quantity changes
+      
 function updateTotalPrice() {
     let total = 0;
     document.querySelectorAll('.cart-item').forEach(item => {
         const price = parseFloat(item.querySelector('.price').dataset.price);
         const quantity = parseInt(item.querySelector('.quantity-input').value);
-        total += price * quantity; // Calculate total based on current quantities
+        total += price * quantity; 
     });
-    return total; // Return the calculated total
+    return total; 
 }
 
 // Function to display the total amount
 function displayTotalAmount() {
-    const totalAmount = updateTotalPrice(); // Get the updated total amount
-    document.getElementById('total-price').textContent = `₹ ${totalAmount}`; // Update total display
-    document.getElementById('total-price-input').value = totalAmount; // Update hidden input for form submission
+    const totalAmount = updateTotalPrice(); 
+    document.getElementById('total-price').textContent = `₹ ${totalAmount}`; 
+    document.getElementById('total-price-input').value = totalAmount; 
 }
 
 // Handle plus button clicks
 document.querySelectorAll('.plus').forEach(button => {
     button.addEventListener('click', function () {
-        const input = this.previousElementSibling; // Get the input element
-        let quantity = parseInt(input.value); // Get the current quantity
-        const stock = parseInt(input.getAttribute('data-stock')); // Get the stock value
+        const input = this.previousElementSibling; 
+        let quantity = parseInt(input.value); 
+        const stock = parseInt(input.getAttribute('data-stock')); 
 
         if (quantity < stock) {
-            input.value = quantity + 1; // Increment the quantity
-            displayTotalAmount(); // Update total amount after changing quantity
+            input.value = quantity + 1; 
+            displayTotalAmount(); 
         } else {
-            alert('Quantity cannot exceed available stock.'); // Alert if exceeding stock
+            alert('Quantity cannot exceed available stock.'); 
         }
     });
 });
@@ -336,14 +309,14 @@ document.querySelectorAll('.plus').forEach(button => {
 // Handle minus button clicks
 document.querySelectorAll('.minus').forEach(button => {
     button.addEventListener('click', function () {
-        const input = this.nextElementSibling; // Get the input element
-        let quantity = parseInt(input.value); // Get the current quantity
+        const input = this.nextElementSibling; 
+        let quantity = parseInt(input.value); 
 
         if (quantity > 1) {
-            input.value = quantity - 1; // Decrement the quantity
-            displayTotalAmount(); // Update total amount after changing quantity
+            input.value = quantity - 1; 
+            displayTotalAmount(); 
         } else {
-            alert('Quantity cannot be less than 1.'); // Alert if trying to go below 1
+            alert('Quantity cannot be less than 1.'); 
         }
     });
 });
@@ -354,16 +327,16 @@ document.querySelectorAll('.quantity-input').forEach(input => {
         const stock = parseInt(this.getAttribute('data-stock'));
         if (this.value < 1) {
             alert('Quantity cannot be less than 1.');
-            this.value = 1; // Reset to 1
+            this.value = 1;
         } else if (this.value > stock) {
             alert('Quantity cannot exceed available stock.');
-            this.value = stock; // Reset to max stock
+            this.value = stock; 
         }
         else if (this.value > 10) {
             alert('Maximum purchase Quantity exceed ');
-            this.value = 10; // Reset to max stock
+            this.value = 10; 
         }
-        displayTotalAmount(); // Update total amount after input change
+        displayTotalAmount();
     });
 });
 
@@ -376,26 +349,23 @@ document.getElementById('checkout-form').addEventListener('submit', function (ev
 
     // Add hidden input fields for each product's quantity
     document.querySelectorAll('.quantity-input').forEach(input => {
-        const variantId = input.name.split('_')[1]; // Extract variant ID from input name
+        const variantId = input.name.split('_')[1]; 
         const quantity = input.value;
 
         const hiddenInput = document.createElement('input');
         hiddenInput.type = 'hidden';
-        hiddenInput.name = `quantity_${variantId}`; // Create field like quantity_<id>
+        hiddenInput.name = `quantity_${variantId}`; 
         hiddenInput.value = quantity;
-        hiddenInput.classList.add('hidden-quantity-input'); // Add class to track these inputs
+        hiddenInput.classList.add('hidden-quantity-input');
 
-        form.appendChild(hiddenInput); // Append the hidden input to the form
+        form.appendChild(hiddenInput);
     });
 
-    // Display total amount before proceeding
+   
     displayTotalAmount();
 });
 
-// Initialize the total amount display on page load
 displayTotalAmount();
-
-
 
     // Function to show the popup message
     function showPopup(message, type) {

@@ -9,6 +9,14 @@ from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from django.core.paginator import Paginator
 from User.models import Order,Order_details,Address
+from datetime import datetime, timedelta
+from django.db.models import Sum
+from reportlab.lib.pagesizes import A4 # type: ignore
+from reportlab.pdfgen import canvas # type: ignore
+from django.http import HttpResponse
+
+
+
 
 #---------------- ADMIN LOGIN SECTION --------------#
 
@@ -57,7 +65,7 @@ def productadd(request):
 
 
 def product(request):
-    search_query = request.GET.get('q', '').strip()  # Get search query, default to an empty string
+    search_query = request.GET.get('q', '').strip() 
 
     if not request.user.is_authenticated or not request.user.is_superuser: 
         return redirect('login_admin')
@@ -68,10 +76,9 @@ def product(request):
     if search_query:
         products = products.filter(product_name__icontains=search_query)
     
-
-    paginator = Paginator(products, 7)  # Show 10 items per page
-    page_number = request.GET.get('page')  # Get the current page number
-    page_obj = paginator.get_page(page_number)  # Get the corresponding page
+    paginator = Paginator(products, 7) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number) 
 
     no_products_found = not products.exists()
 
@@ -154,7 +161,7 @@ def paint(request):
     return render(request,'admin/paint.html',{'page_obj': page_obj, 'no_paint_found': no_paint_found})
 
 
-#---------------- VARIANTS SECTION ---------------#
+#----------------------- VARIANTS SECTION --------------------------#
 
 def variant(request, product_id):
     if not request.user.is_authenticated or not request.user.is_superuser:  
@@ -164,14 +171,12 @@ def variant(request, product_id):
     variants = Variant.objects.filter(product=products).order_by('-id')
 
     if request.method == 'POST':
-        # Check if it's an edit or a new variant
         variant_id = request.POST.get('variant_id')
-        
         size = request.POST.get('size')
         price = request.POST.get('price')
         stock = request.POST.get('stock')
 
-        if variant_id:  # If variant_id exists, update the variant
+        if variant_id:
             variant = get_object_or_404(Variant, id=variant_id)
             variant.frame_size = size
             variant.price = price
@@ -180,14 +185,10 @@ def variant(request, product_id):
         else: 
             existing_variant = Variant.objects.filter(product=products, frame_size=size).first()
             if existing_variant:
-                # Handle the case where the variant already exists
-                # You can return an error message to the template or use messages framework
                 return render(request, 'admin/variant.html', {
                     'page_obj': variants,
                     'error_message': "!"
                 })
-            
-             # Otherwise, create a new variant
             Variant.objects.create(
                 frame_size=size,
                 stock=stock,
@@ -202,15 +203,10 @@ def variant(request, product_id):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-
-
     return render(request, 'admin/variant.html', {'page_obj': page_obj})
 
 
-
-
-
-#-------------------- ORDERS SECTION -----------------#
+#---------------------- ORDERS SECTION -------------------#
 
 def all_orders(request):
     orders = Order.objects.all().order_by('-id')
@@ -218,7 +214,6 @@ def all_orders(request):
     paginator = Paginator(orders, 8)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-
 
     return render(request,'admin/orders.html', {'page_obj': page_obj})
 
@@ -228,9 +223,7 @@ def order_items(request,order_id):
     total_amount=order_id.total_amount
     order_items=Order_details.objects.filter(order=order_id)
     order_address=Address.objects.get(id=order_id.address.id)
-    print(order_address)
-    print(total_amount)
-    print(order_items)
+
     context={
         'order_items':order_items,
         'order_address':order_address,
@@ -238,7 +231,6 @@ def order_items(request,order_id):
         'order_id':order_id    
     }
     return render(request,'admin/order_items.html', context)
-
 
 def change_order_status(request, order_id):
     if request.method == 'POST':
@@ -249,18 +241,14 @@ def change_order_status(request, order_id):
         return redirect('order_items', order_id=order_id)
 
 
-#----------------- COUPONS SECTION --------------#
-
-
+#-------------------- COUPONS SECTION ---------------------#
 
 def coupon(request):
     search_query = request.GET.get('q', '').strip()
     coupons = Coupons.objects.all()
-    print('hii')
     if search_query:
         coupons = coupons.filter(coupon_code__icontains=search_query)
-        print('working')
-    
+       
     paginator = Paginator(coupons, 8)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -270,13 +258,9 @@ def coupon(request):
     return render(request,'admin/coupons.html', {'page_obj': page_obj, 'no_coupon_found': no_coupon_found})
 
 def remove_coupon(request, coupon_id):
-    print("hhhgh")
     coupon_item = Coupons.objects.get(id = coupon_id)
     coupon_item.delete()    
     return redirect('coupon')
-
-
-
 
 def edit_coupon(request):
     coupon_id = request.POST.get('categoryId')
@@ -284,9 +268,6 @@ def edit_coupon(request):
     percentage = request.POST.get('percentage').strip()
     expiry_date = request.POST.get('expiry_date').strip()
     coupon = get_object_or_404(Coupons, id = coupon_id)
-
-    print(coupon_id)
-
     
     if len(edit_coupon) > 6:
         messages.error(request, "Paint type cannot exceed 6 characters.")
@@ -297,9 +278,7 @@ def edit_coupon(request):
     messages.success(request, "Success")
     return redirect('coupon')
 
-
 def add_coupon(request):
-    print('hai jaseeeeeeeeeeeeer')
     if not request.user.is_authenticated or not request.user.is_superuser:
         return redirect('admin_login')
     
@@ -308,10 +287,6 @@ def add_coupon(request):
         percentage = request.POST.get('percentage').strip()
         expiry_date = request.POST.get('expiry_date').strip()
 
-        print(coupon_code)
-        print(percentage)
-        print(expiry_date)
-        
         all_coupons = [coupon.coupon_code for coupon in Coupons.objects.all()]
 
         if coupon_code in all_coupons:
@@ -322,7 +297,6 @@ def add_coupon(request):
             if coupon_code in existing_coupon:
                 messages.error(request, f"coupon '{coupon_code}' is too similar to '{existing_coupon}'.")
                 return redirect('coupon')
-
 
         if Coupons.objects.filter(coupon_code=coupon_code).exists():
             messages.error(request, "Coupon already exists.")
@@ -339,11 +313,11 @@ def add_coupon(request):
     return render(request, 'admin/coupons.html')
 
 
-
 def sale(request):
     return render(request, 'admin/sale.html')
 
 
+#-------------------------- OFFER SECTION ------------------------#
 
 def offer(request):
     offer = Art.objects.all()
@@ -360,10 +334,9 @@ def add_offer_page(request):
     art = Art.objects.filter(art_type_status=True)
 
     context = {
-        'arts': art  # Pass arts to the template
+        'arts': art
     }
     return render(request, 'admin/add_offer.html', context)
-
 
 def add_offer(request):
     if request.method == 'POST':
@@ -386,36 +359,19 @@ def add_offer(request):
     return render(request, 'admin/offer.html')
 
 def remove_offer(request, offer_id):
-    # Get the offer object or return 404 if it doesn't exist
     offer = get_object_or_404(Art, id=offer_id)
-    
-    # Delete the offer
     offer.delete()
-    
-    # Redirect to the offers list or another relevant page
     return redirect('offer')
 
 
-
-# def sales(request):
-
-#     return render(request, 'admin/sales.html')
-
-
-from datetime import datetime, timedelta
-from django.db.models import Sum
-from django.shortcuts import render
-from User.models import Order
+#----------------------- SALES SECTION -------------------------#
 
 def sales(request):
-    # Get the date range and filter type from request parameters
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
     filter_type = request.GET.get('status')
-
     orders = Order.objects.all()
 
-    # Initialize variables for filtering dates
     if filter_type == 'daily':
         today = datetime.now().date()
         start_date = today
@@ -423,25 +379,22 @@ def sales(request):
 
     elif filter_type == 'weekly':
         today = datetime.now().date()
-        start_date = today - timedelta(days=today.weekday())  # Start of the week (Monday)
-        end_date = today + timedelta(days=(6 - today.weekday()))  # End of the week (Sunday)
+        start_date = today - timedelta(days=today.weekday()) 
+        end_date = today + timedelta(days=(6 - today.weekday()))
 
     elif filter_type == 'monthly':
         today = datetime.now().date()
-        start_date = today.replace(day=1)  # Start of the month
-        end_date = (today.replace(day=1) + timedelta(days=32)).replace(day=1) - timedelta(days=1)  # End of the month
+        start_date = today.replace(day=1) 
+        end_date = (today.replace(day=1) + timedelta(days=32)).replace(day=1) - timedelta(days=1) 
 
-    # Convert string dates to datetime if they are provided
     if start_date and isinstance(start_date, str):
         start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
     if end_date and isinstance(end_date, str):
         end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
 
-    # Filter by date if start and end dates are provided
     if start_date and end_date:
         orders = orders.filter(order_date__range=(start_date, end_date))
 
-    # Calculate overall metrics
     overall_sales_count = orders.count()
     overall_amount = orders.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
 
@@ -455,10 +408,10 @@ def sales(request):
 
 
 
-from reportlab.lib.pagesizes import A4 # type: ignore
-from reportlab.pdfgen import canvas # type: ignore
-from django.http import HttpResponse
-from User.models import Order
+
+
+
+
 
 def export_pdf(request):
     response = HttpResponse(content_type='application/pdf')
@@ -467,10 +420,8 @@ def export_pdf(request):
     pdf = canvas.Canvas(response, pagesize=A4)
     width, height = A4
 
-    # Fetch data from your model
     orders = Order.objects.all()
 
-    # Add title and headers
     pdf.setFont("Helvetica-Bold", 16)
     pdf.drawString(100, height - 100, "Sales Report")
     
@@ -490,11 +441,10 @@ def export_pdf(request):
         pdf.drawString(250, y, f"₹{order.total_amount}")
         pdf.drawString(350, y, order.order_date.strftime('%Y-%m-%d'))
 
-        # Check if deliver_date is None and handle it
         if order.deliver_date:
             pdf.drawString(450, y, order.deliver_date.strftime('%Y-%m-%d'))
         else:
-            pdf.drawString(450, y, "Pending")  # Display "Pending" or leave it blank
+            pdf.drawString(450, y, "Pending")
 
         pdf.drawString(550, y, order.payment_method)
         y -= 20

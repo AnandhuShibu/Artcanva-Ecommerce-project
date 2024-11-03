@@ -232,9 +232,6 @@ def new_password(request):
 #========================= HOME SECTION ===========================#
 
 def home(request):
-    
-
-
     arrivals = Product.objects.filter(
     Q(product_status=True) & Q(variants__isnull=False)
     ).distinct().order_by('-id')[:3]
@@ -257,6 +254,7 @@ def shop(request):
     products = Product.objects.filter(
     Q(product_status=True) & Q(variants__isnull=False)
     ).distinct()
+
     if selected_categories:
         products = products.filter(art_category__id__in=selected_categories)
 
@@ -280,8 +278,6 @@ def shop(request):
     unique_frame_sizes = Variant.objects.order_by('frame_size').distinct()
     paints = Paint.objects.filter(paint_type_status=True)
     arts = Art.objects.filter(art_type_status=True)
-
-
 
     context = {
         'products': page_obj.object_list,
@@ -313,15 +309,10 @@ def single(request, product_id, variant_id):
     if request.user.is_authenticated:
         in_wishlist = Wishlist.objects.filter(user=request.user, variant=variant).exists()
 
-    print(related_product)
-    print(product.art_category.art_type_offer)
-
     offer_price = product.art_category.art_type_offer
     variant_amount = variant.price
-    
     offer_amount = None
     
-   
     if offer_price > 1:
         offer_amount = variant_amount * (Decimal(1) - (Decimal(offer_price) / Decimal(100)))
         print('LAST AMOUNT:', offer_amount)
@@ -361,8 +352,6 @@ def jasir(request):
 
 def error(request):
     return render(request, 'user/error.html')
-
-
 
 def change(request):
     return render(request, 'user/password_verify.html')

@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Art Canva Dashboard</title>
     <style>
+
         main {
             flex-grow: 1;
             padding: 30px;
@@ -112,7 +113,6 @@
             background-color: #b21719;
         }
 
-        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -189,7 +189,6 @@
             animation: slideDown 0.5s ease;
         }
         
-        /* Adding slide-down animation */
         @keyframes slideDown {
             from {
                 opacity: 0;
@@ -216,19 +215,20 @@
         }
         
         .alert-button {
-            margin-top: 20px; /* Space above button */
-            padding: 10px 20px; /* Padding for button */
-            border: none; /* Remove border */
-            border-radius: 5px; /* Rounded corners for button */
-            background-color: #007bff; /* Button color */
-            color: white; /* Button text color */
-            cursor: pointer; /* Change cursor to pointer */
-            transition: background-color 0.3s ease; /* Transition for hover effect */
+            margin-top: 20px;
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white; 
+            cursor: pointer; 
+            transition: background-color 0.3s ease; 
         }
         
         .alert-button:hover {
-            background-color: #0056b3; /* Darker button on hover */
+            background-color: #0056b3;
         }
+
         .pagination-container {
             text-align: center;
             margin-top: 20px;
@@ -275,12 +275,12 @@
     </style>
 </head>
 <body>
-
     <div class="container">
         <!-- Main content -->
         <main>
             <div class="header">
                 <h1>TYPES OF PAINT</h1>
+
                 <form method="GET" action="{% url 'paint' %}" class="d-flex justify-content-center">
                     <input 
                       class="form-control custom-search-input me-2 w-50" 
@@ -292,6 +292,7 @@
                     >
                     <button class="btn btn-outline-success custom-search-button" type="submit">Search</button>
                   </form>
+                  
                 <button class="add-btn" id="openModalBtn">ADD NEW PAINT</button>
             </div>
             {% if messages %}

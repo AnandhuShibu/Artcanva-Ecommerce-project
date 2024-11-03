@@ -5,12 +5,11 @@ from django.contrib import messages
 import re
 
 
-#================ ADDING SECTION =================#
+#======================= ART ADDING SECTION ===================#
 
 def add_art(request):
     if not request.user.is_authenticated or not request.user.is_superuser:
         return redirect('admin_login')
-    
     
     if request.method == 'POST':
         art_type = request.POST.get('art_type').strip()
@@ -25,7 +24,6 @@ def add_art(request):
             if low in existing_art:
                 messages.error(request, f"Art type '{art_type}' is too similar to '{existing_art}'.")
                 return redirect('art')
-
 
         if Art.objects.filter(art_type=art_type).exists():
             messages.error(request, "Art type already exists.")
@@ -45,6 +43,8 @@ def add_art(request):
     
     return render(request, 'admin/art.html')
 
+
+#======================= PAINT ADDING SECTION ==================#
 
 def add_paint(request):
     if not request.user.is_authenticated or not request.user.is_superuser:
@@ -82,7 +82,7 @@ def add_paint(request):
     return render(request,'admin/paint.html')
 
 
-#================ STATUS =================#
+#======================= ART AND PAINT STATUS =========================#
 
 def art_status(request,art_id):
     art = get_object_or_404(Art,id = art_id)
@@ -103,14 +103,13 @@ def paint_status(request,paint_id):
     return redirect('paint')
  
 
-#================ EDITING SECTION =================#
+#======================== ART AND PAINT EDITING SECTION ======================#
 
 def edit_art(request):
     art_id = request.POST.get('categoryId')
     new_type = request.POST.get('art_type').strip()
     art = get_object_or_404(Art, id = art_id)
 
- 
     if re.search(r'\d', new_type):
         messages.error(request, "Art type cannot contain numbers.")
         return redirect('art')

@@ -6,7 +6,7 @@
     <title>Sales Report</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Custom Styling */
+        
         body {
             background-color: #f4f6f9;
             font-family: Arial, sans-serif;
@@ -49,12 +49,12 @@
         .table th, .table td {
             vertical-align: middle;
         }
+
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Header with Export Buttons -->
         <div class="report-header mb-4">
             <h3>Sales Report</h3>
             <div class="export-buttons">
@@ -63,7 +63,6 @@
             </div>
         </div>
 
-        <!-- Filter Section -->
         <form method="get" class="filter-section">
             <select class="form-control" name="status">
                 <option value="all">All</option>
@@ -76,8 +75,6 @@
             <button type="submit" class="btn btn-primary">Filter</button>
         </form>
         
-
-        <!-- Overall Statistics -->
         <div class="row mb-4">
             <div class="col-md-4">
                 <div class="stats-card">
@@ -99,7 +96,6 @@
             </div>
         </div>
 
-        <!-- Sales Table -->
         <table class="table table-bordered table-hover">
             <thead class="thead-dark">
                 <tr>
@@ -115,7 +111,7 @@
                 {% for order in orders %}
                 <tr>
                     <td>{{ order.id }}</td>
-                    <td>{{ order.user.username }}</td> <!-- Assuming a related user model -->
+                    <td>{{ order.user.username }}</td> 
                     <td>₹{{ order.total_amount }}</td>
                     <td>{{ order.order_date|date:"d-m-Y" }}</td>
                     <td>{{ order.deliver_date }}</td>
@@ -125,10 +121,8 @@
             </tbody>
         </table>
 
-        <!-- Pagination controls if you add pagination in your view -->
         <nav>
             <ul class="pagination justify-content-center">
-                <!-- Pagination logic goes here -->
             </ul>
         </nav>
     </div>
