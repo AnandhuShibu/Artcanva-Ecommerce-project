@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Art Canva - Order Details</title>
+    <link rel="icon" href="static/images/arts.png" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <style>
         body {
@@ -306,6 +307,24 @@
             .download-invoice-btn:hover {
                 background-color: #45a049;
             }
+            .go {
+                background-color: #4CAF50; /* Green background */
+                border: none; /* Remove borders */
+                color: white; /* White text */
+                padding: 10px 20px; /* Some padding */
+                text-align: center; /* Centered text */
+                text-decoration: none; /* Remove underline */
+                display: inline-block; /* Get it to display inline */
+                font-size: 16px; /* Increase font size */
+                margin: 4px 2px; /* Add some margin */
+                cursor: pointer; /* Pointer cursor on hover */
+                border-radius: 5px; /* Rounded corners */
+                transition: background-color 0.3s; /* Smooth background color transition */
+            }
+            
+            .go:hover {
+                background-color: #45a049; /* Darker green on hover */
+            }
             
             
 
@@ -338,6 +357,8 @@
 }
 
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
 </head>
 <body>
 
@@ -363,7 +384,11 @@
 <hr>
 
 <!-- Main Content Section -->
-<a href="{% url 'orders' %}"><button class='go'>GO BACK</button></a>
+<a href="{% url 'orders' %}">
+    <button class="go">
+        <i class="fas fa-arrow-left"></i> GO BACK
+    </button>
+</a>
 <div class="container">
  
     
@@ -413,7 +438,7 @@
         
         <div class="order-actions">
             
-            <a href=""><button class="cancel-btn">CANCEL ITEM</button></a>
+            <a href=""><button class="cancel-btn">RETURN ITEM</button></a>
             <br>
             <button class="review-btn">ADD REVIEW</button> <!-- Updated Button -->
         </div>

@@ -232,7 +232,13 @@ def new_password(request):
 #========================= HOME SECTION ===========================#
 
 def home(request):
-    arrivals = Product.objects.filter(product_status = True).order_by('-id')[:3]
+    
+
+
+    arrivals = Product.objects.filter(
+    Q(product_status=True) & Q(variants__isnull=False)
+    ).distinct().order_by('-id')[:3]
+
     populars = Product.objects.filter(product_status = True)[:4]
     context = {
         'arrivals': arrivals,
@@ -248,8 +254,9 @@ def shop(request):
     selected_categories = request.POST.getlist('categories') if request.method == 'POST' else []
     selected_size = request.POST.getlist('size') if request.method == 'POST' else []
     price_order = request.POST.get('price_order') if request.method == 'POST' else None
-    products = Product.objects.filter(product_status=True)
-
+    products = Product.objects.filter(
+    Q(product_status=True) & Q(variants__isnull=False)
+    ).distinct()
     if selected_categories:
         products = products.filter(art_category__id__in=selected_categories)
 
@@ -506,15 +513,44 @@ def password_change(request):
 
 #========================== CART SECTION ======================#
 
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import Cart
+
 def cart(request):
     if not request.user.is_authenticated:
-        messages.info(request, "Please log in view Cart.")
+        messages.info(request, "Please log in to view Cart.")
         return redirect('login')
 
-    cart_items = Cart.objects.filter(user=request.user).order_by('-id')
+    cart_items = Cart.objects.filter(user=request.user, product__product_status=True).order_by('-id')
     is_empty = not cart_items.exists()
 
-    return render(request,'user/cart.html', {'cart_items': cart_items, 'is_empty': is_empty})
+    # Dictionary to store the calculated offer price for each cart item
+    cart_items_with_offer_price = []
+
+    for item in cart_items:
+        product = item.product
+        art_category = product.art_category
+
+        # Calculate the price with or without the offer
+        if art_category.art_type_offer:
+            # Apply the offer price (assuming it's a discount percentage)
+            offer_price = item.variant.price - (item.variant.price * art_category.art_type_offer / 100)
+        else:
+            # No offer, use the normal price
+            offer_price = item.variant.price
+
+        # Add the item with its calculated offer price to the list
+        cart_items_with_offer_price.append({
+            'item': item,
+            'offer_price': offer_price
+        })
+
+    # Pass the list of items with offer prices to the template
+    return render(request, 'user/cart.html', {
+        'cart_items_with_offer_price': cart_items_with_offer_price,
+        'is_empty': is_empty
+    })
 
 
 def add_cart(request,product_id, variant_id):
@@ -556,6 +592,8 @@ def checkout_og(request):
                 messages.error(request, "Quantity cannot be less than 1.")
                 return redirect('cart')
 
+            
+            
             if quantity > 10:
                 messages.error(request, "Purchase quantity cannot exceed 10.")
                 return redirect('cart')
@@ -564,7 +602,7 @@ def checkout_og(request):
                 messages.error(request, f"{variant.product.product_name} is Out of stock !")
                 return redirect('cart')
 
-            cart_item = get_object_or_404(Cart, user=request.user, variant_id=variant_id)
+            cart_item = get_object_or_404(Cart, user=request.user, variant_id=variant_id, product__product_status=True)
             cart_item.quantity = quantity
             cart_item.save()
 
@@ -647,7 +685,7 @@ def checkout(request):
     
     all_address = Address.objects.filter(user_id_id = request.user)
     total_price = request.session.get('total_price', 0)
-    cart_items=Cart.objects.filter(user=request.user)
+    cart_items=Cart.objects.filter(user=request.user, product__product_status=True)
     # Assuming `user` is the current user
     used_coupon_ids = Coupon_user.objects.filter(user=request.user).values_list('coupon_used_id', flat=True)
 
@@ -668,7 +706,7 @@ def checkout(request):
     return render(request,'user/checkout.html', context)
 
 def validate_stock(user):
-    cart_items = Cart.objects.filter(user=user)
+    cart_items = Cart.objects.filter(user=user,product__product_status=True)
     for item in cart_items:
         variant = get_object_or_404(Variant, id=item.variant_id)
 

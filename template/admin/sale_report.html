@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sales Report PDF</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        table, th, td { border: 1px solid black; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h2>Sales Report</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>User</th>
+                <th>Total Amount</th>
+                <th>Order Date</th>
+                <th>Delivery Date</th>
+                <th>Payment Method</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.user.username }}</td>
+                <td>₹{{ order.total_amount }}</td>
+                <td>{{ order.order_date|date:"d-m-Y" }}</td>
+                <td>{{ order.deliver_date }}</td>
+                <td>{{ order.payment_method }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

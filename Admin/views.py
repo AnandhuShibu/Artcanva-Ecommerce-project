@@ -276,6 +276,8 @@ def remove_coupon(request, coupon_id):
     return redirect('coupon')
 
 
+
+
 def edit_coupon(request):
     coupon_id = request.POST.get('categoryId')
     edit_coupon = request.POST.get('edit_coupon').strip()
@@ -383,10 +385,124 @@ def add_offer(request):
         return redirect('offer')
     return render(request, 'admin/offer.html')
 
+def remove_offer(request, offer_id):
+    # Get the offer object or return 404 if it doesn't exist
+    offer = get_object_or_404(Art, id=offer_id)
+    
+    # Delete the offer
+    offer.delete()
+    
+    # Redirect to the offers list or another relevant page
+    return redirect('offer')
 
+
+
+# def sales(request):
+
+#     return render(request, 'admin/sales.html')
+
+
+from datetime import datetime, timedelta
+from django.db.models import Sum
+from django.shortcuts import render
+from User.models import Order
 
 def sales(request):
+    # Get the date range and filter type from request parameters
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    filter_type = request.GET.get('status')
 
-    return render(request, 'admin/sales.html')
+    orders = Order.objects.all()
+
+    # Initialize variables for filtering dates
+    if filter_type == 'daily':
+        today = datetime.now().date()
+        start_date = today
+        end_date = today
+
+    elif filter_type == 'weekly':
+        today = datetime.now().date()
+        start_date = today - timedelta(days=today.weekday())  # Start of the week (Monday)
+        end_date = today + timedelta(days=(6 - today.weekday()))  # End of the week (Sunday)
+
+    elif filter_type == 'monthly':
+        today = datetime.now().date()
+        start_date = today.replace(day=1)  # Start of the month
+        end_date = (today.replace(day=1) + timedelta(days=32)).replace(day=1) - timedelta(days=1)  # End of the month
+
+    # Convert string dates to datetime if they are provided
+    if start_date and isinstance(start_date, str):
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+    if end_date and isinstance(end_date, str):
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+
+    # Filter by date if start and end dates are provided
+    if start_date and end_date:
+        orders = orders.filter(order_date__range=(start_date, end_date))
+
+    # Calculate overall metrics
+    overall_sales_count = orders.count()
+    overall_amount = orders.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
+
+    context = {
+        'orders': orders,
+        'overall_sales_count': overall_sales_count,
+        'overall_amount': overall_amount,
+    }
+
+    return render(request, 'admin/sales.html', context)
+
+
+
+from reportlab.lib.pagesizes import A4 # type: ignore
+from reportlab.pdfgen import canvas # type: ignore
+from django.http import HttpResponse
+from User.models import Order
+
+def export_pdf(request):
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="sales_report.pdf"'
+    
+    pdf = canvas.Canvas(response, pagesize=A4)
+    width, height = A4
+
+    # Fetch data from your model
+    orders = Order.objects.all()
+
+    # Add title and headers
+    pdf.setFont("Helvetica-Bold", 16)
+    pdf.drawString(100, height - 100, "Sales Report")
+    
+    pdf.setFont("Helvetica", 12)
+    y = height - 150
+    pdf.drawString(50, y, "Order ID")
+    pdf.drawString(150, y, "User Name")
+    pdf.drawString(250, y, "Total Amount")
+    pdf.drawString(350, y, "Ordered at")
+    pdf.drawString(450, y, "Delivered at")
+    pdf.drawString(550, y, "Payment Method")
+    
+    y -= 20
+    for order in orders:
+        pdf.drawString(50, y, str(order.id))
+        pdf.drawString(150, y, order.user.username)
+        pdf.drawString(250, y, f"₹{order.total_amount}")
+        pdf.drawString(350, y, order.order_date.strftime('%Y-%m-%d'))
+
+        # Check if deliver_date is None and handle it
+        if order.deliver_date:
+            pdf.drawString(450, y, order.deliver_date.strftime('%Y-%m-%d'))
+        else:
+            pdf.drawString(450, y, "Pending")  # Display "Pending" or leave it blank
+
+        pdf.drawString(550, y, order.payment_method)
+        y -= 20
+        if y < 40:
+            pdf.showPage()
+            y = height - 40
+
+    pdf.save()
+    return response
 
 

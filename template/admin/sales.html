@@ -58,8 +58,8 @@
         <div class="report-header mb-4">
             <h3>Sales Report</h3>
             <div class="export-buttons">
-                <a href="#" class="btn btn-secondary">Export as PDF</a>
-                <a href="#" class="btn btn-secondary">Export as Excel</a>
+                <a href="{% url 'export_pdf' %}" class="btn btn-secondary">Export as PDF</a>
+                <a href="{% url 'panel' %}" class="btn btn-secondary">Back to Dashboard</a>
             </div>
         </div>
 
@@ -67,12 +67,15 @@
         <form method="get" class="filter-section">
             <select class="form-control" name="status">
                 <option value="all">All</option>
-                <!-- Add other filter options here -->
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
             </select>
             <input type="date" class="form-control" name="start_date" placeholder="Start Date">
             <input type="date" class="form-control" name="end_date" placeholder="End Date">
             <button type="submit" class="btn btn-primary">Filter</button>
         </form>
+        
 
         <!-- Overall Statistics -->
         <div class="row mb-4">
@@ -114,7 +117,7 @@
                     <td>{{ order.id }}</td>
                     <td>{{ order.user.username }}</td> <!-- Assuming a related user model -->
                     <td>₹{{ order.total_amount }}</td>
-                    <td>{{ order.order_date }}</td>
+                    <td>{{ order.order_date|date:"d-m-Y" }}</td>
                     <td>{{ order.deliver_date }}</td>
                     <td>{{ order.payment_method }}</td>
                 </tr>

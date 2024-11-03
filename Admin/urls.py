@@ -24,7 +24,11 @@ urlpatterns = [
     path('change_order_status/<int:order_id>/', views.change_order_status, name='change_order_status'),
     path('add_coupon/', views.add_coupon, name='add_coupon'),
     path('remove_coupon/<int:coupon_id>', views.remove_coupon, name='remove_coupon'),
-   
+    path('remove_offer/<int:offer_id>', views.remove_offer, name='remove_offer'),
+
     
+    # path('sales_report/', views.sales_report, name='sales_report'),
+    path('sales_report/export_pdf/', views.export_pdf, name='export_pdf'),
+    # path('sales_report/export_excel/', views.export_excel, name='export_excel'),
 ]
 
