@@ -270,23 +270,26 @@
         <h4>Your wishlist is empty!</h4>
     </div>
 {% else %}
-    {% for item in page_obj %}
-        <div class="wishlist-item row" id="item1">
-            <div class="col-md-2">
-                <img src="{{ item.product.images1.url }}" alt="Product Image">
-            </div>
-            <div class="details col-md-7">
-                <h5>{{ item.product.product_name }}</h5>
-                <p>Frame size: {{ item.variant.frame_size }} inches</p>
-                <p>₹ {{ item.variant.price }}</p>
-                <p class="stock">IN STOCK</p>
-            </div>
-            <div class="actions col-md-3 text-right">
-                <a href="{% url 'add_cart_wishlist' item.product.id item.variant.id %}" class="btn btn-danger btn-sm add_cart-item">Add to Cart</a>
-                <a href="{% url 'remove_wishlist_item' item.variant.id %}" class="btn btn-danger btn-sm remove-item">Remove</a>
-            </div>
-        </div>
-    {% endfor %}
+{% for entry in page_obj %}
+<div class="wishlist-item row" id="item1">
+    <div class="col-md-2">
+        <img src="{{ entry.item.product.images1.url }}" alt="Product Image">
+    </div>
+    <div class="details col-md-7">
+        <h5>{{ entry.item.product.product_name }}</h5>
+        <p>Frame size: {{ entry.item.variant.frame_size }} inches</p>
+        
+        <!-- Display offer price -->
+        <p>₹ {{ entry.offer_price }}</p>
+        
+        <p class="stock">IN STOCK</p>
+    </div>
+    <div class="actions col-md-3 text-right">
+        <a href="{% url 'add_cart_wishlist' entry.item.product.id entry.item.variant.id %}" class="btn btn-danger btn-sm add_cart-item">Add to Cart</a>
+        <a href="{% url 'remove_wishlist_item' entry.item.variant.id %}" class="btn btn-danger btn-sm remove-item">Remove</a>
+    </div>
+</div>
+{% endfor %}
 
     <div class="pagination-container">
         <ul class="pagination">

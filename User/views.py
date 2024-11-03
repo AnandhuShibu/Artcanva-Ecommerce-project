@@ -592,8 +592,6 @@ def checkout_og(request):
                 messages.error(request, "Quantity cannot be less than 1.")
                 return redirect('cart')
 
-            
-            
             if quantity > 10:
                 messages.error(request, "Purchase quantity cannot exceed 10.")
                 return redirect('cart')
@@ -685,6 +683,8 @@ def checkout(request):
     
     all_address = Address.objects.filter(user_id_id = request.user)
     total_price = request.session.get('total_price', 0)
+
+    print('total after offer ',total_price )
     cart_items=Cart.objects.filter(user=request.user, product__product_status=True)
     # Assuming `user` is the current user
     used_coupon_ids = Coupon_user.objects.filter(user=request.user).values_list('coupon_used_id', flat=True)
@@ -783,6 +783,7 @@ def place_order(request):
         selected_address_id = request.POST.get('selected_address')
         # selected_address = Address.objects.get(id=selected_address_id)
         total_price = int(request.session.get('total_price', 0)) * 100  # Convert to paise
+        print('convert paise', total_price)
         coupon_discount_price = request.POST.get('final_price', None)
         ##getting selected coupon code
         selected_coupon_code = request.POST.get('selected_coupon_code', None) 
@@ -802,7 +803,7 @@ def place_order(request):
             final_amount = int(float(coupon_discount_price) * 100)  # Convert to paise
         else:
             final_amount = total_price
-
+        print('final', final_amount)
         # Validate if the selected address exists and belongs to the user
       # Ensure `selected_address_id` is valid
         if not selected_address_id:
@@ -951,8 +952,6 @@ def orders(request):
 def order_details(request, order_id):
     orders = get_object_or_404(Order, id=order_id)
     order_items=Order_details.objects.filter(order = orders)
-    quantity = request.POST.get('quantity')
-    print(quantity)
     return render(request, 'user/order_details.html', {'order_items':order_items, 'orders':orders})
 
 def order_placed(request):
@@ -998,35 +997,91 @@ def submit_review(request,product_id, order_id, variant_id):
 #==================== WISHLIST SECTION ================#
 
 
-def wishlist(request):
-    if not request.user.is_authenticated:
-        messages.info(request, "Please log in view wishlist.")
-        return redirect('login')
+# def wishlist(request):
+#     if not request.user.is_authenticated:
+#         messages.info(request, "Please log in view wishlist.")
+#         return redirect('login')
     
-    wishlist_items = Wishlist.objects.filter(user=request.user).order_by('-id')
+#     wishlist_items = Wishlist.objects.filter(user=request.user).order_by('-id')
 
-    paginator = Paginator(wishlist_items, 3)  # Show 10 items per page
-    page_number = request.GET.get('page')  # Get the current page number
-    page_obj = paginator.get_page(page_number)  # Get the corresponding page
+#     paginator = Paginator(wishlist_items, 3)  # Show 10 items per page
+#     page_number = request.GET.get('page')  # Get the current page number
+#     page_obj = paginator.get_page(page_number)  # Get the corresponding page
 
    
-    is_empty = not wishlist_items.exists()
-    return render(request,'user/wishlist.html', {'is_empty': is_empty, 'page_obj': page_obj})
+#     is_empty = not wishlist_items.exists()
+#     return render(request,'user/wishlist.html', {'is_empty': is_empty, 'page_obj': page_obj})
 
 
-def add_wishlist(request,product_id, variant_id):
+# def add_wishlist(request,product_id, variant_id):
+#     if not request.user.is_authenticated:
+#         messages.info(request, "Please log in to add items to your wishlist.")
+#         return redirect('login')
+    
+#     product_id = get_object_or_404(Product, id=product_id)
+#     variant_id = get_object_or_404(Variant,id = variant_id)
+#     wishlist_item_exists = Wishlist.objects.filter(user=request.user, variant=variant_id).exists()
+#     if wishlist_item_exists:
+#         messages.warning(request, "This item is already in your wishlist.")
+#         return redirect('shop')
+#     Wishlist.objects.create(product=product_id, user=request.user, variant=variant_id)
+#     return redirect('wishlist')
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from .models import Wishlist, Product, Variant
+
+def add_wishlist(request, product_id, variant_id):
     if not request.user.is_authenticated:
         messages.info(request, "Please log in to add items to your wishlist.")
         return redirect('login')
     
-    product_id = get_object_or_404(Product, id=product_id)
-    variant_id = get_object_or_404(Variant,id = variant_id)
-    wishlist_item_exists = Wishlist.objects.filter(user=request.user, variant=variant_id).exists()
+    product = get_object_or_404(Product, id=product_id)
+    variant = get_object_or_404(Variant, id=variant_id)
+    
+    wishlist_item_exists = Wishlist.objects.filter(user=request.user, variant=variant).exists()
     if wishlist_item_exists:
         messages.warning(request, "This item is already in your wishlist.")
         return redirect('shop')
-    Wishlist.objects.create(product=product_id, user=request.user, variant=variant_id)
+
+    Wishlist.objects.create(product=product, user=request.user, variant=variant)
     return redirect('wishlist')
+
+def wishlist(request):
+    if not request.user.is_authenticated:
+        messages.info(request, "Please log in to view your wishlist.")
+        return redirect('login')
+
+    wishlist_items = Wishlist.objects.filter(user=request.user)
+    is_empty = not wishlist_items.exists()
+    # Calculate offer prices for each item
+    wishlist_items_with_offer_price = []
+    for item in wishlist_items:
+        product = item.product
+        art_category = product.art_category
+
+        # Calculate price based on offer
+        if art_category.art_type_offer:
+            offer_price = item.variant.price - (item.variant.price * art_category.art_type_offer / 100)
+        else:
+            offer_price = item.variant.price
+
+        wishlist_items_with_offer_price.append({
+            'item': item,
+            'offer_price': offer_price
+        })
+    paginator = Paginator(wishlist_items_with_offer_price, 3)  # Show 10 items per page
+    page_number = request.GET.get('page')  # Get the current page number
+    page_obj = paginator.get_page(page_number)  # Get the corresponding page
+
+
+
+    return render(request, 'user/wishlist.html', {
+        'page_obj': page_obj,
+        'is_empty':is_empty
+    })
+
 
 
 def remove_wishlist_item(request, variant_id):

@@ -96,4 +96,3 @@ class Wallet_Transaction(models.Model):
     transaction_mode = models.CharField(max_length=50)
 
 
-    
