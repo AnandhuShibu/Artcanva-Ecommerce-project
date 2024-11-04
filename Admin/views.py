@@ -395,11 +395,18 @@ def sales(request):
     if start_date and end_date:
         orders = orders.filter(order_date__range=(start_date, end_date))
 
+
+
+    paginator = Paginator(orders, 4)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+
     overall_sales_count = orders.count()
     overall_amount = orders.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
 
     context = {
-        'orders': orders,
+        'page_obj': page_obj,
         'overall_sales_count': overall_sales_count,
         'overall_amount': overall_amount,
     }
@@ -461,9 +468,8 @@ from django.contrib import messages
 from User.models import Return
 
 def return_request(request):
-    return_items = Return.objects.filter(status = 'request').order_by('id')
+    return_items = Return.objects.all().order_by('id')
     return render(request, 'admin/return_request.html', {'return_items': return_items})
-
 
 
 def return_status(request):
@@ -477,5 +483,6 @@ def return_status(request):
             return_item.save()
             return redirect('return_request')
         
-    return_items = Return.objects.filter(status = 'request').order_by('id')
+    return_items = Return.objects.filter(status='request').order_by('id')
     return render(request, 'admin/return_request.html', {'return_items': return_items})
+

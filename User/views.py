@@ -448,6 +448,30 @@ def edit_address(request):
         district = request.POST.get('district')
         state = request.POST.get('state')
 
+        errors = []
+
+        if not fullname or len(fullname) < 3 or not fullname.replace(" ", "").isalpha():
+            errors.append("Fullname must be at least 3 characters long.")
+
+        if not fullname.replace(" ", "").isalpha():
+            errors.append("Fullname must contain only alphabets")
+
+        pattern = r"^[6-9]\d{9}$"
+
+        if not re.match(pattern, mobile):
+            errors.append("Please Enter Valid Phone Number")
+
+        if not pincode.isdigit() or len(pincode) != 6:
+            errors.append("Pincode must be a 6-digit number.")
+
+        if not address or len(address) < 5:
+            errors.append("Address must be at least 5 characters long.")
+
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+            return redirect('profile')
+
         if address_id:
             address_instance = get_object_or_404(Address, id=address_id)
             address_instance.fullname = fullname
@@ -943,6 +967,11 @@ def orders(request):
 
     return render(request, 'user/orders.html', context)
 
+
+
+
+
+
 def order_details(request, order_id):
     orders = get_object_or_404(Order, id=order_id)
     return_button = None
@@ -954,9 +983,9 @@ def order_details(request, order_id):
     order_items=Order_details.objects.filter(order = orders)
 
     # Retrieve accepted returns and convert to a list for easier handling in the template
-    accepted_returns = Return.objects.filter(variant__in=[item.variant for item in order_items], status='accepted')
+    accepted_returns = Return.objects.filter(variant__in=[item.variant for item in order_items], status='accepted', user=request.user)
     accepted_variant_ids = list(accepted_returns.values_list('variant_id', flat=True))
-
+    
     # Debugging output
     print('Accepted variant IDs:', accepted_variant_ids)
 
@@ -967,6 +996,47 @@ def order_details(request, order_id):
         'orders':orders
     }
     return render(request, 'user/order_details.html', context)
+
+
+
+
+
+
+def item_return(request,product_id, order_id, variant_id):
+    if request.method == 'POST':
+        reason = request.POST.get('reason')
+        request_value = request.POST.get('request')
+        product = get_object_or_404(Product, id=product_id)
+        variant = get_object_or_404(Variant, id=variant_id)
+        existing_return = Return.objects.filter(product=product, user=request.user, variant=variant).exists()
+
+        if existing_return:
+            messages.warning(request, 'You have already submitted a return request for this item.')
+            return redirect('order_details', order_id)  # Redirect back to the order details page
+        
+        if reason == 'damaged':
+            text = 'Damaged Product'
+        elif reason == 'wrong_item':
+            text = 'Wrong Item Sent'
+        elif reason == 'not_satisfied':
+            text = 'Not Satisfied with Product'
+        else:
+            text = 'Other'
+
+        Return.objects.create(
+            reason=text,
+            status=request_value,
+            product=product,
+            variant=variant,
+            user=request.user
+        )
+
+        messages.success(request, 'Your return request has been successfully sent')
+
+        return redirect('order_details',order_id)
+    
+
+
 
 
 
@@ -1152,38 +1222,7 @@ def order_cancel(request, order_id):
     return redirect('order_details',order_id=order_id)
 
 
-def item_return(request,product_id, order_id, variant_id):
-    if request.method == 'POST':
-        reason = request.POST.get('reason')
-        request_value = request.POST.get('request')
-        product = get_object_or_404(Product, id=product_id)
-        variant = get_object_or_404(Variant, id=variant_id)
-        existing_return = Return.objects.filter(product=product, user=request.user, variant=variant).exists()
 
-        if existing_return:
-            messages.warning(request, 'You have already submitted a return request for this item.')
-            return redirect('order_details', order_id)  # Redirect back to the order details page
-
-        if reason == 'damaged':
-            text = 'Damaged Product'
-        elif reason == 'wrong_item':
-            text = 'Wrong Item Sent'
-        elif reason == 'not_satisfied':
-            text = 'Not Satisfied with Product'
-        else:
-            text = 'Other'
-
-        Return.objects.create(
-            reason=text,
-            status=request_value,
-            product=product,
-            variant=variant,
-            user=request.user
-        )
-
-        messages.success(request, 'Your return request has been successfully sent')
-
-        return redirect('order_details',order_id)
     
 
 
