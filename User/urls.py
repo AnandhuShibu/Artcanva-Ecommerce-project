@@ -55,4 +55,6 @@ urlpatterns = [
     path('export-sales-report/', export_sales_report, name='export_sales_report'),
     path('submit-review/<int:order_id>/<int:product_id>/<int:variant_id>', submit_review, name='submit_review'),
     path('download-invoice/<int:order_id>/', views.download_invoice, name='download_invoice'),
+
+    path('item_return/<int:order_id>/<int:product_id>/<int:variant_id>', views.item_return, name='item_return')
     ]

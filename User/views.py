@@ -24,7 +24,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import check_password
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
-from . models import Order,Order_details, Review, Wishlist
+from . models import Order,Order_details, Review, Wishlist, Return
 from django.http import JsonResponse
 from django.db import transaction
 from django.conf import settings
@@ -935,13 +935,40 @@ def orders(request):
     paginator = Paginator(orders, 8)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj':page_obj,
+        'no_user_orders_found': no_user_orders_found
+    }
 
-    return render(request, 'user/orders.html', {'page_obj':page_obj, 'no_user_orders_found': no_user_orders_found})
+    return render(request, 'user/orders.html', context)
 
 def order_details(request, order_id):
     orders = get_object_or_404(Order, id=order_id)
+    return_button = None
+
+    if orders.status == 'Delivered':
+        return_button = 'delivered'
+
+
     order_items=Order_details.objects.filter(order = orders)
-    return render(request, 'user/order_details.html', {'order_items':order_items, 'orders':orders})
+
+    # Retrieve accepted returns and convert to a list for easier handling in the template
+    accepted_returns = Return.objects.filter(variant__in=[item.variant for item in order_items], status='accepted')
+    accepted_variant_ids = list(accepted_returns.values_list('variant_id', flat=True))
+
+    # Debugging output
+    print('Accepted variant IDs:', accepted_variant_ids)
+
+    context = {
+        'order_items':order_items,
+        'return_button': return_button,
+        'accepted_variant_ids': accepted_variant_ids,
+        'orders':orders
+    }
+    return render(request, 'user/order_details.html', context)
+
+
 
 def order_placed(request):
     return render(request, 'user/order_placed.html')
@@ -1123,6 +1150,42 @@ def order_cancel(request, order_id):
     order.save()
 
     return redirect('order_details',order_id=order_id)
+
+
+def item_return(request,product_id, order_id, variant_id):
+    if request.method == 'POST':
+        reason = request.POST.get('reason')
+        request_value = request.POST.get('request')
+        product = get_object_or_404(Product, id=product_id)
+        variant = get_object_or_404(Variant, id=variant_id)
+        existing_return = Return.objects.filter(product=product, user=request.user, variant=variant).exists()
+
+        if existing_return:
+            messages.warning(request, 'You have already submitted a return request for this item.')
+            return redirect('order_details', order_id)  # Redirect back to the order details page
+
+        if reason == 'damaged':
+            text = 'Damaged Product'
+        elif reason == 'wrong_item':
+            text = 'Wrong Item Sent'
+        elif reason == 'not_satisfied':
+            text = 'Not Satisfied with Product'
+        else:
+            text = 'Other'
+
+        Return.objects.create(
+            reason=text,
+            status=request_value,
+            product=product,
+            variant=variant,
+            user=request.user
+        )
+
+        messages.success(request, 'Your return request has been successfully sent')
+
+        return redirect('order_details',order_id)
+    
+
 
 #==================== SINGLE ORDER SECTION =================#
 
@@ -1312,6 +1375,7 @@ def download_invoice(request, order_id):
     
     except Order.DoesNotExist:
         return HttpResponse("Order not found.", status=404)
+
 
 
 

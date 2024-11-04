@@ -227,6 +227,24 @@
             .cancel-btn:hover{
                 background-color: #687289;
             }
+
+            
+
+            .return-btn  {
+                background-color: #DEAD6F;
+                color: black;
+                padding: 10px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 10px;
+            }
+
+            .return-btn:hover{
+                background-color: #DEAD6F;
+            }
+
+
             /* Modal Background */
             .modal {
                 display: none;
@@ -325,8 +343,34 @@
             .go:hover {
                 background-color: #45a049; /* Darker green on hover */
             }
-            
-            
+
+            .modal-content {
+                background-color: #fff;
+                margin: 15% auto;
+                padding: 25px 30px;
+                border-radius: 15px;
+                width: 400px;
+                max-width: 90%;
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+                text-align: center;
+                font-family: 'Roboto', sans-serif;
+            }
+   
+        
+    /* Dropdown Styling */
+.modal-content select{
+    width: 90%;
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    color: #333;
+    background-color: #f9f9f9;
+}
+
+
+
 
 /* Popup styles */
 .popup-message {
@@ -437,10 +481,18 @@
 
         
         <div class="order-actions">
-            
-            <a href=""><button class="cancel-btn">RETURN ITEM</button></a>
-            <br>
-            <button class="review-btn">ADD REVIEW</button> <!-- Updated Button -->
+            {% if return_button %}
+                {% if item.variant.id in accepted_variant_ids %}
+                    <button class="return-btn return-btn" disabled>RETURN ACCEPTED</button>
+                {% else %}
+                    <button class="return-btn return-btn">RETURN ITEM</button>
+                    <button class="review-btn">ADD REVIEW</button>
+                {% endif %}
+                <br>
+                
+            {% else %}
+                <h4>{{ orders.status }}</h4>
+            {% endif %}
         </div>
         <!-- Review Modal -->
 
@@ -457,7 +509,30 @@
             </div>
     </div>
     </form>
-        
+
+    <form id="returnForm" action="{% url 'item_return' orders.id item.product.id item.variant.id %}" method="POST">
+        {% csrf_token %}
+        <div id="returnModal" class="modal">
+            <div class="modal-content">
+                <span class="close-return-btn">&times;</span>
+                <h3>Return Item</h3>
+                <label for="reason">Reason</label>
+                <select name="reason" id="reason">
+                    <option value="" disabled selected>Select a reason</option>
+                    <option value="damaged">Damaged Product</option>
+                    <option value="wrong_item">Wrong Item Sent</option>
+                    <option value="not_satisfied">Not Satisfied with Product</option>
+                    <option value="other">Other</option>
+                </select>
+                <label for="request">Request</label>
+                <select name="request" id="request">
+                    <option value="" disabled selected>Select the request</option>
+                    <option value="request">Request</option>
+                </select>
+                <button type="submit" class="submit-btn">SUBMIT RETURN</button>
+            </div>
+        </div>
+    </form>   
     </div>
     {% endfor %}
 </div>
@@ -475,6 +550,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const closeModalButton = document.querySelector(".close-btn");
     const submitButton = document.getElementById("submitReview");
 
+    // Return modal elements
+    const returnModal = document.getElementById("returnModal");
+    const openReturnButtons = document.querySelectorAll(".return-btn");
+    const closeReturnButton = document.querySelector(".close-return-btn");
+
+
     // Open modal when any "ADD REVIEW" button is clicked
     openModalButtons.forEach(button => {
         button.onclick = () => {
@@ -485,6 +566,18 @@ document.addEventListener("DOMContentLoaded", () => {
     // Close modal when the close button is clicked
     closeModalButton.onclick = () => {
         modal.style.display = "none";
+    };
+
+    // Open return modal
+    openReturnButtons.forEach(button => {
+        button.onclick = () => {
+            returnModal.style.display = "block";
+        };
+    });
+
+    // Close return modal
+    closeReturnButton.onclick = () => {
+        returnModal.style.display = "none";
     };
 
     // Close modal when clicking outside of the modal content

@@ -96,3 +96,12 @@ class Wallet_Transaction(models.Model):
     transaction_mode = models.CharField(max_length=50)
 
 
+class Return(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='returns')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name='returns')
+    status = models.CharField(max_length=100, default='pending')
+    reason = models.CharField(max_length=200, default='Other')
+
+    def __str__(self):
+        return f"Return by {self.user} for {self.variant} - Status: {self.status} - Reason: {self.get_reason_display()}"

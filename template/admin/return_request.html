@@ -1,0 +1,238 @@
+{% extends "admin/sidebar.html" %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art Canva Dashboard</title>
+    <style>
+
+        main {
+            flex-grow: 1;
+            padding: 30px;
+            background-color: #f0f2f5;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .header input {
+            padding: 10px;
+            width: 250px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        .add-btn {
+            padding: 10px 20px;
+            background-color: #00b894;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-btn:hover {
+            background-color: #009970;
+        }
+
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0px 3px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .product-table th, .product-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .product-table th {
+            background-color: #f4f4f4;
+        }
+
+        .product-table td {
+            font-size: 15px;
+            color: #2d3436;
+        }
+
+        .product-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .action-btn {
+            padding: 5px 10px;
+            margin-right: 5px;
+            background-color: #0984e3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background-color: #006bb5;
+        }
+
+        .deactivate-btn {
+            padding: 5px 10px;
+            margin-right: 5px;
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .activate-btn {
+            padding: 5px 10px;
+            margin-right: 5px;
+            background-color: #46923c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn {
+            padding: 9px 10px;
+            margin-right: -7px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .pagination-container {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .pagination {
+            list-style: none;
+            padding: 0;
+            display: inline-block;
+        }
+        
+        .pagination li {
+            display: inline;
+            margin: 0 5px;
+        }
+        
+        .pagination a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        .pagination a:hover {
+            background-color: #007bff;
+            color: white;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <main>
+            <div class="header">
+                <h1>RETURN REQUESTS</h1>
+
+                <form method="GET" action="" class="d-flex justify-content-center">
+                    <input 
+                      class="form-control custom-search-input me-2 w-50" 
+                      type="search" 
+                      name="q" 
+                      placeholder="Search products..." 
+                      value="{{ search_query }}" 
+                      aria-label="Search">
+                    <button class="btn btn-outline-success custom-search-button" type="submit">Search</button>
+                  </form>
+
+            </div>
+            <table class="product-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>PRODUCT</th>
+                        <th>COUSTOMER NAME</th>
+                        <th>REASON</th>
+                        <th>STATUS</th>
+                        <th>ACTION</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <form action="{% url "return_status"  %}" method='POST'>
+                    {% csrf_token %}
+                    {% for item in return_items%}
+                    <tr>
+                        <td></td>
+                        <td>{{item.product.product_name}} </td>
+                        <td>{{item.user.username}} </td>
+                        <td>{{item.reason}}</td>
+                        <td>{{item.status}} </td>
+                        <td>
+                            <input type="hidden" name="return_id" value="{{ item.id }}"> <!-- Hidden input to store the item's ID -->
+                            <select name="accept">
+                                <option value="" disabled selected>Select</option>
+                                <option value="accepted">Accept</option>
+                            </select>
+                            <button type='submit'>SUBMIT</button>
+
+                           
+                        </td>
+                    </tr>
+                {% endfor %}
+            </form>
+                </tbody>
+            </table>
+            <div class="pagination-container">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li><a href="?page=1">&laquo; First</a></li>
+                        <li><a href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+                    <li class="current-page">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</li>
+                    {% if page_obj.has_next %}
+                        <li><a href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                        <li><a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+{% endblock %}

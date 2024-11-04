@@ -8,7 +8,7 @@ from variant_app.models import Variant
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from django.core.paginator import Paginator
-from User.models import Order,Order_details,Address
+from User.models import Order,Order_details,Address,Return
 from datetime import datetime, timedelta
 from django.db.models import Sum
 from reportlab.lib.pagesizes import A4 # type: ignore
@@ -456,3 +456,26 @@ def export_pdf(request):
     return response
 
 
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from User.models import Return
+
+def return_request(request):
+    return_items = Return.objects.filter(status = 'request').order_by('id')
+    return render(request, 'admin/return_request.html', {'return_items': return_items})
+
+
+
+def return_status(request):
+    if request.method == 'POST':
+        return_id = request.POST.get('return_id')  # ID of the return request
+        selected_status = request.POST.get('accept')  # Fetch the selected status
+        
+        if return_id and selected_status:
+            return_item = get_object_or_404(Return, id=return_id)
+            return_item.status = selected_status
+            return_item.save()
+            return redirect('return_request')
+        
+    return_items = Return.objects.filter(status = 'request').order_by('id')
+    return render(request, 'admin/return_request.html', {'return_items': return_items})
