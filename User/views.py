@@ -33,7 +33,10 @@ from decimal import Decimal
 
 
 
-#============= USER SIGNUP ============#
+
+
+
+#========================= USER SIGNUP =====================#
 
 
 def signup(request):
@@ -69,7 +72,7 @@ def signup(request):
 
 
 
-#=============== USER OTP SECTION =============#
+#=========================== USER OTP SECTION =========================#
 
 
 def create_otp(length=4):
@@ -526,10 +529,6 @@ def password_change(request):
 
 #========================== CART SECTION ======================#
 
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .models import Cart
-
 def cart(request):
     if not request.user.is_authenticated:
         messages.info(request, "Please log in to view Cart.")
@@ -538,28 +537,19 @@ def cart(request):
     cart_items = Cart.objects.filter(user=request.user, product__product_status=True).order_by('-id')
     is_empty = not cart_items.exists()
 
-    # Dictionary to store the calculated offer price for each cart item
     cart_items_with_offer_price = []
 
     for item in cart_items:
         product = item.product
         art_category = product.art_category
-
-        # Calculate the price with or without the offer
         if art_category.art_type_offer:
-            # Apply the offer price (assuming it's a discount percentage)
             offer_price = item.variant.price - (item.variant.price * art_category.art_type_offer / 100)
         else:
-            # No offer, use the normal price
             offer_price = item.variant.price
-
-        # Add the item with its calculated offer price to the list
         cart_items_with_offer_price.append({
             'item': item,
             'offer_price': offer_price
         })
-
-    # Pass the list of items with offer prices to the template
     return render(request, 'user/cart.html', {
         'cart_items_with_offer_price': cart_items_with_offer_price,
         'is_empty': is_empty
@@ -589,7 +579,6 @@ def remove_cart_item(request, variant_id):
 #========================== CHECK OUT SECTION ======================#
 
 def checkout_og(request):
-    print('CHECKOUT OG')              ########### print
     if request.method == 'POST':
         total_price = request.POST.get('total_price')
         quantities = {
@@ -616,9 +605,6 @@ def checkout_og(request):
             cart_item = get_object_or_404(Cart, user=request.user, variant_id=variant_id, product__product_status=True)
             cart_item.quantity = quantity
             cart_item.save()
-
-            print('SAVED QUANTITY:', quantity)  # Debugging output
-
         request.session['total_price'] = total_price
 
         return redirect('checkout')
@@ -630,10 +616,6 @@ def checkout(request):
     em = Cart.objects.filter(user = request.user)
     if not em:
         return redirect('home') 
-    print('cart:'  ,em)
-
-
-    print('CHECK OUT ENTERING')
 
     if not request.user.is_authenticated:
         messages.info(request, "PLEASE LOGIN.")
@@ -697,15 +679,9 @@ def checkout(request):
     all_address = Address.objects.filter(user_id_id = request.user)
     total_price = request.session.get('total_price', 0)
 
-    print('total after offer ',total_price )
     cart_items=Cart.objects.filter(user=request.user, product__product_status=True)
-    # Assuming `user` is the current user
     used_coupon_ids = Coupon_user.objects.filter(user=request.user).values_list('coupon_used_id', flat=True)
-
-    # Get only unused coupons for the specific user
     coupons = Coupons.objects.exclude(id__in=used_coupon_ids)
-
-    # coupons = Coupons.objects.all()
     wallet=Wallet.objects.get(user=request.user)
     wallet_balance=wallet.wallet_amount
     context = {
@@ -794,13 +770,10 @@ def place_order(request):
     if request.method == 'POST':
         payment_method = request.POST.get('payment_method')
         selected_address_id = request.POST.get('selected_address')
-        # selected_address = Address.objects.get(id=selected_address_id)
-        total_price = int(request.session.get('total_price', 0)) * 100  # Convert to paise
-        print('convert paise', total_price)
+        total_price = int(request.session.get('total_price', 0)) * 100  
         coupon_discount_price = request.POST.get('final_price', None)
         ##getting selected coupon code
         selected_coupon_code = request.POST.get('selected_coupon_code', None) 
-        print('HELLO firts : ',selected_coupon_code)
         coupon = None
         if selected_coupon_code:
             ##getting selected coupon ID
@@ -810,33 +783,26 @@ def place_order(request):
                 coupon_used = coupon
             )
         
-            print('HELLO : ',coupon)
-       
         if coupon_discount_price:
             final_amount = int(float(coupon_discount_price) * 100)  # Convert to paise
         else:
             final_amount = total_price
-        print('final', final_amount)
-        # Validate if the selected address exists and belongs to the user
-      # Ensure `selected_address_id` is valid
+
         if not selected_address_id:
             messages.error(request, "Please select a valid address.")
             return redirect('checkout')
         
-        # Validate if the selected address exists and belongs to the user
         try:
             selected_address = Address.objects.get(id=selected_address_id)
         except Address.DoesNotExist:
             messages.error(request, "The selected address is invalid or does not belong to you.")
             return redirect('checkout')
 
-        # Check stock before placing the order
         stock_error = validate_stock(request.user)
         if stock_error:
             messages.error(request, stock_error)
             return redirect('cart')
         
-
         if payment_method == 'COD':
             order = Order.objects.create(
                 user=request.user,
@@ -940,13 +906,8 @@ def place_order(request):
             return redirect('order_placed')
 
 
-
-
-# from django.http import HttpResponse
-
 def payment_success(request):
     payment_id = request.GET.get('payment_id')
-    # You can add logic here to update the order status or show a confirmation message
     return redirect('order_placed')
 
 
@@ -968,10 +929,6 @@ def orders(request):
     return render(request, 'user/orders.html', context)
 
 
-
-
-
-
 def order_details(request, order_id):
     orders = get_object_or_404(Order, id=order_id)
     return_button = None
@@ -979,16 +936,10 @@ def order_details(request, order_id):
     if orders.status == 'Delivered':
         return_button = 'delivered'
 
-
     order_items=Order_details.objects.filter(order = orders)
-
-    # Retrieve accepted returns and convert to a list for easier handling in the template
     accepted_returns = Return.objects.filter(variant__in=[item.variant for item in order_items], status='accepted', user=request.user)
     accepted_variant_ids = list(accepted_returns.values_list('variant_id', flat=True))
     
-    # Debugging output
-    print('Accepted variant IDs:', accepted_variant_ids)
-
     context = {
         'order_items':order_items,
         'return_button': return_button,
@@ -999,8 +950,7 @@ def order_details(request, order_id):
 
 
 
-
-
+#============================= RETURN SECTION =========================#
 
 def item_return(request,product_id, order_id, variant_id):
     if request.method == 'POST':
@@ -1036,22 +986,15 @@ def item_return(request,product_id, order_id, variant_id):
         return redirect('order_details',order_id)
     
 
-
-
-
-
 def order_placed(request):
     return render(request, 'user/order_placed.html')
 
 
-#================ RATINGS AND REVIEWS ==========#
+#======================== RATINGS AND REVIEWS =====================#
 
-from django.shortcuts import render, redirect
-from django.contrib import messages
 
 def submit_review(request,product_id, order_id, variant_id):
 
-    print('review called')
     if request.method == 'POST':
         rating = request.POST.get('rating')
         review_text = request.POST.get('reviewtext')
@@ -1065,58 +1008,13 @@ def submit_review(request,product_id, order_id, variant_id):
             variant=variant,
             user=request.user
         )
-
-        
-
-        # Here you can save the rating and review to your database
-        # For example, using a model named Review:
-        # Review.objects.create(rating=rating, review_text=review_text)
-
-        # Add a success message to be displayed
         messages.success(request, 'Thank you for your review!')
-
-        # Redirect to a success page or the product page
-        return redirect('order_details',order_id)  # Replace 'product_detail' with your desired URL name
+        return redirect('order_details',order_id)  
 
 
 
 #==================== WISHLIST SECTION ================#
 
-
-# def wishlist(request):
-#     if not request.user.is_authenticated:
-#         messages.info(request, "Please log in view wishlist.")
-#         return redirect('login')
-    
-#     wishlist_items = Wishlist.objects.filter(user=request.user).order_by('-id')
-
-#     paginator = Paginator(wishlist_items, 3)  # Show 10 items per page
-#     page_number = request.GET.get('page')  # Get the current page number
-#     page_obj = paginator.get_page(page_number)  # Get the corresponding page
-
-   
-#     is_empty = not wishlist_items.exists()
-#     return render(request,'user/wishlist.html', {'is_empty': is_empty, 'page_obj': page_obj})
-
-
-# def add_wishlist(request,product_id, variant_id):
-#     if not request.user.is_authenticated:
-#         messages.info(request, "Please log in to add items to your wishlist.")
-#         return redirect('login')
-    
-#     product_id = get_object_or_404(Product, id=product_id)
-#     variant_id = get_object_or_404(Variant,id = variant_id)
-#     wishlist_item_exists = Wishlist.objects.filter(user=request.user, variant=variant_id).exists()
-#     if wishlist_item_exists:
-#         messages.warning(request, "This item is already in your wishlist.")
-#         return redirect('shop')
-#     Wishlist.objects.create(product=product_id, user=request.user, variant=variant_id)
-#     return redirect('wishlist')
-
-
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from .models import Wishlist, Product, Variant
 
 def add_wishlist(request, product_id, variant_id):
     if not request.user.is_authenticated:
@@ -1141,13 +1039,11 @@ def wishlist(request):
 
     wishlist_items = Wishlist.objects.filter(user=request.user)
     is_empty = not wishlist_items.exists()
-    # Calculate offer prices for each item
     wishlist_items_with_offer_price = []
     for item in wishlist_items:
         product = item.product
         art_category = product.art_category
-
-        # Calculate price based on offer
+        
         if art_category.art_type_offer:
             offer_price = item.variant.price - (item.variant.price * art_category.art_type_offer / 100)
         else:
@@ -1157,11 +1053,9 @@ def wishlist(request):
             'item': item,
             'offer_price': offer_price
         })
-    paginator = Paginator(wishlist_items_with_offer_price, 3)  # Show 10 items per page
-    page_number = request.GET.get('page')  # Get the current page number
-    page_obj = paginator.get_page(page_number)  # Get the corresponding page
-
-
+    paginator = Paginator(wishlist_items_with_offer_price, 3) 
+    page_number = request.GET.get('page') 
+    page_obj = paginator.get_page(page_number)  
 
     return render(request, 'user/wishlist.html', {
         'page_obj': page_obj,
@@ -1171,7 +1065,6 @@ def wishlist(request):
 
 
 def remove_wishlist_item(request, variant_id):
-    print("hhhgh")
     wishlist_items = Wishlist.objects.get(variant=variant_id, user=request.user)
     wishlist_items.delete()    
     return redirect('wishlist')
@@ -1193,7 +1086,7 @@ def add_cart_wishlist(request,product_id, variant_id):
     return redirect('wishlist')
 
 
-#==================== ORDER CANCEL =================#
+#=========================== ORDER CANCEL =======================#
 
 def order_cancel(request, order_id):
     order = get_object_or_404(Order, id=order_id)
@@ -1221,9 +1114,6 @@ def order_cancel(request, order_id):
 
     return redirect('order_details',order_id=order_id)
 
-
-
-    
 
 
 #==================== SINGLE ORDER SECTION =================#
@@ -1259,34 +1149,27 @@ def order_cancel(request, order_id):
 
 
 
-#====================  SALES REPORT SECTION ===================#
+#========================  SALES REPORT SECTION ===================#
 
-from django.shortcuts import render
 from django.db.models import Sum, Count, Q
-from .models import Order
 
 def sales_report(request):
-    # Total Revenue (only successful payments)
     total_revenue = Order.objects.filter(payment_status='Success').aggregate(
         total_sales=Sum('total_amount')
     )['total_sales'] or 0
 
-    # Total Orders by Status
     orders_by_status = Order.objects.values('status').annotate(
         count=Count('id')
     ).order_by('status')
 
-    # Total Orders by Payment Status
     payment_status_count = Order.objects.values('payment_status').annotate(
         count=Count('id')
     ).order_by('payment_status')
 
-    # Orders placed in the current month
     from datetime import datetime
     current_month = datetime.now().month
     monthly_orders = Order.objects.filter(order_date__month=current_month).count()
 
-    # Orders with Coupons Applied
     coupon_usage = Order.objects.filter(coupon__isnull=False).count()
 
     context = {
@@ -1333,28 +1216,18 @@ from .models import Order, Order_details  # Import your models
 
 def download_invoice(request, order_id):
     try:
-        # Retrieve the order
         order = Order.objects.get(id=order_id)
-        
-        # Retrieve order items
         order_items = Order_details.objects.filter(order=order)
-
-        # Create PDF response
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="invoice_{order_id}.pdf"'
-        
-        # Create a SimpleDocTemplate
         pdf = SimpleDocTemplate(
             response,
             pagesize=A4,
-            title="Order invoice",  # Set your desired title here
-           
+            title="Order invoice", 
         )
         
-        # Create a list to hold the elements for the PDF
         elements = []
 
-        # Add the header
         styles = getSampleStyleSheet()
         header_style = ParagraphStyle(
             name='CenteredHeader',
@@ -1365,51 +1238,41 @@ def download_invoice(request, order_id):
         header = Paragraph("ORDER INVOICE", header_style)
         elements.append(header)
 
-        # Add space between header and table
         elements.append(Paragraph("<br/>", styles['Normal']))
         
-        # Create the data for the table
         table_data = [
             ["Product Name", "Quantity"],  # Table header
         ]
 
-        # Populate table data
         for item in order_items:
-            product_name = item.product.product_name  # Assuming `product` has a `name` field
+            product_name = item.product.product_name  
             quantity = item.quantity
             table_data.append([product_name, quantity])
         
-        # Define column widths (adjust as needed)
-        column_widths = [250, 150]  # Width for Product Name and Quantity
+        column_widths = [250, 150] 
         
         # Create the table with specified widths
         table = Table(table_data, colWidths=column_widths)
         table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),  # Header background color
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),  # Header text color
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),  # Center align all cells
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),  # Header font
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),  # Padding for header
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),  # Background for table data
-            ('GRID', (0, 0), (-1, -1), 1, colors.black),  # Grid lines
-            ('ROWHEIGHT', (0, 0), (-1, -1), 40),  # Set row height
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),  
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),  
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),  
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),  
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),  
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),  
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),  
+            ('ROWHEIGHT', (0, 0), (-1, -1), 40),  
         ]))
 
-        # Add the table to the elements
         elements.append(table)
-
-        # Add total amount
         elements.append(Paragraph(f"<br/>Total Amount: Rs {order.total_amount}", styles['Normal']))
 
         if order.coupon:
-            coupon_code = order.coupon.coupon_code  # Assuming Coupons model has a 'description' field
+            coupon_code = order.coupon.coupon_code 
             elements.append(Paragraph(f"<br/>Coupon Used: {coupon_code}", styles['Normal']))
-            elements.append(Paragraph(f"Coupon percentage: {order.coupon.percentage} % ", styles['Normal']))  # Assuming discount_amount is in Coupons model
+            elements.append(Paragraph(f"Coupon percentage: {order.coupon.percentage} % ", styles['Normal'])) 
 
-
-        # Build the PDF
         pdf.build(elements)
-        
         return response
     
     except Order.DoesNotExist:

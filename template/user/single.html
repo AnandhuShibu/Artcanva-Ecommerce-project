@@ -10,53 +10,50 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
+
         body{
             background-color:#ffffe4
-          }
-          /* Custom navbar height */
-          .navbar {
-            height: 80px; /* Adjust the height as needed */
-            
+        }
+  
+        .navbar {
+            height: 80px;
+        }
       
-          }
-      
-          .logo {
-            font-size: 1.8rem; /* Increase logo size */
-            color: #000000; /* Logo color */
-            font-weight: bold; /* Make the logo bold */
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-            letter-spacing: 1px; /* Increase letter spacing */
+        .logo {
+            font-size: 1.8rem; 
+            color: #000000; 
+            font-weight: bold; 
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); 
+            letter-spacing: 1px; 
             text-decoration: none;
         }
         
-          .navbar-nav .nav-link {
-            font-size: 1.3rem; /* Optional: Increase font size for links */
+        .navbar-nav .nav-link {
+            font-size: 1.3rem; 
             color:#000000
-          }
+        }
       
-      
-      
-          .navbar-nav .nav-item {
-            margin: 0 15px; /* Add horizontal margin between links */
+        .navbar-nav .nav-item {
+            margin: 0 15px; 
         }
         
         .navbar-nav .nav-link {
-            padding: 10px; /* Optional: Adjust padding for links */
+            padding: 10px; 
         }
         
-          .navbar-toggler {
-            padding: 0.5rem; /* Adjust padding for the toggler button */
-          }
+        .navbar-toggler {
+          padding: 0.5rem; 
+        }
 
-          .product-container {
-            display: flex;
-            justify-content: space-between;
-            padding: 30px;
-            margin: 30px auto;
-            background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            max-width: 1200px;
+        .product-container {
+          display: flex;
+          justify-content: space-between;
+          padding: 30px;
+          margin: 30px auto;
+          background-color: #fff;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          border-radius: 8px;
+          max-width: 1200px;
         }
 
         .product-images {
@@ -324,10 +321,10 @@
             font-family: Arial, sans-serif;
         }
         .popup-error {
-            background-color: #f44336; /* Red color for error */
+            background-color: #f44336; 
         }
         .popup-warning {
-            background-color: #ff9800; /* Orange color for warning */
+            background-color: #ff9800; 
         }
         .popup-show {
             top: 25px;
@@ -335,80 +332,79 @@
 
         .offer-percentage {
           position: absolute;
-          top: 15px; /* Adjust as needed */
-          left: 15px; /* Adjust as needed */
+          top: 15px; 
+          left: 15px; 
           background-color: rgba(255, 0, 0, 0.8);
           color: white;
           padding: 10px 15px;
-          border-radius: 10px; /* Rounded corners */
+          border-radius: 10px;
           font-weight: bold;
-          font-size: 1.2em; /* Slightly larger font */
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Shadow effect */
-          transition: transform 0.3s ease; /* Animation on hover */
-          z-index: 10; /* Ensure it appears above other elements */
+          font-size: 1.2em; 
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); 
+          transition: transform 0.3s ease; 
+          z-index: 10; 
       }
       
-      /* Animation effect */
       .offer-percentage:hover {
-          transform: scale(1.1); /* Slightly enlarge on hover */
+          transform: scale(1.1);
       }
 
       .price {
         font-size: 1.2em;
         display: flex;
         gap: 10px;
-    }
+      }
     
-    .original-price {
-      text-decoration: line-through;
-      color: #878787;
-      font-family: math;
-      margin-top: 6px;
-  }
-  
-    
-    .offer-price {
-      font-size: x-large;
-      color: #000000; /* Set to a green color */
-      font-weight: bold;
+      .original-price {
+        text-decoration: line-through;
+        color: #878787;
+        font-family: math;
+        margin-top: 6px;
     }
 
-    .original {
-      font-size: x-large;
-      color: #000000;
-      font-weight: bold;
-    }
+      
+      .offer-price {
+        font-size: x-large;
+        color: #000000; /* Set to a green color */
+        font-weight: bold;
+      }
 
-    
+      .original {
+        font-size: x-large;
+        color: #000000;
+        font-weight: bold;
+      }
 
-    #price {
-      margin-top: 11px;
-      margin-bottom: 1rem;
-      font-size: small;
-  }
-  .breadcrumb {
-    font-size: 14px;
-    color: #000000;
-    margin-top: 25px;
-    margin-bottom: 40px;
-    margin-left: 20px;
-  }
-  
-  .breadcrumb a {
-    text-decoration: none;
-    color: #000000;
-    margin-right: 10px;
-    margin-left: 10px;
-  }
-  
-  .breadcrumb a:hover {
-    text-decoration: underline;
-  }
-  
-  .breadcrumb span {
-    font-weight: bold;
-    color: #000;
-  }
+      
+
+      #price {
+        margin-top: 11px;
+        margin-bottom: 1rem;
+        font-size: small;
+      }
+      .breadcrumb {
+        font-size: 14px;
+        color: #000000;
+        margin-top: 25px;
+        margin-bottom: 40px;
+        margin-left: 20px;
+      }
+
+      .breadcrumb a {
+        text-decoration: none;
+        color: #000000;
+        margin-right: 10px;
+        margin-left: 10px;
+      }
+
+      .breadcrumb a:hover {
+        text-decoration: underline;
+      }
+
+      .breadcrumb span {
+        font-weight: bold;
+        color: #000;
+      }
       
     </style>
 
@@ -495,8 +491,6 @@
           <img src="{{ product.images3.url }}" alt="Thumbnail 2" onclick="changeImage(this)">
       </div>
   </div>
-
-    
     <div class="product-details">
         <h2 class="product-title">{{ product.product_name }}</h2>
         {% if offer_amount %}
@@ -510,9 +504,7 @@
         {% else %}
 
         <div class="price">
-          
           <span class="original">₹{{ variant_amount|floatformat:0 }}</span>
-
         </div>
 
         {% endif %}
@@ -531,9 +523,6 @@
         <div>
             <p></p>
         </div>
-
-        
-
         <div class="product-actions">
           {% if variant.stock == 0 %}
               <h3>OUT OF STOCK</h3>
@@ -587,15 +576,8 @@
         {% else %}
         <h5 id = "no">No reviews</h5>
         {% endif %}
-
-        
     </div>
-
-
 </div>
-
-
-
 
 <div class="related-products">
     <h3>Related Products</h3>
@@ -609,9 +591,6 @@
 
     </div>
 </div>
-
-
-
 
   <!-- Footer Section Start -->
 <footer class="bg-dark text-white mt-5 pt-4">

@@ -7,6 +7,7 @@
     <link rel="icon" href="static/images/arts.png" type="image/x-icon">
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
+
         body {
             background-color: #f8f9fa;
             font-family: Arial, sans-serif;
@@ -92,12 +93,9 @@
                     <th>Payment method</th>
                     <th>Status</th>
                     <th></th>
-                    
-                    
                 </tr>
             </thead>
             <tbody>
-
                 {% if no_user_orders_found %}
                     <tr>
                         <td colspan="6" class="text-center" style="text-align: center; color: red; font-weight: bold;">
@@ -105,18 +103,15 @@
                         </td>
                     </tr>
                 {% else %}
-
-               {% for order in page_obj %}
+                {% for order in page_obj %}
                 <tr>
                     <td>{{ order.id }}</td>
                     <td>₹ {{ order.total_amount }}</td>
                     <td>{{ order.order_date|date:"d-m-y"}}</td>
                     <td>{{ order.payment_method }}</td>
                     <td>{{ order.status }}</td>
-                    
                     <td><a href="{% url 'order_details' order.id %}">view</a></td>
                 </tr>
-
                 {% endfor %}
             </tbody>
             {% endif %}
@@ -136,12 +131,10 @@
                     <li><a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
                 {% endif %}
             </ul>
-            
         </div>
     </div>
     <a href="{% url 'home'%}">Go to Home Page</a> <br>
     <a href="{% url 'profile'%}">Go to Profile</a>
-
 </div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
