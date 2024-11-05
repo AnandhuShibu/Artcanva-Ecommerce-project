@@ -205,15 +205,19 @@
                         <td>{{item.status}} </td>
                         <td>
                             <input type="hidden" name="return_id" value="{{ item.id }}"> <!-- Hidden input to store the item's ID -->
-                            <select name="accept">
+                            {% if item.status != 'accepted' %}
+                                <select name="accept">
                                 <option value="" disabled selected>Select</option>
                                 <option value="accepted">Accept</option>
-                            </select>
-                            <button type='submit'>SUBMIT</button>
+                                </select>
+                                <button type='submit'>SUBMIT</button>
+                            {% else %}
+                                <span>Status Accepted</span>
+                            {% endif %}
                         </td>
                     </tr>
-                {% endfor %}
-            </form>
+                    {% endfor %}
+                    </form>
 
 
                 </tbody>

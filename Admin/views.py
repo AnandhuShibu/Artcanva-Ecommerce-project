@@ -8,7 +8,7 @@ from variant_app.models import Variant
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from django.core.paginator import Paginator
-from User.models import Order,Order_details,Address,Return
+from User.models import Order,Order_details,Address,Return,Wallet,Wallet_Transaction
 from datetime import datetime, timedelta
 from django.db.models import Sum,F
 from reportlab.lib.pagesizes import A4 # type: ignore
@@ -485,9 +485,17 @@ def return_status(request):
         return_id = request.POST.get('return_id')  # ID of the return request
         selected_status = request.POST.get('accept')  # Fetch the selected status
         
-        print('status', selected_status)
         if return_id and selected_status:
             return_item = get_object_or_404(Return, id=return_id)
+            if selected_status == 'accepted':
+                order_detail = get_object_or_404(Order_details, product=return_item.product, order__user=return_item.user)
+                amount_to_refund = order_detail.variant.price * order_detail.quantity 
+                
+                # Add amount to user's wallet
+                wallet, created = Wallet.objects.get_or_create(user=order_detail.order.user)
+                wallet.wallet_amount += amount_to_refund
+                wallet.save()
+
             return_item.status = selected_status
             return_item.save()
 
