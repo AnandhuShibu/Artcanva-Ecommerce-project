@@ -683,8 +683,12 @@ def checkout(request):
     cart_items=Cart.objects.filter(user=request.user, product__product_status=True)
     used_coupon_ids = Coupon_user.objects.filter(user=request.user).values_list('coupon_used_id', flat=True)
     coupons = Coupons.objects.exclude(id__in=used_coupon_ids)
-    wallet=Wallet.objects.get(user=request.user)
-    wallet_balance=wallet.wallet_amount
+    try:
+        wallet = Wallet.objects.get(user=request.user)
+        wallet_balance = wallet.wallet_amount if wallet.wallet_amount is not None and wallet.wallet_amount > 0 else 0
+    except Wallet.DoesNotExist:
+        wallet_balance = 0  # Set balance to 0 if wallet does not exist
+
     context = {
         'all_address': all_address,
         'total_price': total_price,
@@ -1099,17 +1103,17 @@ def order_cancel(request, order_id):
     order.status='Cancelled'
     order.save()
 
-    if order.payment_method in ['Razorpay', 'Wallets']:
-        wallet, created = Wallet.objects.get_or_create(user=request.user, defaults={'wallet_amount': 0})
-        wallet.wallet_amount += order.total_amount  # Increment the wallet amount
-        wallet.save()
+    # if order.payment_method in ['Razorpay', 'Wallets']:
+    #     wallet, created = Wallet.objects.get_or_create(user=request.user, defaults={'wallet_amount': 0})
+    #     wallet.wallet_amount += order.total_amount  # Increment the wallet amount
+    #     wallet.save()
       
-        trasanction = Wallet_Transaction.objects.create(
-            user = request.user,
-            transaction_amount = order.total_amount,
-            type = 'Credit',
-            transaction_mode = order.payment_method     
-        )
+        # trasanction = Wallet_Transaction.objects.create(
+        #     user = request.user,
+        #     transaction_amount = order.total_amount,
+        #     type = 'Credit',
+        #     transaction_mode = order.payment_method     
+        # )
    
     order.save()
 
