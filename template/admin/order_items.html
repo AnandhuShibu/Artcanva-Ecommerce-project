@@ -109,16 +109,23 @@
                             <option value="Pending" selected>Pending</option>
                             <option value="Shipped">Shipped</option>
                             <option value="Delivered">Delivered</option>
+
                         {% elif order_id.status == "Shipped" %}
                             <option value="Shipped" selected>Shipped</option>
                             <option value="Delivered">Delivered</option>
+                        {% elif order_id.status == "Cancelled" %}
+                            <option value="" selected disabled>Cancelled</option>
                         {% else %}
                             <option value="Delivered" selected>Delivered</option>
                         {% endif %}
                     </select>
                 </div>
                 <br>
+                {% if order_id.status == "Cancelled" %}
+                
+                {% else %}
                 <button type="submit">Update Status</button>
+                {% endif %}
                 <br>
             </form>
             <br>

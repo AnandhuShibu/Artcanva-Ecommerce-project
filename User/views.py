@@ -318,7 +318,7 @@ def single(request, product_id, variant_id):
     
     if offer_price > 1:
         offer_amount = variant_amount * (Decimal(1) - (Decimal(offer_price) / Decimal(100)))
-        print('LAST AMOUNT:', offer_amount)
+        
     else:
         print('LOWER')
 
@@ -528,6 +528,7 @@ def password_change(request):
 
 
 #========================== CART SECTION ======================#
+
 
 def cart(request):
     if not request.user.is_authenticated:

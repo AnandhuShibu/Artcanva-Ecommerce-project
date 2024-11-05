@@ -196,7 +196,7 @@
 
                     <form action="{% url "return_status"  %}" method='POST'>
                     {% csrf_token %}
-                    {% for item in return_items%}
+                    {% for item in page_obj%}
                     <tr>
                         <td></td>
                         <td>{{item.product.product_name}} </td>

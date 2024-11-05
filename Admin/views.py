@@ -10,10 +10,13 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from User.models import Order,Order_details,Address,Return
 from datetime import datetime, timedelta
-from django.db.models import Sum
+from django.db.models import Sum,F
 from reportlab.lib.pagesizes import A4 # type: ignore
 from reportlab.pdfgen import canvas # type: ignore
 from django.http import HttpResponse
+from coupon_app . models import Coupon_user, Coupons
+from django.utils import timezone
+from django.db.models.functions import Round
 
 
 
@@ -214,6 +217,7 @@ def all_orders(request):
     paginator = Paginator(orders, 8)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+    
 
     return render(request,'admin/orders.html', {'page_obj': page_obj})
 
@@ -237,6 +241,11 @@ def change_order_status(request, order_id):
         new_status = request.POST.get('order_status')
         order = get_object_or_404(Order, id=order_id)
         order.status = new_status
+
+        if new_status == 'Delivered':
+            order.deliver_date = timezone.now()
+        else:
+            order.deliver_date = None
         order.save()
         return redirect('order_items', order_id=order_id)
 
@@ -313,26 +322,18 @@ def add_coupon(request):
     return render(request, 'admin/coupons.html')
 
 
-def sale(request):
-    return render(request, 'admin/sale.html')
-
 
 #-------------------------- OFFER SECTION ------------------------#
 
 def offer(request):
-    offer = Art.objects.all()
-    paginator = Paginator(offer, 6)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-    return render(request, 'admin/offer.html', {'page_obj': page_obj})
-
+    offers = Art.objects.all()
+    
+    return render(request, 'admin/offer.html', {'offers': offers})
 
 def add_offer_page(request):
     if not request.user.is_authenticated or not request.user.is_superuser: 
         return redirect('login_admin')
     art = Art.objects.filter(art_type_status=True)
-
     context = {
         'arts': art
     }
@@ -366,11 +367,16 @@ def remove_offer(request, offer_id):
 
 #----------------------- SALES SECTION -------------------------#
 
+
+def sale(request):
+    return render(request, 'admin/sale.html')
+
+
 def sales(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
     filter_type = request.GET.get('status')
-    orders = Order.objects.all()
+    orders = Order.objects.filter(status = 'Delivered').order_by('-id')
 
     if filter_type == 'daily':
         today = datetime.now().date()
@@ -395,8 +401,6 @@ def sales(request):
     if start_date and end_date:
         orders = orders.filter(order_date__range=(start_date, end_date))
 
-
-
     paginator = Paginator(orders, 4)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -405,19 +409,20 @@ def sales(request):
     overall_sales_count = orders.count()
     overall_amount = orders.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
 
+   
+    overall_discount = (
+    orders.filter(coupon__isnull=False)
+    .annotate(discount_amount=Round(F('total_amount') * F('coupon__percentage') / 100, 2))
+    .aggregate(total_discount=Sum('discount_amount'))['total_discount'] or 0
+)
     context = {
         'page_obj': page_obj,
         'overall_sales_count': overall_sales_count,
         'overall_amount': overall_amount,
+        'overall_discount': overall_discount
     }
 
     return render(request, 'admin/sales.html', context)
-
-
-
-
-
-
 
 
 def export_pdf(request):
@@ -463,13 +468,16 @@ def export_pdf(request):
     return response
 
 
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from User.models import Return
+#----------------------  CHANGING RETURN STATUS --------------------#
 
 def return_request(request):
-    return_items = Return.objects.all().order_by('id')
-    return render(request, 'admin/return_request.html', {'return_items': return_items})
+    return_items = Return.objects.all().order_by('-id')
+
+    paginator = Paginator(return_items, 6)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'admin/return_request.html', {'page_obj': page_obj})
 
 
 def return_status(request):
@@ -477,12 +485,15 @@ def return_status(request):
         return_id = request.POST.get('return_id')  # ID of the return request
         selected_status = request.POST.get('accept')  # Fetch the selected status
         
+        print('status', selected_status)
         if return_id and selected_status:
             return_item = get_object_or_404(Return, id=return_id)
             return_item.status = selected_status
             return_item.save()
+
+            print('HELLO')
             return redirect('return_request')
         
-    return_items = Return.objects.filter(status='request').order_by('id')
+    return_items = Return.objects.filter(status='request').order_by('-id')
     return render(request, 'admin/return_request.html', {'return_items': return_items})
 
