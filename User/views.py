@@ -1,3 +1,4 @@
+from datetime import date
 import random
 import re
 import string
@@ -312,16 +313,18 @@ def single(request, product_id, variant_id):
     if request.user.is_authenticated:
         in_wishlist = Wishlist.objects.filter(user=request.user, variant=variant).exists()
 
-    offer_price = product.art_category.art_type_offer
+    offer_price = product.art_category.art_type_offer or 0
     variant_amount = variant.price
     offer_amount = None
-    
-    if offer_price > 1:
+    if offer_price > 0:
         offer_amount = variant_amount * (Decimal(1) - (Decimal(offer_price) / Decimal(100)))
         
     else:
-        print('LOWER')
+        offer_amount = 0
 
+    offer_display = f"{offer_price}% OFF" if offer_price > 0 else "0% OFF"
+
+    
     return render(request, 'user/single.html', {
         'product': product,
         'variant': variant,
@@ -331,7 +334,8 @@ def single(request, product_id, variant_id):
         'reviews': reviews,
         'related_product':related_product,
         'variant_amount': variant_amount,
-        'offer_amount': offer_amount
+        'offer_amount': offer_amount,
+        'offer_display': offer_display
     })
 
 
@@ -421,6 +425,7 @@ def profile(request):
     used_coupon_ids = Coupon_user.objects.filter(user=request.user).values_list('coupon_used_id', flat=True)
     for coupon in coupons:
         coupon.is_used = coupon.id in used_coupon_ids
+        coupon.is_expired = coupon.expiry_date < date.today() 
     no_coupon_found = not coupons.exists()
     wallet, created = Wallet.objects.get_or_create(user=request.user, defaults={'wallet_amount': 0})
     wallet_transaction = Wallet_Transaction.objects.filter(user=request.user).order_by('-id')
@@ -588,6 +593,8 @@ def checkout_og(request):
             if key.startswith('quantity_')
         }
 
+        
+
         for variant_id, quantity in quantities.items():
             variant = get_object_or_404(Variant, id=variant_id)
 
@@ -682,7 +689,9 @@ def checkout(request):
 
     cart_items=Cart.objects.filter(user=request.user, product__product_status=True)
     used_coupon_ids = Coupon_user.objects.filter(user=request.user).values_list('coupon_used_id', flat=True)
-    coupons = Coupons.objects.exclude(id__in=used_coupon_ids)
+    coupons = Coupons.objects.exclude(id__in=used_coupon_ids).filter(expiry_date__gte=date.today())
+    
+
     try:
         wallet = Wallet.objects.get(user=request.user)
         wallet_balance = wallet.wallet_amount if wallet.wallet_amount is not None and wallet.wallet_amount > 0 else 0
@@ -1102,18 +1111,19 @@ def order_cancel(request, order_id):
     
     order.status='Cancelled'
     order.save()
+    
 
-    # if order.payment_method in ['Razorpay', 'Wallets']:
-    #     wallet, created = Wallet.objects.get_or_create(user=request.user, defaults={'wallet_amount': 0})
-    #     wallet.wallet_amount += order.total_amount  # Increment the wallet amount
-    #     wallet.save()
+    if order.payment_method in ['Razorpay', 'Wallets']:
+        wallet, created = Wallet.objects.get_or_create(user=request.user, defaults={'wallet_amount': 0})
+        wallet.wallet_amount += order.total_amount  # Increment the wallet amount
+        wallet.save()
       
-        # trasanction = Wallet_Transaction.objects.create(
-        #     user = request.user,
-        #     transaction_amount = order.total_amount,
-        #     type = 'Credit',
-        #     transaction_mode = order.payment_method     
-        # )
+        trasanction = Wallet_Transaction.objects.create(
+            user = request.user,
+            transaction_amount = order.total_amount,
+            type = 'Credit',
+            transaction_mode = order.payment_method     
+        )
    
     order.save()
 

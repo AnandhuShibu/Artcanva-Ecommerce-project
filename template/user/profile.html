@@ -410,6 +410,7 @@
                   <th>PERCENTAGE %</th>
                   <th>EXPIRY DATE</th>
                   <th>COUPON STATUS</th>
+                  <th>COUPON EXPIRY STATUS</th>
               </tr>
           </thead>
           <tbody>
@@ -433,12 +434,19 @@
                         NOT USED
                     {% endif %}
                   </td>
+
+                  <td>
+                    {% if coupon.is_expired %}
+                        EXPIRED
+                    {% else %}
+                        NOT EXPIRED
+                    {% endif %}
+                </td>
+                
               </tr>
               {% endfor %}
             {% endif %}
-              
           </tbody>
-          
        </table>
       </div>
 

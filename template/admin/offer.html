@@ -324,7 +324,7 @@
                     <tr>
                         <td>{{offer.id}}</td>
                         <td>{{offer.art_type}}</td>
-                        <td>{{offer.art_type_offer}}<span>%</span></td>
+                        <td>{{offer.art_type_offer|default:"0"}}<span>%</span></td>
                         <td>
                             <a href="{% url 'remove_offer' offer.id %}"><button class="deactivate-btn">DELETE</button></a>
                         </td>

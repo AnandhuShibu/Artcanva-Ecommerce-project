@@ -373,7 +373,9 @@
                         <td>{{ product.paint_category.paint_type }}</td>
                         <td>
                             <a href="{% url 'variant' product.id %}"><button class="action-btn">View Variant</button></a>
+
                             <button class="action-btn edit_product">Edit Product</button>
+
                             {% if product.product_status %}
                             <a href="{% url 'product_status' product.id %}"><button class="deactivate-btn">Deactivate</button></a>
                             {% else %}
@@ -405,11 +407,11 @@
     </div>
 
     <!-- Edit Product Modal -->
-<div id="editproductModal" class="modal">
+{% comment %} <div id="editproductModal" class="modal">
     <div class="modal-content">
         <span class="close-edit">&times;</span>
         <h2>Edit Product</h2>
-        <form id="editProductForm" action="" method="POST">
+        <form id="editProductForm" action="{% url "edit_product" product.id %}" method="POST">
             {% csrf_token %}
             <input type="text" name="product_name" id="productNameInput" placeholder="Product Name" required>
             
@@ -430,10 +432,9 @@
             <button type="submit" class="modal-btn">Save Changes</button>
         </form>
     </div>
-</div>
+</div> {% endcomment %}
 
-<script>
-    
+{% comment %} <script>
     // JavaScript to handle modal functionality
     const editModal = document.getElementById("editproductModal");
     const editButtons = document.querySelectorAll(".edit_product");
@@ -449,9 +450,14 @@
             const artCategory = row.cells[3].textContent;
             const paintCategory = row.cells[4].textContent;
 
+            // Populate modal fields
             document.getElementById("productNameInput").value = productName;
-            document.getElementById("artTypeSelect").value = artCategory;
-            document.getElementById("paintTypeSelect").value = paintCategory;
+            document.getElementById("artTypeSelect").value = artCategory; // Ensure this corresponds to the art type ID in the DB
+            document.getElementById("paintTypeSelect").value = paintCategory; // Ensure this corresponds to the paint type ID in the DB
+
+            // Update the form's action to include the product ID for the update
+            //const form = document.getElementById("editProductForm");
+            //form.action =  `/edit_product/${productId}/`; // Add the product_id dynamically to the form action
         });
     });
 
@@ -464,7 +470,8 @@
             editModal.style.display = "none";
         }
     };
-</script>
+</script> {% endcomment %}
+
 </body>
 </html>
 {% endblock %}

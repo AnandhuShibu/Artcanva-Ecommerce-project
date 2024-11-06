@@ -482,11 +482,15 @@
       </div>
       
       <!-- Span to display the offer percentage -->
+
+      {% if offer_display != "0% OFF" %}
       <span class="offer-percentage" style="position: absolute; top: 20px; left: 20px; background-color: rgba(255, 0, 0, 0.7); color: white; padding: 5px; border-radius: 5px;">
-        {{ product.art_category.art_type_offer }}% OFF
+        {{ offer_display }}
       </span>
+      {% endif %}
   
       <div class="thumbnail-images">
+          <img src="{{ product.images1.url }}" alt="Thumbnail 1" onclick="changeImage(this)">
           <img src="{{ product.images2.url }}" alt="Thumbnail 1" onclick="changeImage(this)">
           <img src="{{ product.images3.url }}" alt="Thumbnail 2" onclick="changeImage(this)">
       </div>

@@ -330,7 +330,6 @@
                         <td>{{coupon.percentage}}<span>%</span></td>
                         <td>{{coupon.expiry_date}}</td>
                         <td>
-                            <button class="action-btn edit-btn">EDIT</button>
                             <a href="{% url 'remove_coupon' coupon.id %}"><button class="deactivate-btn">DELETE</button></a>
                     
                         </td>
@@ -365,8 +364,11 @@
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2>Add New Coupon</h2>
-            <input type="text" name='coupon_code' placeholder="Coupon code" required>
-            <input type="number" name='percentage' placeholder="Percentage" min="0" max="100" required>
+            <label for="">Coupon code</label>
+            <input type="text" name='coupon_code' required>
+            <label for="">Percentage</label>
+            <input type="number" name='percentage' min="1" max="100" required>
+            <label for="">Expiry date</label>
             <input type="date" name='expiry_date' required>
             <button type="submit" class="modal-btn">Submit</button>
         </div>

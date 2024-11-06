@@ -326,8 +326,9 @@ def add_coupon(request):
 #-------------------------- OFFER SECTION ------------------------#
 
 def offer(request):
-    offers = Art.objects.all()
-    
+
+    offers = Art.objects.filter(art_type_offer__gt=0)
+
     return render(request, 'admin/offer.html', {'offers': offers})
 
 def add_offer_page(request):
@@ -338,6 +339,7 @@ def add_offer_page(request):
         'arts': art
     }
     return render(request, 'admin/add_offer.html', context)
+
 
 def add_offer(request):
     if request.method == 'POST':
@@ -359,9 +361,11 @@ def add_offer(request):
         return redirect('offer')
     return render(request, 'admin/offer.html')
 
+
 def remove_offer(request, offer_id):
     offer = get_object_or_404(Art, id=offer_id)
-    offer.delete()
+    offer.art_type_offer = 0  # Set the offer percentage to 0%
+    offer.save()
     return redirect('offer')
 
 
