@@ -8,7 +8,7 @@ from variant_app.models import Variant
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from django.core.paginator import Paginator
-from User.models import Order,Order_details,Address,Return,Wallet,Wallet_Transaction
+from User.models import Order,Order_details,Address,Return,Wallet,Wallet_Transaction,OrderAddress
 from datetime import datetime, timedelta
 from django.db.models import Sum,F
 from reportlab.lib.pagesizes import A4 # type: ignore
@@ -95,6 +95,8 @@ def product(request):
     return render(request,'admin/product.html', context)
 
 
+
+    
 #------------------- USERS SECTION ----------------#
 
 def users(request):
@@ -226,7 +228,7 @@ def order_items(request,order_id):
     order_id = get_object_or_404(Order, id = order_id)
     total_amount=order_id.total_amount
     order_items=Order_details.objects.filter(order=order_id)
-    order_address=Address.objects.get(id=order_id.address.id)
+    order_address = get_object_or_404(OrderAddress, order=order_id)
 
     context={
         'order_items':order_items,

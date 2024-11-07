@@ -121,68 +121,7 @@
             text-color:#ffffff
         }
       
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
-            padding-top: 60px;
-        }
-
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 30%;
-            border-radius: 10px;
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .modal input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-
-        .modal-btn {
-            background-color: #00b894;
-            color: white;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            width: 100%;
-        }
-
-        .modal-btn:hover {
-            background-color: #009970;
-        }
-
-        .modal-content {
-            /* Your existing modal styles */
-        }
+        
         
         .input-field {
             width: 100%;
@@ -212,67 +151,6 @@
             border-color: #007bff;
         }
         
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px); /* Blur background */
-            transition: opacity 0.3s ease;
-        }
-
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 30px;
-            width: 40%;
-            border-radius: 12px;
-            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-            animation: fadeIn 0.5s ease;
-        }
-
-        .close-edit {
-            color: #aaa;
-            float: right;
-            font-size: 24px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .close-edit:hover {
-            color: black;
-        }
-
-        .modal input, .modal select {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            font-size: 16px;
-            background-color: #f8f8f8;
-        }
-
-        .modal-btn {
-            width: 100%;
-            padding: 12px;
-            background-color: #00b894;
-            color: white;
-            font-size: 18px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .modal-btn:hover {
-            background-color: #009970;
-        }
-
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -406,71 +284,7 @@
         </main>
     </div>
 
-    <!-- Edit Product Modal -->
-{% comment %} <div id="editproductModal" class="modal">
-    <div class="modal-content">
-        <span class="close-edit">&times;</span>
-        <h2>Edit Product</h2>
-        <form id="editProductForm" action="{% url "edit_product" product.id %}" method="POST">
-            {% csrf_token %}
-            <input type="text" name="product_name" id="productNameInput" placeholder="Product Name" required>
-            
-            <select name="art_type" id="artTypeSelect" class="input-field" required>
-                <option value="" disabled selected>Select Art Category</option>
-                {% for i in art %}
-                <option value="{{ i.art_type }}">{{ i.art_type }}</option>
-                {% endfor %}
-            </select>
-
-            <select name="paint_type" id="paintTypeSelect" class="input-field" required>
-                <option value="" disabled selected>Select Paint Category</option>
-                {% for i in paint %}
-                <option value="{{ i.paint_type }}">{{ i.paint_type }}</option>
-                {% endfor %}
-            </select>
-
-            <button type="submit" class="modal-btn">Save Changes</button>
-        </form>
-    </div>
-</div> {% endcomment %}
-
-{% comment %} <script>
-    // JavaScript to handle modal functionality
-    const editModal = document.getElementById("editproductModal");
-    const editButtons = document.querySelectorAll(".edit_product");
-    const closeEditModal = document.querySelector(".close-edit");
-
-    editButtons.forEach((btn) => {
-        btn.addEventListener("click", function () {
-            editModal.style.display = "block";
-
-            const row = btn.closest("tr");
-            const productId = row.cells[1].textContent;
-            const productName = row.cells[2].textContent;
-            const artCategory = row.cells[3].textContent;
-            const paintCategory = row.cells[4].textContent;
-
-            // Populate modal fields
-            document.getElementById("productNameInput").value = productName;
-            document.getElementById("artTypeSelect").value = artCategory; // Ensure this corresponds to the art type ID in the DB
-            document.getElementById("paintTypeSelect").value = paintCategory; // Ensure this corresponds to the paint type ID in the DB
-
-            // Update the form's action to include the product ID for the update
-            //const form = document.getElementById("editProductForm");
-            //form.action =  `/edit_product/${productId}/`; // Add the product_id dynamically to the form action
-        });
-    });
-
-    closeEditModal.onclick = function () {
-        editModal.style.display = "none";
-    };
-
-    window.onclick = function (event) {
-        if (event.target === editModal) {
-            editModal.style.display = "none";
-        }
-    };
-</script> {% endcomment %}
+   
 
 </body>
 </html>

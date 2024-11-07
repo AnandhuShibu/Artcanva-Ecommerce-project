@@ -17,7 +17,9 @@ class Address(models.Model):
 
     def __str__(self):
         return f"{self.fullname}, {self.city}, {self.district}, {self.district}"
-    
+
+
+
 
 class Cart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cart_items')
@@ -46,7 +48,6 @@ class Order(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
     order_date = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
-    address = models.ForeignKey(Address, on_delete=models.CASCADE)
     deliver_date = models.DateTimeField(null=True, blank= True)
     coupon = models.ForeignKey(Coupons, null=True, blank=True, on_delete=models.SET_NULL, related_name='orders')
     
@@ -65,6 +66,16 @@ class Order_details(models.Model):
     
     item_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
 
+
+class OrderAddress(models.Model):
+    fullname = models.CharField(max_length=50)
+    mobile = models.CharField(max_length=15) 
+    pincode = models.CharField(max_length=10) 
+    address = models.CharField(max_length=200)
+    city = models.CharField(max_length=50)
+    district = models.CharField(max_length=50)
+    state = models.CharField(max_length=50)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='orders')
 
 
 class Review(models.Model):

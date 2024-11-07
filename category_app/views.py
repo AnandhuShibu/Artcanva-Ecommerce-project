@@ -36,6 +36,10 @@ def add_art(request):
         if re.search(r'\d', art_type):
             messages.error(request, "Art type cannot contain numbers.")
             return redirect('art')
+
+        if not re.match(r'^[A-Za-z\s]+$', art_type):
+            messages.error(request, "Art type cannot contain special characters.")
+            return redirect('art')
       
         Art.objects.create(art_type=art_type)
         messages.success(request, "Art type added successfully!")
@@ -75,6 +79,11 @@ def add_paint(request):
         
         if re.search(r'\d', paint_type):
             messages.error(request, "Paint type cannot contain numbers.")
+            return redirect('paint')
+        
+
+        if not re.match(r'^[A-Za-z\s]+$', paint_type):
+            messages.error(request, "Paint type cannot contain special characters.")
             return redirect('paint')
 
         Paint.objects.create(paint_type = paint_type)
@@ -118,10 +127,34 @@ def edit_art(request):
         messages.error(request, "Art type cannot exceed 100 characters.")
         return redirect('art')
     
+    if re.search(r'\d', new_type):
+        messages.error(request, "Art type cannot contain numbers.")
+        return redirect('art')
+    
+    # Check for special characters (allow only letters and spaces)
+    if not re.match(r'^[A-Za-z\s]+$', new_type):
+        messages.error(request, "Art type cannot contain special characters.")
+        return redirect('art')
+    
+    # Duplicate and similarity check
+    new_type_lower = new_type.lower()
+    all_art_types = [a.art_type.lower() for a in Art.objects.exclude(id=art_id)]
+
+    if new_type_lower in all_art_types:
+        messages.error(request, "Art type already exists.")
+        return redirect('art')
+
+    for existing_type in all_art_types:
+        if new_type_lower in existing_type or existing_type in new_type_lower:
+            messages.error(request, f"Art type '{new_type}' is too similar to '{existing_type}'.")
+            return redirect('art')
+
+    
     art.art_type=new_type
     art.save()
     messages.success(request, "Success")
     return redirect('art')
+
 
 
 def edit_paint(request):
@@ -136,6 +169,22 @@ def edit_paint(request):
     if len(new_type) > 100:
         messages.error(request, "Paint type cannot exceed 100 characters.")
         return redirect('paint')
+    
+    if not re.match(r'^[A-Za-z\s]+$', new_type):
+            messages.error(request, "Paint type cannot contain special characters.")
+            return redirect('paint')
+    
+    new_type_lower = new_type.lower()
+    all_paint_types = [p.paint_type.lower() for p in Paint.objects.exclude(id=paint_id)]
+
+    if new_type_lower in all_paint_types:
+        messages.error(request, "Paint type already exists.")
+        return redirect('paint')
+
+    for existing_type in all_paint_types:
+        if new_type_lower in existing_type or existing_type in new_type_lower:
+            messages.error(request, f"Paint type '{new_type}' is too similar to '{existing_type}'.")
+            return redirect('paint')
     
     paint.paint_type=new_type
     paint.save()

@@ -7,6 +7,7 @@ urlpatterns = [
     path('',views.login_admin, name='login_admin'),
     path('panel/',views.panel, name='panel'),
     path('productadd',views.productadd, name='productadd'),
+  
     path('users/',views.users, name='users'),
     path('all_orders/',views.all_orders, name='all_orders'),
     path('order_items/<int:order_id>/',views.order_items, name='order_items'),
@@ -29,7 +30,6 @@ urlpatterns = [
     path('return_request/',views.return_request, name='return_request'),
     path('return_status/',views.return_status, name='return_status'),
    
-    
-    
+
 ]
 

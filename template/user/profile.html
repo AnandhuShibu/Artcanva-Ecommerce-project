@@ -304,7 +304,7 @@
       color: #2d3436;
   }
   </style>
-
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
   <div id="popup-message" class="popup-message"></div>
@@ -391,7 +391,11 @@
             <p>{{info.city}}, {{info.district}}, {{info.pincode}}, {{info.state}}</p>
             <p>Mobile : {{info.mobile}}</p>
             <button class="btn" onclick="openEditModal({{info.id}}, '{{info.fullname}}', '{{info.mobile}}', '{{info.pincode}}', '{{info.address}}', '{{info.city}}', '{{info.district}}', '{{info.state}}')">Edit</button>
-            <a href="{% url 'remove_address_profile' info.id %}"><button class="btn btn-sm btn-outline-danger">DELETE</button></a>
+
+            <a href="{% url 'remove_address_profile' info.id %}" onclick="return confirmDelete(event, this)">
+              <button class="btn btn-sm btn-outline-danger">DELETE</button>
+          </a>
+          
             
           </div>
         </div>
@@ -648,6 +652,28 @@
       {% endfor %}
   {% endif %}
   
+  </script>
+
+  <script>
+    function confirmDelete(event, element) {
+      event.preventDefault();  // Prevent the default link behavior
+      Swal.fire({
+        title: "Are you sure?",
+        text: "This action will permanently delete the Address!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!",
+        cancelButtonText: "Cancel"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Navigate to the URL if confirmed
+          window.location.href = element.href;
+        }
+      });
+      return false;  // Prevent the default link action
+    }
   </script>
 
 </body>

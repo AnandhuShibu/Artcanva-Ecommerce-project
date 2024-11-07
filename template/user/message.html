@@ -383,3 +383,74 @@ cart amount
 </html>
 
 <button type="submit" class="btn btn-danger w-100">Apply Filters</button>
+
+
+
+PRODUCT EDIT MODAL.
+
+
+ <!-- Edit Product Modal -->
+{% comment %} <div id="editproductModal" class="modal">
+    <div class="modal-content">
+        <span class="close-edit">&times;</span>
+        <h2>Edit Product</h2>
+        <form id="editProductForm" action="{% url "edit_product" product.id %}" method="POST">
+            {% csrf_token %}
+            <input type="text" name="product_name" id="productNameInput" placeholder="Product Name" required>
+            
+            <select name="art_type" id="artTypeSelect" class="input-field" required>
+                <option value="" disabled selected>Select Art Category</option>
+                {% for i in art %}
+                <option value="{{ i.art_type }}">{{ i.art_type }}</option>
+                {% endfor %}
+            </select>
+
+            <select name="paint_type" id="paintTypeSelect" class="input-field" required>
+                <option value="" disabled selected>Select Paint Category</option>
+                {% for i in paint %}
+                <option value="{{ i.paint_type }}">{{ i.paint_type }}</option>
+                {% endfor %}
+            </select>
+
+            <button type="submit" class="modal-btn">Save Changes</button>
+        </form>
+    </div>
+</div> {% endcomment %}
+
+{% comment %} <script>
+    // JavaScript to handle modal functionality
+    const editModal = document.getElementById("editproductModal");
+    const editButtons = document.querySelectorAll(".edit_product");
+    const closeEditModal = document.querySelector(".close-edit");
+
+    editButtons.forEach((btn) => {
+        btn.addEventListener("click", function () {
+            editModal.style.display = "block";
+
+            const row = btn.closest("tr");
+            const productId = row.cells[1].textContent;
+            const productName = row.cells[2].textContent;
+            const artCategory = row.cells[3].textContent;
+            const paintCategory = row.cells[4].textContent;
+
+            // Populate modal fields
+            document.getElementById("productNameInput").value = productName;
+            document.getElementById("artTypeSelect").value = artCategory; // Ensure this corresponds to the art type ID in the DB
+            document.getElementById("paintTypeSelect").value = paintCategory; // Ensure this corresponds to the paint type ID in the DB
+
+            // Update the form's action to include the product ID for the update
+            //const form = document.getElementById("editProductForm");
+            //form.action =  `/edit_product/${productId}/`; // Add the product_id dynamically to the form action
+        });
+    });
+
+    closeEditModal.onclick = function () {
+        editModal.style.display = "none";
+    };
+
+    window.onclick = function (event) {
+        if (event.target === editModal) {
+            editModal.style.display = "none";
+        }
+    };
+</script> {% endcomment %}

@@ -1,10 +1,12 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Art Canva - Order Details</title>
-    <link rel="icon" href="static/images/arts.png" type="image/x-icon">
+    <link rel="icon" href="{% static 'images/arts.png' %}" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <style>
         body {
@@ -413,7 +415,7 @@
 
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
@@ -449,25 +451,39 @@
     <div class="content-wrapper">
         <div class="delivery-address">
             <h2>Delivery Address</h2>
-            <p>{{orders.address.fullname}},</p>
-            <p>{{orders.address.address}},</p>
-            <p>Phone Number: {{orders.address.mobile}}</p>
-            <p>City : {{orders.address.city}}</p>
-            <p>District : {{orders.address.district}}</p>
-            <p>Pincode : {{orders.address.pincode}}</p>
-            <p>State : {{orders.address.state}}</p>
+            <p>{{order_address.fullname}},</p>
+            <p>{{order_address.address}},</p>
+            <p>Phone Number: {{order_address.mobile}}</p>
+            <p>City : {{order_address.city}}</p>
+            <p>District : {{order_address.district}}</p>
+            <p>Pincode : {{order_address.pincode}}</p>
+            <p>State : {{order_address.state}}</p>
         </div>
-        <h4 style="padding-left: 50px;"> TOTAL AMOUNT: ₹{{orders.total_amount}}</h4>
-        <br>
+
+
+        <div class="order-summary" style="padding-left: 50px;">
+            <h3 style="margin-bottom: 10px;">TOTAL AMOUNT: ₹{{orders.total_amount}}</h3>
+            
+            <br>
+            <!-- Show coupon code only if it exists -->
+            {% if orders.coupon %}
+                <h5 style="margin-top: 0;margin-bottom: 9px;">Coupon Code: {{orders.coupon.coupon_code}}</h5>
+                <h5 style="margin-top: 0;">Coupon Percentage: {{orders.coupon.percentage}}%</h5>
+            {% endif %}
+        </div>
+        
+
+
         <div class="cancel">
             {% if orders.status == 'Cancelled' %}
                 <button class="cancel-btn" disabled style="background-color: gray; cursor: not-allowed;">
                     ORDER CANCELLED
                 </button>
             {% else %}
-                <a href="{% url 'order_cancel' orders.id %}">
-                    <button class="cancel-btn">CANCEL ORDER</button>
-                </a>
+            <a href="{% url 'order_cancel' orders.id %}" onclick="return confirmCancelOrder(event, this)">
+                <button class="cancel-btn">CANCEL ORDER</button>
+            </a>
+            
                 <button class="download-invoice-btn" onclick="downloadInvoice()">DOWNLOAD INVOICE</button>
             {% endif %}
         </div>
@@ -622,6 +638,28 @@ function downloadInvoice() {
         {% endfor %}
     {% endif %}
 </script>
+
+<script>
+    function confirmCancelOrder(event, element) {
+      event.preventDefault();  // Prevent the default link behavior
+      Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to cancel this order?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!",
+        cancelButtonText: "Cancel"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Navigate to the URL if confirmed
+          window.location.href = element.href;
+        }
+      });
+      return false;  // Prevent the default link action
+    }
+  </script>
 
 
 </body>

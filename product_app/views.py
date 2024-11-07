@@ -19,6 +19,18 @@ def add_product(request):
         image2 = request.FILES.get('image2')
         image3 = request.FILES.get('image3')
 
+        if Product.objects.filter(product_name=product_name).exists():
+            messages.error(request, 'A product with this name already exists.')
+            return redirect('productadd')
+        
+        if not paint_type:
+            messages.error(request, 'Please select a paint type.')
+            return redirect('add_product')
+        
+        if not category_name:
+            messages.error(request, 'Please select a category.')
+            return redirect('add_product')
+
         def validate_image(file):
             valid_mime_types = ['image/jpeg', 'image/png', 'image/gif']
             if file and file.content_type not in valid_mime_types:

@@ -273,6 +273,7 @@
         }
 
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <div class="container">
@@ -330,7 +331,11 @@
                         <td>{{coupon.percentage}}<span>%</span></td>
                         <td>{{coupon.expiry_date}}</td>
                         <td>
-                            <a href="{% url 'remove_coupon' coupon.id %}"><button class="deactivate-btn">DELETE</button></a>
+
+
+                            
+
+                            <a href="{% url 'remove_coupon' coupon.id %}" onclick="return confirmDelete(event, this)" ><button class="deactivate-btn">DELETE</button></a>
                     
                         </td>
                     </tr>
@@ -375,21 +380,7 @@
     </form>
     </div>
     
-    <form action="{% url 'edit_art' %}" method = 'POST'>
-    {% csrf_token %}
-    <div id="editCouponModal" class="modal">
-        <div class="modal-content">
-            <span class="close-edit">&times;</span>
-            <h2>Edit Art</h2>
-            <input type="hidden" id="editCategoryId" name="categoryId">
-            <input id="coupon_code" name="edit_coupon" type="text" placeholder="" required>
-            <input id="editArtType" name="percentage" type="text" placeholder="Type of Art" required>
-            <input id="editArtType" name="art_type" type="text" placeholder="Type of Art" required>
-
-            <button type="submit" class="modal-btn">Save Changes</button>
-        </div>
-    </div>
-    </form>
+    
     
     <script>
         // Add Art Modal
@@ -411,7 +402,7 @@
             }
         }
 
-        // Edit Art Modal
+        {% comment %} // Edit Art Modal
         var editModal = document.getElementById("editCouponModal");
         var editButtons = document.querySelectorAll(".edit-btn");
         var closeEditModal = document.getElementsByClassName("close-edit")[0];
@@ -427,9 +418,9 @@
                 document.getElementById("editCategoryId").value = categoryId;
                 document.getElementById("coupon_code").value = editCoupon;
             });
-        });
+        }); {% endcomment %}
 
-        closeEditModal.onclick = function() {
+        {% comment %} closeEditModal.onclick = function() {
             editModal.style.display = "none";
         }
 
@@ -437,8 +428,32 @@
             if (event.target == editModal) {
                 editModal.style.display = "none";
             }
-        }
+        } {% endcomment %}
     </script>
+
+
+    <script>
+        function confirmDelete(event, element) {
+          event.preventDefault();  // Prevent the default link behavior
+          Swal.fire({
+            title: "Are you sure?",
+            text: "This action will permanently delete the coupon!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!",
+            cancelButtonText: "Cancel"
+          }).then((result) => {
+            if (result.isConfirmed) {
+              // Navigate to the URL if confirmed
+              window.location.href = element.href;
+            }
+          });
+          return false;  // Prevent the default link action
+        }
+      </script>
+
 </body>
 </html>
 {% endblock %}

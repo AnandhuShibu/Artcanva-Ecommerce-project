@@ -75,9 +75,26 @@
         .dropdown select {
             padding: 10px;
             border-radius: 5px;
-            border: 1px solid #ddd;
+            border: 2px solid #000000;
             background-color: #fff;
+            padding-right: 58px;
         }
+
+        button[type="submit"] {
+            background-color: #4CAF50; /* Green background */
+            color: white; /* White text */
+            border: none; /* Remove borders */
+            padding: 12px 24px; /* Some padding */
+            font-size: 16px; /* Increase font size */
+            cursor: pointer; /* Pointer/hand icon */
+            border-radius: 8px; /* Rounded corners */
+            transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+        }
+        
+        button[type="submit"]:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+        
     </style>
 </head>
 
@@ -98,7 +115,7 @@
                 <p>{{ total_amount }}</p>
             </div>
         </div>
-        <h1>{{ order_id.status }}</h1>
+        <h1>{{ order_id.status|upper }}</h1>
         <div class="dropdown-container">
 
             <form method="POST" action="{% url 'change_order_status' order_id.id %}">

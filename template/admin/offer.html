@@ -271,25 +271,16 @@
             font-size: 14px;
             transition: background-color 0.3s ease;
         }
+      
 
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <div class="container">
         <main>
             <div class="header">
                 <h1>OFFERS</h1>
-                <form method="GET" action="{% url 'coupon' %}" class="d-flex justify-content-center">
-                    <input 
-                      class="form-control custom-search-input me-2 w-50" 
-                      type="search" 
-                      name="q" 
-                      placeholder="Search products..." 
-                      value="{{ search_query }}" 
-                      aria-label="Search"
-                    >
-                    <button class="btn btn-outline-success custom-search-button" type="submit">Search</button>
-                  </form>
                 <a href="{% url 'add_offer_page' %}"><button  class="add-btn">ADD NEW OFFER</button></a>
             </div>
 
@@ -326,7 +317,9 @@
                         <td>{{offer.art_type}}</td>
                         <td>{{offer.art_type_offer|default:"0"}}<span>%</span></td>
                         <td>
-                            <a href="{% url 'remove_offer' offer.id %}"><button class="deactivate-btn">DELETE</button></a>
+                            <a href="{% url 'remove_offer' offer.id %}" onclick="return confirmDelete(event, this)">
+                                <button class="deactivate-btn">DELETE</button>
+                            </a>
                         </td>
                     </tr>
                     {% endfor %}
@@ -365,6 +358,16 @@
         </div>
     </div>
     </form>
+
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <h2>Confirm Deletion</h2>
+            <p>Are you sure you want to delete this offer?</p>
+            <button id="confirmDeleteBtn" class="modal-btn">Yes, Delete</button>
+            <button id="cancelDeleteBtn" class="modal-btn cancel-btn">Cancel</button>
+        </div>
+    </div>
+    
 
     
     <script>
@@ -415,6 +418,30 @@
             }
         }
     </script>
+
+
+    
+    <script>
+        function confirmDelete(event, element) {
+          event.preventDefault();  // Prevent the default link behavior
+          Swal.fire({
+            title: "Are you sure?",
+            text: "This action will permanently delete the offer!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!",
+            cancelButtonText: "Cancel"
+          }).then((result) => {
+            if (result.isConfirmed) {
+              // Navigate to the URL if confirmed
+              window.location.href = element.href;
+            }
+          });
+          return false;  // Prevent the default link action
+        }
+      </script>
 </body>
 </html>
 {% endblock %}

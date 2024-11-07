@@ -29,7 +29,7 @@ from . models import Order,Order_details, Review, Wishlist, Return
 from django.http import JsonResponse
 from django.db import transaction
 from django.conf import settings
-from .models import Cart, Address, Order, Order_details, Wallet, Wallet_Transaction
+from .models import Cart, Address, Order, Order_details, Wallet, Wallet_Transaction, OrderAddress
 from decimal import Decimal
 
 
@@ -822,8 +822,18 @@ def place_order(request):
                 user=request.user,
                 total_amount=final_amount / 100,
                 payment_method=payment_method,
-                address=selected_address,
                 coupon = coupon
+            )
+
+            OrderAddress.objects.create(
+                order=order,
+                fullname=selected_address.fullname,
+                mobile=selected_address.mobile,
+                pincode=selected_address.pincode,
+                address=selected_address.address,
+                district=selected_address.district,
+                city=selected_address.city,
+                state=selected_address.state
             )
 
             for item in cart_items:
@@ -846,8 +856,19 @@ def place_order(request):
                 user=request.user,
                 total_amount=final_amount / 100, 
                 payment_method=payment_method,
-                address=selected_address,
+                
                 coupon = coupon
+            )
+
+            OrderAddress.objects.create(
+                order=order,
+                fullname=selected_address.fullname,
+                mobile=selected_address.mobile,
+                pincode=selected_address.pincode,
+                address=selected_address.address,
+                district=selected_address.district,
+                city=selected_address.city,
+                state=selected_address.state
             )
 
             # Save order details
@@ -887,8 +908,19 @@ def place_order(request):
                 user=request.user,
                 total_amount=final_amount / 100,
                 payment_method=payment_method,
-                address=selected_address,
+                
                 coupon = coupon
+            )
+            
+            OrderAddress.objects.create(
+                order=order,
+                fullname=selected_address.fullname,
+                mobile=selected_address.mobile,
+                pincode=selected_address.pincode,
+                address=selected_address.address,
+                district=selected_address.district,
+                city=selected_address.city,
+                state=selected_address.state
             )
 
             for item in cart_items:
@@ -946,6 +978,20 @@ def orders(request):
 def order_details(request, order_id):
     orders = get_object_or_404(Order, id=order_id)
     return_button = None
+    order_address = get_object_or_404(OrderAddress, order=order_id)
+    
+    if orders.coupon:
+            coupon_code = orders.coupon.coupon_code 
+
+            print('code', coupon_code)
+            print('percentage', orders.coupon.percentage )
+        #     elements.append(Paragraph(f"<br/>Coupon Used: {coupon_code}", styles['Normal']))
+        #     elements.append(Paragraph(f"Coupon percentage: {order.coupon.percentage} % ", styles['Normal'])) 
+
+    else:
+        print("NO COUPON")
+        #     elements.append(Paragraph(f"<br/>Coupon Used: No coupon Used", styles['Normal']))
+    
 
     if orders.status == 'Delivered':
         return_button = 'delivered'
@@ -958,7 +1004,8 @@ def order_details(request, order_id):
         'order_items':order_items,
         'return_button': return_button,
         'accepted_variant_ids': accepted_variant_ids,
-        'orders':orders
+        'orders':orders,
+        'order_address': order_address
     }
     return render(request, 'user/order_details.html', context)
 
@@ -1110,7 +1157,18 @@ def order_cancel(request, order_id):
         return redirect('order_details', order_id=order_id)
     
     order.status='Cancelled'
+
+    order_details = Order_details.objects.filter(order=order)
+    
+    for detail in order_details:
+        variant = detail.variant
+        variant.stock += detail.quantity  # Increase the stock by the quantity in the order
+        variant.save()  # Save the updated stock value
+
+    # Update the order status in the database
     order.save()
+    
+
     
 
     if order.payment_method in ['Razorpay', 'Wallets']:
@@ -1247,10 +1305,11 @@ def download_invoice(request, order_id):
         header_style = ParagraphStyle(
             name='CenteredHeader',
             fontSize=20,
-            alignment=1,  # Center alignment
-            spaceAfter=12  # Space after the header
+            alignment=1,  
+            spaceAfter=12  
         )
-        header = Paragraph("ORDER INVOICE", header_style)
+        
+        header = Paragraph("ARTCANVA ORDER INVOICE", header_style)
         elements.append(header)
 
         elements.append(Paragraph("<br/>", styles['Normal']))
@@ -1282,10 +1341,33 @@ def download_invoice(request, order_id):
         elements.append(table)
         elements.append(Paragraph(f"<br/>Total Amount: Rs {order.total_amount}", styles['Normal']))
 
+        
         if order.coupon:
             coupon_code = order.coupon.coupon_code 
             elements.append(Paragraph(f"<br/>Coupon Used: {coupon_code}", styles['Normal']))
             elements.append(Paragraph(f"Coupon percentage: {order.coupon.percentage} % ", styles['Normal'])) 
+
+        else:
+            elements.append(Paragraph(f"<br/>Coupon Used: No coupon Used", styles['Normal']))
+        
+        order_address = get_object_or_404(OrderAddress, order=order_id)
+
+        custom_style = ParagraphStyle('CustomStyle',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold', 
+        fontSize=14, 
+        textColor='black',  
+        spaceAfter=12, 
+        alignment=1,  
+        )
+        elements.append(Paragraph(f"<br/>Ordered Address", custom_style))
+        elements.append(Paragraph(f"<br/>Name: {order_address.fullname}", styles['Normal']))
+        elements.append(Paragraph(f"<br/>Address: {order_address.address}", styles['Normal']))
+        elements.append(Paragraph(f"<br/>Phone Number: {order_address.mobile}", styles['Normal']))
+        elements.append(Paragraph(f"<br/>City: {order_address.city}", styles['Normal']))
+        elements.append(Paragraph(f"<br/>District: {order_address.district}", styles['Normal']))
+        elements.append(Paragraph(f"<br/>Pincode: {order_address.pincode}", styles['Normal']))
+        elements.append(Paragraph(f"<br/>State: {order_address.state}", styles['Normal']))
 
         pdf.build(elements)
         return response
