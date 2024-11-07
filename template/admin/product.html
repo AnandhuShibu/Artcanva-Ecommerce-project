@@ -189,7 +189,7 @@
         }
         .btn {
             padding: 9px 10px;
-            margin-right: -7px;
+            margin-right: 4px;
             background-color: #007bff;
             color: white;
             border: none;
@@ -199,10 +199,56 @@
             transition: background-color 0.3s ease;
         }
 
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+            max-width: 80%;
+        }
+
+        .popup-message {
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #FFDE21; /* Green color for success */
+            color: #000000;
+            padding: 20px 35px;
+            border-radius: 6px;
+            z-index: 1000;
+            transition: top 0.5s ease-in-out;
+            box-shadow: 0 5px 7px rgba(0, 0, 0, 0.1);
+            font-family: Arial, sans-serif;
+        }
+        .popup-error {
+            background-color: #f44336; /* Red color for error */
+        }
+        .popup-success {
+            background-color: #00ab41; /* Red color for error */
+        }
+
+        .popup-show {
+            top: 25px;
+        }
+
     </style>
 </head>
 <body>
-    
+    <div id="popup-message" class="popup-message"></div>
     <div class="container">
         <main>
             <div class="header">
@@ -252,7 +298,7 @@
                         <td>
                             <a href="{% url 'variant' product.id %}"><button class="action-btn">View Variant</button></a>
 
-                            <button class="action-btn edit_product">Edit Product</button>
+                            <button class="action-btn" onclick="openEditModal('{{ product.id }}', '{{ product.product_name }}', '{{ product.art_category.id }}', '{{ product.paint_category.id }}')">Edit Product</button>
 
                             {% if product.product_status %}
                             <a href="{% url 'product_status' product.id %}"><button class="deactivate-btn">Deactivate</button></a>
@@ -281,10 +327,74 @@
                     {% endif %}
                 </ul>
             </div>
+
         </main>
     </div>
 
-   
+    <div id="editModal" style="display: none;" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Edit Product</h2>
+            <form method="POST" action="{% url 'edit_product' %}">
+                {% csrf_token %}
+                <input type="hidden" name="product_id" id="editProductId">
+                
+                <label for="editProductName">Product Name</label>
+                <input type="text" name="product_name" id="editProductName" class="input-field">
+                
+                <label for="editArtCategory">Art Category</label>
+                <select name="art_category" id="editArtCategory" class="input-field">
+                    {% for i in art %}
+                        <option value="{{ i.id }}">{{ i.art_type }}</option>
+                    {% endfor %}
+                </select>
+                
+                <label for="editPaintCategory">Paint Category</label>
+                <select name="paint_category" id="editPaintCategory" class="input-field">
+                    {% for j in paint %}
+                        <option value="{{ j.id }}">{{ j.paint_type }}</option>
+                    {% endfor %}
+                </select>
+                
+                <button type="submit" class="btn">Save Changes</button>
+                <button type="button" class="btn" onclick="closeEditModal()">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+<script>
+    function openEditModal(productId, productName, artCategoryId, paintCategoryId) {
+        document.getElementById("editProductId").value = productId;
+        document.getElementById("editProductName").value = productName;
+        document.getElementById("editArtCategory").value = artCategoryId;
+        document.getElementById("editPaintCategory").value = paintCategoryId;
+        document.getElementById("editModal").style.display = "flex";
+    }
+    
+    function closeEditModal() {
+        document.getElementById("editModal").style.display = "none";
+    }
+    </script>
+    
+    <script>
+        // Function to show the popup message
+        function showPopup(message, type) {
+            const popup = document.getElementById('popup-message');
+            popup.textContent = message;
+            popup.className = `popup-message popup-${type} popup-show`;
+    
+            // Hide the popup after 3 seconds
+            setTimeout(() => {
+                popup.className = 'popup-message';
+            }, 3000);
+        }
+    
+        // Check for Django messages and display them
+        {% if messages %}
+            {% for message in messages %}
+                showPopup("{{ message }}", "{{ message.tags }}");
+            {% endfor %}
+        {% endif %}
+    </script>
 
 </body>
 </html>

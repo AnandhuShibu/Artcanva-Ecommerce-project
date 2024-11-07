@@ -1,3 +1,4 @@
+import re
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login as authlogin, logout
 from django.contrib.auth.models import User
@@ -75,7 +76,7 @@ def product(request):
     paint = Paint.objects.all()
     art = Art.objects.all()
     products = Product.objects.all().order_by('-id')
-
+    
     if search_query:
         products = products.filter(product_name__icontains=search_query)
     
@@ -95,7 +96,37 @@ def product(request):
     return render(request,'admin/product.html', context)
 
 
+#------------------------- EDIT PRODUCT SECTION ----------------------#
 
+def edit_product(request):
+    if request.method == 'POST':
+        product_id = request.POST.get('product_id')
+        product_name = request.POST.get('product_name')
+        art_category_id = request.POST.get('art_category')
+        paint_category_id = request.POST.get('paint_category')
+        
+        
+        if not art_category_id or not paint_category_id:
+            print("not")
+            messages.error(request, "Please select both Art Category and Paint Category.")
+            return redirect('product') 
+
+        if Product.objects.filter(product_name=product_name).exclude(id=product_id).exists():
+            messages.error(request, "Product name already exists")
+            return redirect('product')
+        
+        if not re.match(r'^[a-zA-Z0-9\s]+$', product_name):
+            messages.error(request, "Product name should not contain special characters.")
+            return redirect('product')
+        
+        product = get_object_or_404(Product, id=product_id)
+        product.product_name = product_name
+        product.art_category_id = art_category_id
+        product.paint_category_id = paint_category_id
+        product.save()
+        messages.success(request, "Product updated successfully.")
+        return redirect('product')
+ 
     
 #------------------- USERS SECTION ----------------#
 

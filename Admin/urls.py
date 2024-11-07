@@ -29,7 +29,7 @@ urlpatterns = [
     path('sales_report/export_pdf/', views.export_pdf, name='export_pdf'),
     path('return_request/',views.return_request, name='return_request'),
     path('return_status/',views.return_status, name='return_status'),
-   
+    path('edit_product/', views.edit_product, name='edit_product'),
 
 ]
 
