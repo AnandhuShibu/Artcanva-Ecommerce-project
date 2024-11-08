@@ -409,11 +409,129 @@ def sale(request):
     return render(request, 'admin/sale.html')
 
 
+
+
+from datetime import datetime, timedelta
+from django.db.models import Sum, F
+from django.core.paginator import Paginator
+
+from datetime import datetime, timedelta
+from django.db.models import Sum, F
+from django.core.paginator import Paginator
+
+from datetime import datetime, timedelta
+from django.db.models import Sum, F
+from django.core.paginator import Paginator
+
 def sales(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
     filter_type = request.GET.get('status')
-    orders = Order.objects.filter(status = 'Delivered').order_by('-id')
+    orders = Order.objects.filter(status='Delivered').order_by('-id')
+
+    # Debugging prints to check the date filtering logic
+    print("start_date", start_date)
+    print("end_date", end_date)
+    print("filter_type", filter_type)
+
+    # Handle different filter types (daily, weekly, monthly)
+    if filter_type == 'daily':
+        print("Daily filter applied")
+        today = datetime.now().date()
+        start_date = today
+        end_date = today
+
+    elif filter_type == 'weekly':
+        print("Weekly filter applied")
+        today = datetime.now().date()
+        start_date = today - timedelta(days=today.weekday())  # Start of the week (Monday)
+        end_date = today + timedelta(days=(6 - today.weekday()))  # End of the week (Sunday)
+
+    elif filter_type == 'monthly':
+        print("Monthly filter applied")
+        today = datetime.now().date()
+        start_date = today.replace(day=1)  # First day of the month
+        end_date = (today.replace(day=1) + timedelta(days=32)).replace(day=1) - timedelta(days=1)  # Last day of the month
+
+    # Ensure the start_date and end_date are in date format
+    if start_date and isinstance(start_date, str):
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+    if end_date and isinstance(end_date, str):
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+
+    # Debugging prints to check if dates are parsed correctly
+    print("Parsed start_date:", start_date)
+    print("Parsed end_date:", end_date)
+
+    # Apply date filtering only if both dates are valid
+    if start_date and end_date:
+        print("Filtering orders by date range")
+        orders = orders.filter(order_date__date__range=(start_date, end_date))  # Use order_date__date to strip time part
+
+    # Pagination logic
+    paginator = Paginator(orders, 4)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Calculate overall sales count, total amount, and overall discount
+    overall_sales_count = orders.count()
+    overall_amount = orders.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
+
+    overall_discount = (
+        orders.filter(coupon__isnull=False)
+        .annotate(discount_amount=Round(F('total_amount') * F('coupon__percentage') / 100, 2))
+        .aggregate(total_discount=Sum('discount_amount'))['total_discount'] or 0
+    )
+
+    context = {
+        'page_obj': page_obj,
+        'overall_sales_count': overall_sales_count,
+        'overall_amount': overall_amount,
+        'overall_discount': overall_discount,
+    }
+
+    return render(request, 'admin/sales.html', context)
+
+
+
+from datetime import datetime, timedelta
+from django.http import HttpResponse
+from django.db.models import Sum, F
+from reportlab.lib.pagesizes import A4 # type: ignore
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph # type: ignore
+from reportlab.lib.styles import getSampleStyleSheet # type: ignore
+
+def export_pdf(request):
+    # Get filter parameters from the request
+    filter_type = request.GET.get('status')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    # Prepare the response and PDF document
+    response = HttpResponse(content_type='application/pdf')
+    
+    response['Content-Disposition'] = 'attachment; filename="sales_report.pdf"'
+    
+    # Prepare the document
+    doc = SimpleDocTemplate(response, pagesize=A4)
+    doc.title = "ARTCANVA SALES REPORT"
+    elements = []
+    
+
+    # Add the Heading
+    styles = getSampleStyleSheet()
+    heading_style = styles['Heading1']
+    heading_style.fontSize = 18  # Adjust font size
+    heading_style.alignment = 1  # Center alignment
+    
+    heading = Paragraph("ARTCANVA SALES REPORT", heading_style)
+    elements.append(heading)
+
+    # Add some space after the heading
+    elements.append(Paragraph("<br/><br/>", styles['Normal']))
+
+    # Handle different filter types (daily, weekly, monthly)
+    orders = Order.objects.filter(status='Delivered').order_by('-id')
 
     if filter_type == 'daily':
         today = datetime.now().date()
@@ -422,87 +540,86 @@ def sales(request):
 
     elif filter_type == 'weekly':
         today = datetime.now().date()
-        start_date = today - timedelta(days=today.weekday()) 
-        end_date = today + timedelta(days=(6 - today.weekday()))
+        start_date = today - timedelta(days=today.weekday())  # Start of the week (Monday)
+        end_date = today + timedelta(days=(6 - today.weekday()))  # End of the week (Sunday)
 
     elif filter_type == 'monthly':
         today = datetime.now().date()
-        start_date = today.replace(day=1) 
-        end_date = (today.replace(day=1) + timedelta(days=32)).replace(day=1) - timedelta(days=1) 
+        start_date = today.replace(day=1)  # First day of the month
+        end_date = (today.replace(day=1) + timedelta(days=32)).replace(day=1) - timedelta(days=1)  # Last day of the month
 
+    # Ensure start_date and end_date are valid date objects
     if start_date and isinstance(start_date, str):
         start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
     if end_date and isinstance(end_date, str):
         end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
 
+    # Apply date filtering if both dates are valid
     if start_date and end_date:
-        orders = orders.filter(order_date__range=(start_date, end_date))
+        orders = orders.filter(order_date__date__range=(start_date, end_date))  # Filter by date range
 
-    paginator = Paginator(orders, 4)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-
+     # Calculate total sales count, total amount, and total discount
     overall_sales_count = orders.count()
     overall_amount = orders.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
 
-   
+    # Calculate discount amount (if coupon applied)
     overall_discount = (
-    orders.filter(coupon__isnull=False)
-    .annotate(discount_amount=Round(F('total_amount') * F('coupon__percentage') / 100, 2))
-    .aggregate(total_discount=Sum('discount_amount'))['total_discount'] or 0
-)
-    context = {
-        'page_obj': page_obj,
-        'overall_sales_count': overall_sales_count,
-        'overall_amount': overall_amount,
-        'overall_discount': overall_discount
-    }
+        orders.filter(coupon__isnull=False)
+        .annotate(discount_amount=Round(F('total_amount') * F('coupon__percentage') / 100, 2))
+        .aggregate(total_discount=Sum('discount_amount'))['total_discount'] or 0
+    )
 
-    return render(request, 'admin/sales.html', context)
-
-
-def export_pdf(request):
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="sales_report.pdf"'
+    # Add summary information to the PDF
+    summary_data = [
+        f"Total Sales: {overall_sales_count}",
+        f"Total Amount: {overall_amount}",
+        f"Total Discount: {overall_discount}",
+    ]
+    for summary in summary_data:
+        elements.append(Paragraph(summary, styles['Normal']))
     
-    pdf = canvas.Canvas(response, pagesize=A4)
-    width, height = A4
+    # Add some space after the summary
+    elements.append(Paragraph("<br/><br/>", styles['Normal']))
 
-    orders = Order.objects.all()
+    # Define the table data
+    data = [
+        ["Order ID", "Customer Name", "Total Amount", "Ordered at", "Delivered at", "Payment Method"]  # Header row
+    ]
 
-    pdf.setFont("Helvetica-Bold", 16)
-    pdf.drawString(100, height - 100, "Sales Report")
-    
-    pdf.setFont("Helvetica", 12)
-    y = height - 150
-    pdf.drawString(50, y, "Order ID")
-    pdf.drawString(150, y, "User Name")
-    pdf.drawString(250, y, "Total Amount")
-    pdf.drawString(350, y, "Ordered at")
-    pdf.drawString(450, y, "Delivered at")
-    pdf.drawString(550, y, "Payment Method")
-    
-    y -= 20
+    # Add data for each order in the filtered set
     for order in orders:
-        pdf.drawString(50, y, str(order.id))
-        pdf.drawString(150, y, order.user.username)
-        pdf.drawString(250, y, f"₹{order.total_amount}")
-        pdf.drawString(350, y, order.order_date.strftime('%Y-%m-%d'))
+        row = [
+            str(order.id),
+            order.user.username,
+            f"{order.total_amount}",
+            order.order_date.strftime('%Y-%m-%d'),
+            order.deliver_date.strftime('%Y-%m-%d') if order.deliver_date else "Pending",
+            order.payment_method
+        ]
+        data.append(row)
 
-        if order.deliver_date:
-            pdf.drawString(450, y, order.deliver_date.strftime('%Y-%m-%d'))
-        else:
-            pdf.drawString(450, y, "Pending")
+    # Create the table
+    table = Table(data)
+    
+    # Style the table (alignment, border width, etc.)
+    table.setStyle(TableStyle([
+        ('TEXTCOLOR', (0, 0), (-1, 0), (0, 0, 0)),  # Header row text color
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),  # Align all columns to the center
+        ('GRID', (0, 0), (-1, -1), 1, (0, 0, 0)),  # Grid lines for all cells
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),  # Bold header row
+        ('FONTSIZE', (0, 0), (-1, -1), 10),  # Font size for table
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),  # Padding for header row
+        ('BACKGROUND', (0, 0), (-1, 0), (0.8, 0.8, 0.8)),  # Header background color
+    ]))
+    
+    # Add the table to the document
+    elements.append(table)
 
-        pdf.drawString(550, y, order.payment_method)
-        y -= 20
-        if y < 40:
-            pdf.showPage()
-            y = height - 40
-
-    pdf.save()
+    # Build the PDF
+    doc.build(elements)
+    
     return response
+
 
 
 #----------------------  CHANGING RETURN STATUS --------------------#

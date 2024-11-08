@@ -7,7 +7,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-        
         body {
             background-color: #f4f6f9;
             font-family: Arial, sans-serif;
@@ -87,29 +86,36 @@
 </head>
 <body>
 
-    <div class="container">
-        <div class="report-header mb-4">
-            <h3>Sales Report</h3>
-            <div class="export-buttons">
-                <a href="{% url 'export_pdf' %}" class="btn btn-secondary">Export as PDF</a>
-                <a href="{% url 'panel' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i>Back to Dashboard</a>
-
-                
-            </div>
+<div class="container">
+    <div class="report-header mb-4">
+        <h3>Sales Report</h3>
+        <div class="export-buttons">
+            <a href="{% url 'export_pdf' %}?status={{ filter_type }}&start_date={{ start_date }}&end_date={{ end_date }}" class="btn btn-secondary">
+                Export PDF
+            </a>
+            <a href="{% url 'panel' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i>Back to Dashboard</a>
         </div>
+    </div>
 
-        <form method="get" class="filter-section">
-            <select class="form-control" name="status">
-                <option value="all">All</option>
-                <option value="daily">Daily</option>
-                <option value="weekly">Weekly</option>
-                <option value="monthly">Monthly</option>
-            </select>
-            <input type="date" class="form-control" name="start_date" placeholder="Start Date">
-            <input type="date" class="form-control" name="end_date" placeholder="End Date">
-            <button type="submit" class="btn btn-primary">Filter</button>
-        </form>
+    <form method="get" class="filter-section">
+        <select class="form-control" name="status" id="filter-status">
+            <option value="all" {% if filter_type == 'all' %}selected{% endif %}>All</option>
+            <option value="daily" {% if filter_type == 'daily' %}selected{% endif %}>Daily</option>
+            <option value="weekly" {% if filter_type == 'weekly' %}selected{% endif %}>Weekly</option>
+            <option value="monthly" {% if filter_type == 'monthly' %}selected{% endif %}>Monthly</option>
+            <option value="customize" {% if filter_type == 'customize' %}selected{% endif %}>Customize</option>
+        </select>
         
+        <!-- Preserve selected date values after form submission -->
+        <input type="date" class="form-control" name="start_date" id="start-date" placeholder="Start Date" 
+               value="{{ start_date }}" {% if filter_type != 'customize' %}disabled{% endif %}>
+        <input type="date" class="form-control" name="end_date" id="end-date" placeholder="End Date" 
+               value="{{ end_date }}" {% if filter_type != 'customize' %}disabled{% endif %}>
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+
+        
+        <!-- Sales Report Table and Pagination (Same as before) -->
         <div class="row mb-4">
             <div class="col-md-4">
                 <div class="stats-card">
@@ -142,22 +148,26 @@
                     <th>Payment Method</th>
                 </tr>
             </thead>
-            <tbody>
+            {% if page_obj %}
                 {% for order in page_obj %}
-                <tr>
-                    <td>{{ order.id }}</td>
-                    <td>{{ order.user.username }}</td> 
-                    <td>₹{{ order.total_amount }}</td>
-                    <td>{{ order.order_date|date:"d-m-Y" }}</td>
-                    {% if order.deliver_date %}
-                            <td>{{ order.deliver_date|date:"d-m-y" }}</td>
-                    {% else %}
+                    <tr>
+                        <td>{{ order.id }}</td>
+                        <td>{{ order.user.username }}</td>
+                        <td>₹{{ order.total_amount }}</td>
+                        <td>{{ order.order_date|date:"d-m-Y" }}</td>
+                        {% if order.deliver_date %}
+                            <td>{{ order.deliver_date|date:"d-m-Y" }}</td>
+                        {% else %}
                             <td>Not Yet</td>
-                    {% endif %}
-                    <td>{{ order.payment_method }}</td>
-                </tr>
+                        {% endif %}
+                        <td>{{ order.payment_method }}</td>
+                    </tr>
                 {% endfor %}
-            </tbody>
+            {% else %}
+                <tr>
+                    <td colspan="6" class="text-center">No orders found for the selected filter !</td>
+                </tr>
+            {% endif %}
         </table>
 
         <nav>
@@ -183,5 +193,23 @@
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Enable or disable date fields based on the selected filter status
+        const filterStatus = document.getElementById('filter-status');
+        const startDate = document.getElementById('start-date');
+        const endDate = document.getElementById('end-date');
+
+        function toggleDateFields() {
+            const isCustomizeSelected = filterStatus.value === 'customize';
+            startDate.disabled = !isCustomizeSelected;
+            endDate.disabled = !isCustomizeSelected;
+        }
+
+        filterStatus.addEventListener('change', toggleDateFields);
+
+        // Run toggle function on page load to set date fields correctly
+        document.addEventListener('DOMContentLoaded', toggleDateFields);
+    </script>
 </body>
 </html>

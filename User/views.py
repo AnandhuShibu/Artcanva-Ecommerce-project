@@ -593,8 +593,6 @@ def checkout_og(request):
             if key.startswith('quantity_')
         }
 
-        
-
         for variant_id, quantity in quantities.items():
             variant = get_object_or_404(Variant, id=variant_id)
 
@@ -613,6 +611,7 @@ def checkout_og(request):
             cart_item = get_object_or_404(Cart, user=request.user, variant_id=variant_id, product__product_status=True)
             cart_item.quantity = quantity
             cart_item.save()
+            
         request.session['total_price'] = total_price
 
         return redirect('checkout')

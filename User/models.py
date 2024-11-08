@@ -114,5 +114,4 @@ class Return(models.Model):
     status = models.CharField(max_length=100, default='pending')
     reason = models.CharField(max_length=200, default='Other')
 
-    def __str__(self):
-        return f"Return by {self.user} for {self.variant} - Status: {self.status} - Reason: {self.get_reason_display()}"
+  

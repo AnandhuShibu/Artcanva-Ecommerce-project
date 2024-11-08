@@ -235,6 +235,7 @@
                         <p class="price" data-price="{{ entry.offer_price }}">₹ {{ entry.offer_price }}</p>
                         <div class="quantity d-flex align-items-center mt-2">
                             <button class="btn btn-outline-secondary btn-sm me-2 minus" type="button">-</button>
+                            
                             <input 
                                 type="number"
                                 value="{{ entry.item.quantity }}" 
@@ -243,6 +244,7 @@
                                 name="quantity_{{ entry.item.variant.id }}" 
                                 data-price="{{ entry.offer_price }}"
                                 data-stock="{{ entry.item.variant.stock }}">
+                                
                             <button class="btn btn-outline-secondary btn-sm ms-2 plus" type="button">+</button>
                         </div>
                     </div>

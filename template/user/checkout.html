@@ -297,8 +297,8 @@
             <input type="radio" 
                 name="selected_address" 
                 value="{{ address.id }}" 
-                id="address{{ address.id }}" required>
-            <strong>{{address.fullname}}</strong>
+                id="address{{ address.id }}" {% if address == all_address.0 %} checked {% endif %} required>
+                <strong>{{address.fullname}}</strong>
             <p class="mb-1">
              {{address.address}}<br>{{address.city}}, {{address.district}} - {{address.pincode}}<br>{{address.state}}
             </p>
