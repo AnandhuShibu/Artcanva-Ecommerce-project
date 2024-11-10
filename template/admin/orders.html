@@ -196,6 +196,13 @@
                     </tr>
                 </thead>
                 <tbody>
+                    {% if no_orders_found %}
+                    <tr>
+                        <td colspan="6" class="text-center" style="text-align: center; color: red; font-weight: bold;">
+                            No Orders found !
+                        </td>
+                    </tr>
+                    {% else %}
                     {% for order in page_obj%}
                     <tr>
                         <td></td>
@@ -216,6 +223,7 @@
                     </tr>
                 {% endfor %}
                 </tbody>
+                {% endif %}
             </table>
             <div class="pagination-container">
                 <ul class="pagination">

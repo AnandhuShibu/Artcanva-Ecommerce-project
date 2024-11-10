@@ -7,7 +7,6 @@
     <link rel="icon" href="static/images/arts.png" type="image/x-icon">
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
-
         body {
             background-color: #f8f9fa;
             font-family: Arial, sans-serif;
@@ -46,6 +45,7 @@
                 font-size: 0.9rem;
             }
         }
+
         .pagination-container {
             text-align: center;
             margin-top: 20px;
@@ -78,11 +78,27 @@
             color: white;
         }
 
+        /* Style for the buttons */
+        .top-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .top-buttons .btn {
+            width: 150px;
+            padding: 10px;
+        }
     </style>
 </head>
 <body>
 
 <div class="container mt-5">
+
+    <div class="top-buttons">
+        <a href="{% url 'home' %}" class="btn btn-primary">Go to Home</a>
+        <a href="{% url 'profile' %}" class="btn btn-primary">Go to Profile</a>
+    </div>
 
     <h2>ALL ORDERS</h2>
     <div class="table-responsive">
@@ -135,8 +151,7 @@
             </ul>
         </div>
     </div>
-    <a href="{% url 'home'%}">Go to Home Page</a> <br>
-    <a href="{% url 'profile'%}">Go to Profile</a>
+
 </div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

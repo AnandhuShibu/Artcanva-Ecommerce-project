@@ -461,15 +461,20 @@
         </div>
 
 
-        <div class="order-summary" style="padding-left: 50px;">
-            <h3 style="margin-bottom: 10px;">TOTAL AMOUNT: ₹{{orders.total_amount}}</h3>
-            
+        <div class="order-summary" style="padding-left: 40px;">
+
+            <h4>TOTAL AMOUNT: ₹{{normal_total_price}}</h4>
+
             <br>
             <!-- Show coupon code only if it exists -->
             {% if orders.coupon %}
                 <h5 style="margin-top: 0;margin-bottom: 9px;">Coupon Code: {{orders.coupon.coupon_code}}</h5>
                 <h5 style="margin-top: 0;">Coupon Percentage: {{orders.coupon.percentage}}%</h5>
+            {% else %}
+                <h5>No coupon used</h5>
             {% endif %}
+
+            <h3 style="margin-bottom: 10px;">PAYABLE AMOUNT: ₹{{orders.total_amount}}</h3>
         </div>
         
 
@@ -491,28 +496,31 @@
 
     <!-- Product section below -->
     {% for item in order_items %}
+    <h1>{{ item.id }}</h1>
     <div class="order-details">
         <div class="product-image">
             <img src="{{ item.product.images1.url }}" alt="Shree Ganesha Kerala Mural Painting">
         </div>
         <div class="product-info">
             <h3>{{ item.product.product_name }}</h3>
-            <p>Frame size: {{ item.variant.frame_size }}</p>  
+            <p>Frame size: {{ item.variant.frame_size }}</p>
+            <p>AMOUTN: {{ item.variant.price }}</p>
+            <p>OFFER: {{ item.offer }}</p>  
         </div>
 
+
+
+
         <div class="order-actions">
-            {% if return_button %}
-                {% if item.variant.id in accepted_variant_ids %}
-                    <button class="return-btn return-btn" disabled>RETURN ACCEPTED</button>
-                {% else %}
-                    <button class="return-btn return-btn">RETURN ITEM</button>
+            
+                    <button class="return-btn" onclick="openReturnModal({{ item.id }})">RETURN ITEM</button>
                     <button class="review-btn">ADD REVIEW</button>
-                {% endif %}
+               
                 <br>
                 
-            {% else %}
+           
                 <h4>{{ orders.status }}</h4>
-            {% endif %}
+           
         </div>
         <!-- Review Modal -->
 
@@ -530,92 +538,87 @@
     </div>
     </form>
 
-    <form id="returnForm" action="{% url 'item_return' orders.id item.product.id item.variant.id %}" method="POST">
-        {% csrf_token %}
-        <div id="returnModal" class="modal">
-            <div class="modal-content">
-                <span class="close-return-btn">&times;</span>
-                <h3>Return Item</h3>
-                <label for="reason">Reason</label>
-                <select name="reason" id="reason">
-                    <option value="" disabled selected>Select a reason</option>
-                    <option value="damaged">Damaged Product</option>
-                    <option value="wrong_item">Wrong Item Sent</option>
-                    <option value="not_satisfied">Not Satisfied with Product</option>
-                    <option value="other">Other</option>
-                </select>
-                <label for="request">Request</label>
-                <select name="request" id="request">
-                    <option value="" disabled selected>Select the request</option>
-                    <option value="request">Request</option>
-                </select>
-                <button type="submit" class="submit-btn">SUBMIT RETURN</button>
+
+
+     <form id="returnForm-{{ item.id }}" action="{% url 'item_return' orders.id item.id %}" method="POST">
+            {% csrf_token %}
+            <div id="returnModal-{{ item.id }}" class="modal">
+                <div class="modal-content">
+                    <span class="close-return-btn" onclick="closeReturnModal({{ item.id }})">&times;</span>
+                    <h3>Return Item</h3>
+                    <label for="reason">Reason</label>
+                    <select name="reason" id="reason">
+                        <option value="" disabled selected>Select a reason</option>
+                        <option value="damaged">Damaged Product</option>
+                        <option value="wrong_item">Wrong Item Sent</option>
+                        <option value="not_satisfied">Not Satisfied with Product</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <label for="request">Request</label>
+                    <select name="request" id="request">
+                        <option value="" disabled selected>Select the request</option>
+                        <option value="request">Request</option>
+                    </select>
+                    <button type="submit" class="submit-btn">SUBMIT RETURN</button>
+                </div>
             </div>
-        </div>
-    </form>   
+        </form>   
     </div>
     {% endfor %}
 </div>
 
 
 
-
-
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 <script>
    
-document.addEventListener("DOMContentLoaded", () => {
-    const modal = document.getElementById("reviewModal");
-    const openModalButtons = document.querySelectorAll(".review-btn");
-    const closeModalButton = document.querySelector(".close-btn");
-    const submitButton = document.getElementById("submitReview");
-
-    // Return modal elements
-    const returnModal = document.getElementById("returnModal");
-    const openReturnButtons = document.querySelectorAll(".return-btn");
-    const closeReturnButton = document.querySelector(".close-return-btn");
-
-
-   
-    openModalButtons.forEach(button => {
-        button.onclick = () => {
-            modal.style.display = "block";
+    function openReturnModal(itemId) {
+        document.getElementById('returnModal-' + itemId).style.display = 'block';
+    }
+    
+    function closeReturnModal(itemId) {
+        document.getElementById('returnModal-' + itemId).style.display = 'none';
+    }
+    
+    document.addEventListener("DOMContentLoaded", () => {
+        const reviewModal = document.getElementById("reviewModal");
+        const openReviewButtons = document.querySelectorAll(".review-btn");
+        const closeReviewButton = document.querySelector(".close-btn");
+        const submitReviewButton = document.getElementById("submitReview");
+    
+        openReviewButtons.forEach(button => {
+            button.onclick = () => {
+                reviewModal.style.display = "block";
+            };
+        });
+    
+        closeReviewButton.onclick = () => {
+            reviewModal.style.display = "none";
+        };
+    
+        // Close modals if clicked outside the modal content
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            });
+        };
+    
+        submitReviewButton.onclick = () => {
+            const rating = document.getElementById("rating").value;
+            const reviewText = document.getElementById("reviewText").value;
+            
+            if (rating && reviewText) {
+                alert(`Thank you for your review!\nRating: ${rating}\nReview: ${reviewText}`);
+                reviewModal.style.display = "none"; // Close the modal after submission
+            } else {
+                alert("Please fill out both fields.");
+            }
         };
     });
-
-    closeModalButton.onclick = () => {
-        modal.style.display = "none";
-    };
-
-    openReturnButtons.forEach(button => {
-        button.onclick = () => {
-            returnModal.style.display = "block";
-        };
-    });
-
-    closeReturnButton.onclick = () => {
-        returnModal.style.display = "none";
-    };
-
-    window.onclick = (event) => {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    };
-
-    submitButton.onclick = () => {
-        const rating = document.getElementById("rating").value;
-        const reviewText = document.getElementById("reviewText").value;
-        
-        if (rating && reviewText) {
-            alert(`Thank you for your review!\nRating: ${rating}\nReview: ${reviewText}`);
-            modal.style.display = "none"; // Close the modal after submission
-        } else {
-            alert("Please fill out both fields.");
-        }
-    };
-});
-
+    
 function downloadInvoice() {
     const orderId = "{{ orders.id }}";
     window.location.href = `/download-invoice/${orderId}/`;

@@ -405,7 +405,11 @@
         font-weight: bold;
         color: #000;
       }
-      
+      .out{
+        color: red;
+        
+
+      }
     </style>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMKtkz0p5sy4R8l1L4/fC1RfwD1kLwL4RbfE8" crossorigin="anonymous">
@@ -529,7 +533,7 @@
         </div>
         <div class="product-actions">
           {% if variant.stock == 0 %}
-              <h3>OUT OF STOCK</h3>
+              <h3 class="out">OUT OF STOCK</h3>
           {% elif in_cart %}
           <a href="{% url 'cart' %}"><button class="go-to-cart">Go to cart</button></a>
           {% else %}
@@ -541,6 +545,8 @@
           {% else %}
           <a href="{% url 'add_wishlist_single' product.id variant.id  %}"><button class="add-to-wishlist">Add to Wishlist</button></a>
           {% endif %}
+
+          <h6>STOCK: {{variant.stock}}</h6>
       </div>
       
 

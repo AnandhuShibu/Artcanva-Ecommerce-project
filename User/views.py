@@ -308,6 +308,9 @@ def single(request, product_id, variant_id):
     in_cart = None
     in_wishlist = None
     reviews = Review.objects.filter(variant = variant)[:2]
+
+    print("REVIEW:", reviews)
+    
     if request.user.is_authenticated:
         in_cart = Cart.objects.filter(user=request.user, variant=variant).exists()
     if request.user.is_authenticated:
@@ -824,6 +827,8 @@ def place_order(request):
                 coupon = coupon
             )
 
+            
+
             OrderAddress.objects.create(
                 order=order,
                 fullname=selected_address.fullname,
@@ -836,26 +841,25 @@ def place_order(request):
             )
 
             for item in cart_items:
+                offer_percentage = item.product.art_category.art_type_offer or 0
                 Order_details.objects.create(
                     order=order,
                     product=item.product,
                     quantity=item.quantity,
-                    variant=item.variant
+                    variant=item.variant,
+                    offer = offer_percentage
                 )
                 item.variant.stock -= item.quantity
                 item.variant.save()
 
             cart_items.delete()
-
             return redirect('order_placed')
 
         elif payment_method == 'Razorpay':
-
             order = Order.objects.create(
                 user=request.user,
                 total_amount=final_amount / 100, 
                 payment_method=payment_method,
-                
                 coupon = coupon
             )
 
@@ -872,11 +876,13 @@ def place_order(request):
 
             # Save order details
             for item in cart_items:
+                offer_percentage = item.product.art_category.art_type_offer or 0
                 Order_details.objects.create(
                     order=order,
                     product=item.product,
                     quantity=item.quantity,
-                    variant=item.variant
+                    variant=item.variant,
+                    offer = offer_percentage
                 )
                 item.variant.stock -= item.quantity
                 item.variant.save()
@@ -923,12 +929,15 @@ def place_order(request):
             )
 
             for item in cart_items:
+                offer_percentage = item.product.art_category.art_type_offer or 0
                 Order_details.objects.create(
                     order=order,
                     product=item.product,
                     quantity=item.quantity,
-                    variant=item.variant
+                    variant=item.variant,
+                    offer = offer_percentage
                 )
+
                 item.variant.stock -= item.quantity
                 item.variant.save()
 
@@ -996,33 +1005,59 @@ def order_details(request, order_id):
         return_button = 'delivered'
 
     order_items=Order_details.objects.filter(order = orders)
-    accepted_returns = Return.objects.filter(variant__in=[item.variant for item in order_items], status='accepted', user=request.user)
-    accepted_variant_ids = list(accepted_returns.values_list('variant_id', flat=True))
-    
+    # accepted_returns = Return.objects.filter(variant__in=[item.variant for item in order_items], status='accepted', user=request.user)
+    # accepted_variant_ids = list(accepted_returns.values_list('variant_id', flat=True))
+    items_with_price = []
+    normal_total_price = 0  # Initialize normal total price
+
+    for item in order_items:
+        
+        original_price = item.variant.price * item.quantity
+        discount_price = original_price  # Start with no discount
+        
+        # Check if there is an art type offer
+        if item.product.art_category.art_type_offer:
+            discount_price -= (original_price * item.product.art_category.art_type_offer / 100)
+            
+        items_with_price.append({
+            'item': item,
+            'original_price': original_price,
+            'discount_price': discount_price,
+        })
+        
+        # Add to normal total price (without discount)
+        normal_total_price += original_price
+
     context = {
         'order_items':order_items,
         'return_button': return_button,
-        'accepted_variant_ids': accepted_variant_ids,
+        # 'accepted_variant_ids': accepted_variant_ids,
         'orders':orders,
-        'order_address': order_address
+        'order_address': order_address,
+        'normal_total_price': normal_total_price
     }
     return render(request, 'user/order_details.html', context)
 
 
 
+
 #============================= RETURN SECTION =========================#
 
-def item_return(request,product_id, order_id, variant_id):
+
+def item_return(request, order_id, item_id):
+    print('testing',item_id)
     if request.method == 'POST':
         reason = request.POST.get('reason')
         request_value = request.POST.get('request')
-        product = get_object_or_404(Product, id=product_id)
-        variant = get_object_or_404(Variant, id=variant_id)
-        existing_return = Return.objects.filter(product=product, user=request.user, variant=variant).exists()
+        item = get_object_or_404(Order_details, id=item_id)
+       
+       
 
-        if existing_return:
-            messages.warning(request, 'You have already submitted a return request for this item.')
-            return redirect('order_details', order_id)  # Redirect back to the order details page
+        # existing_return = Return.objects.filter(product=product, user=request.user, variant=variant).exists()
+
+        # if existing_return:
+        #     messages.warning(request, 'You have already submitted a return request for this item.')
+        #     return redirect('order_details', order_id)  # Redirect back to the order details page
         
         if reason == 'damaged':
             text = 'Damaged Product'
@@ -1036,15 +1071,14 @@ def item_return(request,product_id, order_id, variant_id):
         Return.objects.create(
             reason=text,
             status=request_value,
-            product=product,
-            variant=variant,
-            user=request.user
+            order_item=item
         )
 
         messages.success(request, 'Your return request has been successfully sent')
 
         return redirect('order_details',order_id)
-    
+
+
 
 def order_placed(request):
     return render(request, 'user/order_placed.html')
@@ -1060,7 +1094,7 @@ def submit_review(request,product_id, order_id, variant_id):
         review_text = request.POST.get('reviewtext')
         product = get_object_or_404(Product, id=product_id)
         variant = get_object_or_404(Variant, id=variant_id)
-        
+        print('abcde')
         Review.objects.create(
             review=review_text,
             rating=rating,
@@ -1169,7 +1203,6 @@ def order_cancel(request, order_id):
     
 
     
-
     if order.payment_method in ['Razorpay', 'Wallets']:
         wallet, created = Wallet.objects.get_or_create(user=request.user, defaults={'wallet_amount': 0})
         wallet.wallet_amount += order.total_amount  # Increment the wallet amount
@@ -1190,93 +1223,67 @@ def order_cancel(request, order_id):
 
 #==================== SINGLE ORDER SECTION =================#
 
-# def single_order_cancel(request, order_id,):
-#     order = get_object_or_404(Order, id=order_id)
-
-    
-#     if order.status == 'Cancelled':
-#         messages.warning(request, "Order is already cancelled.")
-#         return redirect('order_details', order_id=order_id)
-    
-#     order.status='Cancelled'
-#     order.save()
-
-
-
-#     if order.payment_method in ['Razorpay', 'Wallets']:
-#         wallet, created = Wallet.objects.get_or_create(user=request.user, defaults={'wallet_amount': 0})
-#         wallet.wallet_amount += order.total_amount  # Increment the wallet amount
-#         wallet.save()
-      
-#         trasanction = Wallet_Transaction.objects.create(
-#             user = request.user,
-#             transaction_amount = order.total_amount,
-#             type = 'Credit',
-#             transaction_mode = order.payment_method     
-#         )
-   
-#     order.save()
-
-#     return redirect('order_details',order_id=order_id)
-
 
 
 #========================  SALES REPORT SECTION ===================#
 
-from django.db.models import Sum, Count, Q
+# from django.db.models import Sum, Count, Q
 
-def sales_report(request):
-    total_revenue = Order.objects.filter(payment_status='Success').aggregate(
-        total_sales=Sum('total_amount')
-    )['total_sales'] or 0
+# def sales_report(request):
+#     total_revenue = Order.objects.filter(payment_status='Success').aggregate(
+#         total_sales=Sum('total_amount')
+#     )['total_sales'] or 0
 
-    orders_by_status = Order.objects.values('status').annotate(
-        count=Count('id')
-    ).order_by('status')
+#     orders_by_status = Order.objects.values('status').annotate(
+#         count=Count('id')
+#     ).order_by('status')
 
-    payment_status_count = Order.objects.values('payment_status').annotate(
-        count=Count('id')
-    ).order_by('payment_status')
+#     payment_status_count = Order.objects.values('payment_status').annotate(
+#         count=Count('id')
+#     ).order_by('payment_status')
 
-    from datetime import datetime
-    current_month = datetime.now().month
-    monthly_orders = Order.objects.filter(order_date__month=current_month).count()
+#     from datetime import datetime
+#     current_month = datetime.now().month
+#     monthly_orders = Order.objects.filter(order_date__month=current_month).count()
 
-    coupon_usage = Order.objects.filter(coupon__isnull=False).count()
+#     coupon_usage = Order.objects.filter(coupon__isnull=False).count()
 
-    context = {
-        'total_revenue': total_revenue,
-        'orders_by_status': orders_by_status,
-        'payment_status_count': payment_status_count,
-        'monthly_orders': monthly_orders,
-        'coupon_usage': coupon_usage,
-    }
-    return render(request, 'admin/sale.html', context)
+#     context = {
+#         'total_revenue': total_revenue,
+#         'orders_by_status': orders_by_status,
+#         'payment_status_count': payment_status_count,
+#         'monthly_orders': monthly_orders,
+#         'coupon_usage': coupon_usage,
+#     }
+#     return render(request, 'admin/sale.html', context)
 
-import csv
-from django.http import HttpResponse
 
-def export_sales_report(request):
-    # Prepare the CSV response
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="sales_report.csv"'
 
-    writer = csv.writer(response)
-    writer.writerow(['Order ID', 'User', 'Total Amount', 'Status', 'Payment Status', 'Order Date', 'Coupon Applied'])
 
-    orders = Order.objects.all()
-    for order in orders:
-        writer.writerow([
-            order.id, 
-            order.user.username, 
-            order.total_amount, 
-            order.status, 
-            order.payment_status, 
-            order.order_date, 
-            order.coupon.coupon_code if order.coupon else 'No'
-        ])
+# import csv
+# from django.http import HttpResponse
 
-    return response
+# def export_sales_report(request):
+#     # Prepare the CSV response
+#     response = HttpResponse(content_type='text/csv')
+#     response['Content-Disposition'] = 'attachment; filename="sales_report.csv"'
+
+#     writer = csv.writer(response)
+#     writer.writerow(['Order ID', 'User', 'Total Amount', 'Status', 'Payment Status', 'Order Date', 'Coupon Applied'])
+
+#     orders = Order.objects.all()
+#     for order in orders:
+#         writer.writerow([
+#             order.id, 
+#             order.user.username, 
+#             order.total_amount, 
+#             order.status, 
+#             order.payment_status, 
+#             order.order_date, 
+#             order.coupon.coupon_code if order.coupon else 'No'
+#         ])
+
+#     return response
 
 
 from reportlab.lib.pagesizes import A4 # type: ignore
@@ -1295,7 +1302,8 @@ def download_invoice(request, order_id):
         pdf = SimpleDocTemplate(
             response,
             pagesize=A4,
-            title="Order invoice", 
+            title="Order invoice",
+            encoding='UTF-8'
         )
         
         elements = []
@@ -1314,65 +1322,102 @@ def download_invoice(request, order_id):
         elements.append(Paragraph("<br/>", styles['Normal']))
         
         table_data = [
-            ["Product Name", "Quantity"],  # Table header
+            ["Product Name", "Quantity", "Normal Price", "Offer Price"],  # Table header
         ]
 
+        normal_total_price = 0
+        offer_total_price = 0
+        final_payable_price = 0  # Initialize final payable price
+
         for item in order_items:
-            product_name = item.product.product_name  
+            product_name = item.product.product_name
             quantity = item.quantity
-            table_data.append([product_name, quantity])
+            normal_price = item.variant.price * quantity  # Actual price
+            offer_price = normal_price  # Start with normal price
+
+            # Apply art type offer if available
+            art_offer_percentage = item.product.art_category.art_type_offer if item.product.art_category and item.product.art_category.art_type_offer else 0
+
+            if art_offer_percentage:
+                offer_price = normal_price - (normal_price * art_offer_percentage / 100)
+
+            # Update total amounts
+            normal_total_price += normal_price
+            offer_total_price += offer_price
+
+            table_data.append([product_name, quantity, f"{normal_price:.2f}", f"{offer_price:.2f}"])
+
+        # Apply coupon discount if present
+        if order.coupon:
+            coupon_discount = (offer_total_price * order.coupon.percentage) / 100
+            final_payable_price = offer_total_price - coupon_discount
+        else:
+            final_payable_price = offer_total_price  # No coupon applied
+
+        column_widths = [150, 100, 100, 100]
         
-        column_widths = [250, 150] 
-        
-        # Create the table with specified widths
+        # Create table and apply styling
         table = Table(table_data, colWidths=column_widths)
         table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),  
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),  
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),  
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),  
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),  
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),  
-            ('GRID', (0, 0), (-1, -1), 1, colors.black),  
-            ('ROWHEIGHT', (0, 0), (-1, -1), 40),  
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('ROWHEIGHT', (0, 0), (-1, -1), 40),
         ]))
 
         elements.append(table)
-        elements.append(Paragraph(f"<br/>Total Amount: Rs {order.total_amount}", styles['Normal']))
 
+        # Display normal total amount
+        elements.append(Paragraph(f"<br/>Normal Total Amount: rs {normal_total_price:.2f}", styles['Normal']))
+        elements.append(Paragraph(f"Offer Total Amount: rs {offer_total_price:.2f}", styles['Normal']))
         
+        
+        # Display coupon details if applicable
         if order.coupon:
-            coupon_code = order.coupon.coupon_code 
+            coupon_code = order.coupon.coupon_code
             elements.append(Paragraph(f"<br/>Coupon Used: {coupon_code}", styles['Normal']))
-            elements.append(Paragraph(f"Coupon percentage: {order.coupon.percentage} % ", styles['Normal'])) 
-
+            elements.append(Paragraph(f"Coupon Percentage: {order.coupon.percentage}%", styles['Normal']))
         else:
-            elements.append(Paragraph(f"<br/>Coupon Used: No coupon Used", styles['Normal']))
-        
+            elements.append(Paragraph("<br/>Coupon Used: No coupon used", styles['Normal']))
+
+        # Display final payable amount
+        elements.append(Paragraph(f"<br/>Final Payable Amount: rs{final_payable_price:.2f}", styles['Normal']))
+
+        # Order address details
         order_address = get_object_or_404(OrderAddress, order=order_id)
-
-        custom_style = ParagraphStyle('CustomStyle',
-        parent=styles['Normal'],
-        fontName='Helvetica-Bold', 
-        fontSize=14, 
-        textColor='black',  
-        spaceAfter=12, 
-        alignment=1,  
+        custom_style = ParagraphStyle(
+            'CustomStyle',
+            parent=styles['Normal'],
+            fontName='Helvetica-Bold',
+            fontSize=14,
+            textColor='black',
+            spaceAfter=12,
+            alignment=1,
         )
-        elements.append(Paragraph(f"<br/>Ordered Address", custom_style))
-        elements.append(Paragraph(f"<br/>Name: {order_address.fullname}", styles['Normal']))
-        elements.append(Paragraph(f"<br/>Address: {order_address.address}", styles['Normal']))
-        elements.append(Paragraph(f"<br/>Phone Number: {order_address.mobile}", styles['Normal']))
-        elements.append(Paragraph(f"<br/>City: {order_address.city}", styles['Normal']))
-        elements.append(Paragraph(f"<br/>District: {order_address.district}", styles['Normal']))
-        elements.append(Paragraph(f"<br/>Pincode: {order_address.pincode}", styles['Normal']))
-        elements.append(Paragraph(f"<br/>State: {order_address.state}", styles['Normal']))
+        elements.append(Paragraph("<br/>Ordered Address", custom_style))
+        elements.append(Paragraph(f"Name: {order_address.fullname}", styles['Normal']))
+        elements.append(Paragraph(f"Address: {order_address.address}", styles['Normal']))
+        elements.append(Paragraph(f"Phone Number: {order_address.mobile}", styles['Normal']))
+        elements.append(Paragraph(f"City: {order_address.city}", styles['Normal']))
+        elements.append(Paragraph(f"District: {order_address.district}", styles['Normal']))
+        elements.append(Paragraph(f"Pincode: {order_address.pincode}", styles['Normal']))
+        elements.append(Paragraph(f"State: {order_address.state}", styles['Normal']))
 
+        # Build PDF
         pdf.build(elements)
         return response
-    
+
     except Order.DoesNotExist:
         return HttpResponse("Order not found.", status=404)
+
+
+
+
+
 
 
 

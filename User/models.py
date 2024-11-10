@@ -57,6 +57,7 @@ class Order_details(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     variant = models.ForeignKey(Variant, on_delete= models.CASCADE)
+    offer = models.PositiveIntegerField(null=True, blank=True)
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('shipped', 'Shipped'),
@@ -108,10 +109,9 @@ class Wallet_Transaction(models.Model):
 
 
 class Return(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='returns')
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name='returns')
+    order_item = models.ForeignKey(Order_details, on_delete=models.CASCADE, related_name='returns')
     status = models.CharField(max_length=100, default='pending')
     reason = models.CharField(max_length=200, default='Other')
+    
 
   

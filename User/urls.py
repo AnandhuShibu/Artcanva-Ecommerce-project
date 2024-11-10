@@ -2,7 +2,7 @@ from django.urls import path
 from . import views
 from .views import user_logout, submit_review
 
-from .views import sales_report, export_sales_report
+# from .views import sales_report, export_sales_report
 # from .views import place_order, razorpay_checkout
 
 urlpatterns = [
@@ -22,7 +22,6 @@ urlpatterns = [
     path('addcart/<int:product_id>/<int:variant_id>/',views.add_cart,name='addcart'),
     path('add_wishlist_single/<int:product_id>/<int:variant_id>/',views.add_wishlist_single,name='add_wishlist_single'),
 
-    
     path('profile',views.profile,name='profile'),
     path('single/<int:product_id>/<int:variant_id>/',views.single, name='single'),
     path('remove_cart_item/<int:variant_id>',views.remove_cart_item, name='remove_cart_item'),
@@ -51,10 +50,10 @@ urlpatterns = [
     path('order-cancel/<int:order_id>', views.order_cancel, name= 'order_cancel'),
     # path('single_order_cancel/<int:order_id>/<int:product_id>/<int:variant_id>', views.single_order_cancel, name= 'single_order_cancel'),
 
-    path('sales-report/', sales_report, name='sales_report'),
-    path('export-sales-report/', export_sales_report, name='export_sales_report'),
+    # path('sales-report/', sales_report, name='sales_report'),
+    # path('export-sales-report/', export_sales_report, name='export_sales_report'),
     path('submit-review/<int:order_id>/<int:product_id>/<int:variant_id>', submit_review, name='submit_review'),
     path('download-invoice/<int:order_id>/', views.download_invoice, name='download_invoice'),
 
-    path('item_return/<int:order_id>/<int:product_id>/<int:variant_id>', views.item_return, name='item_return')
+    path('item_return/<int:order_id>/<int:item_id>/', views.item_return, name='item_return')
     ]

@@ -161,6 +161,38 @@
             color: white;
         }
 
+        /* Styling for dropdown and submit button */
+        select {
+            padding: 10px;
+            font-size: 14px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            width: 180px;
+            margin-right: 10px;
+        }
+
+        button[type="submit"] {
+            padding: 10px 20px;
+            background-color: #00b894;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #009970;
+        }
+
+        /* Styling for validation message */
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
     </style>
 </head>
 <body>
@@ -186,42 +218,49 @@
                     <tr>
                         <th></th>
                         <th>PRODUCT</th>
-                        <th>COUSTOMER NAME</th>
+                        <th>CUSTOMER NAME</th>
                         <th>REASON</th>
                         <th>STATUS</th>
                         <th>ACTION</th>
                     </tr>
                 </thead>
                 <tbody>
-
-                    <form action="{% url "return_status"  %}" method='POST'>
-                    {% csrf_token %}
-                    {% for item in page_obj%}
+                    {% if no_request_found %}
                     <tr>
-                        <td></td>
-                        <td>{{item.product.product_name}} </td>
-                        <td>{{item.user.username}} </td>
-                        <td>{{item.reason}}</td>
-                        <td>{{item.status}} </td>
-                        <td>
-                            <input type="hidden" name="return_id" value="{{ item.id }}"> <!-- Hidden input to store the item's ID -->
-                            {% if item.status != 'accepted' %}
-                                <select name="accept">
-                                <option value="" disabled selected>Select</option>
-                                <option value="accepted">Accept</option>
-                                </select>
-                                <button type='submit'>SUBMIT</button>
-                            {% else %}
-                                <span>Status Accepted</span>
-                            {% endif %}
+                        <td colspan="6" class="text-center" style="text-align: center; color: red; font-weight: bold;">
+                            No Request found!
                         </td>
                     </tr>
-                    {% endfor %}
-                    </form>
-
-
+                    {% else %}
+                        {% for item in page_obj %}
+                        <tr>
+                            <td></td>
+                            <td>{{ item.order_item.product.product_name }}</td>
+                            <td>{{ item.order_item.order.user.username }}</td>
+                            <td>{{ item.reason }}</td>
+                            <td>{{ item.status }}</td>
+                            <td>
+                                {% if item.status != 'accepted' %}
+                                    <form action="{% url 'return_status' %}" method="POST" style="display:inline;" id="return-form-{{ item.id }}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="return_id" value="{{ item.id }}"> <!-- Hidden input for the item's ID -->
+                                        <select name="accept" id="accept-{{ item.id }}">
+                                            <option value="" disabled selected>Select</option>
+                                            <option value="accepted">Accept</option>
+                                        </select>
+                                        <button type="submit" onclick="return validateForm({{ item.id }})">SUBMIT</button>
+                                        <div id="error-message-{{ item.id }}" class="error-message" style="display:none;">Please select a status</div>
+                                    </form>
+                                {% else %}
+                                    <span>Status Accepted</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
                 </tbody>
             </table>
+            
             <div class="pagination-container">
                 <ul class="pagination">
                     {% if page_obj.has_previous %}
@@ -237,6 +276,21 @@
             </div>
         </main>
     </div>
+
+    <script>
+        function validateForm(itemId) {
+            var selectedValue = document.getElementById('accept-' + itemId).value;
+            var errorMessage = document.getElementById('error-message-' + itemId);
+
+            if (!selectedValue) {
+                errorMessage.style.display = 'block';
+                return false;
+            } else {
+                errorMessage.style.display = 'none';
+                return true;
+            }
+        }
+    </script>
 </body>
 </html>
 {% endblock %}

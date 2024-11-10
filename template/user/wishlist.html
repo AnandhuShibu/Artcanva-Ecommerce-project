@@ -105,7 +105,7 @@
             font-weight: bold;
         }
 
-        .wishlist-item .out-of-stock {
+        .wishlist-item .outofstock {
             color: red;
             font-weight: bold;
         }
@@ -276,8 +276,17 @@
         
         <!-- Display offer price -->
         <p>₹ {{ entry.offer_price }}</p>
-        
+
+        {% if entry.item.variant.stock > 0 %}
         <p class="stock">IN STOCK</p>
+            {% else %}
+            <p class="outofstock">Out of Stock</p>
+            {% endif %}
+            
+        
+            {% comment %} <p class="stock">IN STOCK</p> {% endcomment %}
+
+        {% comment %} <p>{{entry.item.variant.stock}}</p> {% endcomment %}
     </div>
     <div class="actions col-md-3 text-right">
         <a href="{% url 'add_cart_wishlist' entry.item.product.id entry.item.variant.id %}" class="btn btn-danger btn-sm add_cart-item">Add to Cart</a>

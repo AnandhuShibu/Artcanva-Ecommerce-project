@@ -1,3 +1,4 @@
+from decimal import Decimal
 import re
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login as authlogin, logout
@@ -250,9 +251,11 @@ def all_orders(request):
     paginator = Paginator(orders, 8)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+
+    no_orders_found = not orders.exists()
     
 
-    return render(request,'admin/orders.html', {'page_obj': page_obj})
+    return render(request,'admin/orders.html', {'page_obj': page_obj, 'no_orders_found': no_orders_found})
 
 
 def order_items(request,order_id):
@@ -634,28 +637,81 @@ def return_request(request):
     return render(request, 'admin/return_request.html', {'page_obj': page_obj})
 
 
+from django.shortcuts import get_object_or_404, redirect, render
+
+
 def return_status(request):
     if request.method == 'POST':
         return_id = request.POST.get('return_id')  # ID of the return request
         selected_status = request.POST.get('accept')  # Fetch the selected status
-        
+        print('RETURN STATUS', return_id)
+
         if return_id and selected_status:
             return_item = get_object_or_404(Return, id=return_id)
             if selected_status == 'accepted':
-                order_detail = get_object_or_404(Order_details, product=return_item.product, order__user=return_item.user)
-                amount_to_refund = order_detail.variant.price * order_detail.quantity 
+                # Get the associated Order_details from the Return object
+                order_detail = get_object_or_404(Order_details, id=return_item.order_item.id)
+
+                item_amount = order_detail.variant.price
+
+            
+                # Initialize the amount to refund as the full price
+                amount_to_refund = order_detail.variant.price * order_detail.quantity
+                print(f"Initial amount to refund (without any offer or coupon): {amount_to_refund}")
+
+                # Debug: Print the product's art category
+                print(f"Product Art Category: {order_detail.product.art_category}")
+
+                art_offer=order_detail.offer
+                print('newwwart offer',art_offer)
                 
-                # Add amount to user's wallet
+                # Check if the product has an offer applied (Art model)
+                # art_offer = Art.objects.filter(
+                #     art_type_offer__isnull=False,
+                #     art_type_status=True,
+                #     art_type=order_detail.product.art_category
+                # ).first()
+
+                # Debug: Check if we found an art offer
+                if art_offer > 0:
+                    # print(f"Art offer found: {art_offer.art_type_offer}% off")
+                    # Calculate the discount from the art offer
+                    discount_from_offer = (Decimal(art_offer) / Decimal(100)) * amount_to_refund
+                    print(f"Art offer discount applied: {discount_from_offer}")
+                    amount_to_refund -= discount_from_offer
+                
+                # Check if a coupon was applied to the order
+                coupon_used = order_detail.order.coupon
+                if coupon_used:
+                    # Calculate the discount from the coupon
+                    discount_from_coupon = (coupon_used.percentage / 100) * amount_to_refund
+                    print(f"Coupon discount applied: {discount_from_coupon}")
+                    amount_to_refund -= discount_from_coupon
+                else:
+                    print("No coupon applied")
+
+                requested_user = order_detail.order.user.username
                 wallet, created = Wallet.objects.get_or_create(user=order_detail.order.user)
                 wallet.wallet_amount += amount_to_refund
                 wallet.save()
+
+                trasanction = Wallet_Transaction.objects.create(
+                    user = order_detail.order.user,
+                    transaction_amount = amount_to_refund,
+                    type = 'Credit',
+                    transaction_mode = 'ITEM RETURN'    
+                )
 
             return_item.status = selected_status
             return_item.save()
 
             print('HELLO')
             return redirect('return_request')
-        
+
+    # Fetch return items with status 'request'
     return_items = Return.objects.filter(status='request').order_by('-id')
     return render(request, 'admin/return_request.html', {'return_items': return_items})
+
+
+
 
