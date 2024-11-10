@@ -413,6 +413,28 @@
             cursor: pointer;
         }
 
+        .original_price {
+            text-decoration: line-through;
+            color: #878787;
+            font-family: math;
+            margin-top: 6px;
+        }
+
+        .original {
+            
+            color: #000000;
+            font-family: math;
+            margin-top: 6px;
+        }
+        .p{
+            font-size:small;
+            margin: 10px;
+        }
+
+      
+    
+    
+
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -496,20 +518,26 @@
 
     <!-- Product section below -->
     {% for item in order_items %}
-    <h1>{{ item.id }}</h1>
+   
     <div class="order-details">
         <div class="product-image">
             <img src="{{ item.product.images1.url }}" alt="Shree Ganesha Kerala Mural Painting">
         </div>
         <div class="product-info">
-            <h3>{{ item.product.product_name }}</h3>
+            <h2>{{ item.product.product_name }}</h2>
+           
+            <div class="cash">
+                {% if item.offer %}
+                <span class = "offer_price">{{item_offer|floatformat:0}}</span>
+                <span class = "original_price">₹ {{ item.variant.price|floatformat:0 }}</span>
+                <span class="p">offer price</span>
+                {% else %}
+                <span class = "original">₹ {{ item.variant.price|floatformat:0 }}</span>
+                {% endif %}
+            </div>
             <p>Frame size: {{ item.variant.frame_size }}</p>
-            <p>AMOUTN: {{ item.variant.price }}</p>
-            <p>OFFER: {{ item.offer }}</p>  
+            <span>Qty: {{item.quantity}}</span>
         </div>
-
-
-
 
         <div class="order-actions">
             
@@ -517,10 +545,9 @@
                     <button class="review-btn">ADD REVIEW</button>
                
                 <br>
-                
-           
+
                 <h4>{{ orders.status }}</h4>
-           
+
         </div>
         <!-- Review Modal -->
 

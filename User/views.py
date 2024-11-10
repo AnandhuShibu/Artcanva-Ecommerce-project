@@ -1009,9 +1009,13 @@ def order_details(request, order_id):
     # accepted_variant_ids = list(accepted_returns.values_list('variant_id', flat=True))
     items_with_price = []
     normal_total_price = 0  # Initialize normal total price
-
+    item_offer = None
     for item in order_items:
-        
+
+        if item.offer:
+
+            item_offer = item.variant.price * (Decimal(1) - (Decimal(item.offer) / Decimal(100)))
+
         original_price = item.variant.price * item.quantity
         discount_price = original_price  # Start with no discount
         
@@ -1034,7 +1038,8 @@ def order_details(request, order_id):
         # 'accepted_variant_ids': accepted_variant_ids,
         'orders':orders,
         'order_address': order_address,
-        'normal_total_price': normal_total_price
+        'normal_total_price': normal_total_price,
+        'item_offer': item_offer
     }
     return render(request, 'user/order_details.html', context)
 

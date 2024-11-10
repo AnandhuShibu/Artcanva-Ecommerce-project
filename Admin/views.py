@@ -263,14 +263,23 @@ def order_items(request,order_id):
     total_amount=order_id.total_amount
     order_items=Order_details.objects.filter(order=order_id)
     order_address = get_object_or_404(OrderAddress, order=order_id)
+    item_offer = None
+    for item in order_items:
+
+        if item.offer:
+
+            item_offer = item.variant.price * (Decimal(1) - (Decimal(item.offer) / Decimal(100)))
 
     context={
         'order_items':order_items,
         'order_address':order_address,
         'total_amount':total_amount,
-        'order_id':order_id    
+        'order_id':order_id,
+        'item_offer': item_offer
+
     }
     return render(request,'admin/order_items.html', context)
+
 
 def change_order_status(request, order_id):
     if request.method == 'POST':
@@ -365,7 +374,10 @@ def offer(request):
 
     offers = Art.objects.filter(art_type_offer__gt=0)
 
-    return render(request, 'admin/offer.html', {'offers': offers})
+    no_offer_found = not offers.exists()
+
+
+    return render(request, 'admin/offer.html', {'offers': offers, 'no_offer_found': no_offer_found})
 
 def add_offer_page(request):
     if not request.user.is_authenticated or not request.user.is_superuser: 
@@ -673,7 +685,7 @@ def return_status(request):
                 # ).first()
 
                 # Debug: Check if we found an art offer
-                if art_offer > 0:
+                if art_offer:
                     # print(f"Art offer found: {art_offer.art_type_offer}% off")
                     # Calculate the discount from the art offer
                     discount_from_offer = (Decimal(art_offer) / Decimal(100)) * amount_to_refund

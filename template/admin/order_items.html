@@ -156,7 +156,8 @@
                         <th>Product ID</th>
                         <th>Product Name</th>
                         <th>Quantity</th>
-                        <th>Price</th>
+                        <th>Price ₹</th>
+                        <th>Offer price ₹</th>
                         <th>Category</th>
                         <th>Frame Size</th>
                         <th>Status</th>
@@ -171,7 +172,10 @@
                         <td>{{ item.product.id }}</td>
                         <td>{{ item.product.product_name }}</td>
                         <td>{{ item.quantity }}</td>
-                        <td>{{ item.variant.price }}</td>
+                        <td>{{ item.variant.price|floatformat:0}}</td>
+                        <td>{{ item_offer|floatformat:0 }}</td>
+
+                        
                         <td>{{ item.product.art_category.art_type }}</td>
                         <td>{{ item.variant.frame_size }}</td>
                         <td>{{ order_id.status }}</td>
