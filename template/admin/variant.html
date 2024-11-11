@@ -241,6 +241,13 @@
                     </tr>
                 </thead>
                 <tbody>
+                    {% if no_variant_found %}
+                    <tr>
+                        <td colspan="6" class="text-center" style="text-align: center; color: red; font-weight: bold;">
+                            No variant found !
+                        </td>
+                    </tr>
+                {% else %}
                     {% for variant in page_obj %}
                     <tr>
                         <td></td>
@@ -261,6 +268,7 @@
                     {% endfor %}
                    
                 </tbody>
+                {% endif %}
             </table>
 
             <div class="pagination-container">

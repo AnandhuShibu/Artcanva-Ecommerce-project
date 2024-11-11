@@ -596,8 +596,9 @@
 
 
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-   
     function openReturnModal(itemId) {
         document.getElementById('returnModal-' + itemId).style.display = 'block';
     }
@@ -611,17 +612,17 @@
         const openReviewButtons = document.querySelectorAll(".review-btn");
         const closeReviewButton = document.querySelector(".close-btn");
         const submitReviewButton = document.getElementById("submitReview");
-    
+
         openReviewButtons.forEach(button => {
             button.onclick = () => {
                 reviewModal.style.display = "block";
             };
         });
-    
+
         closeReviewButton.onclick = () => {
             reviewModal.style.display = "none";
         };
-    
+
         // Close modals if clicked outside the modal content
         window.onclick = function(event) {
             const modals = document.querySelectorAll('.modal');
@@ -631,25 +632,50 @@
                 }
             });
         };
-    
-        submitReviewButton.onclick = () => {
+
+        submitReviewButton.onclick = (event) => {
             const rating = document.getElementById("rating").value;
             const reviewText = document.getElementById("reviewText").value;
-            
-            if (rating && reviewText) {
-                alert(`Thank you for your review!\nRating: ${rating}\nReview: ${reviewText}`);
-                reviewModal.style.display = "none"; // Close the modal after submission
-            } else {
-                alert("Please fill out both fields.");
+
+            // Validation: Ensure rating is between 1 and 5
+            if (!rating || rating < 1 || rating > 5) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Rating',
+                    text: 'Please enter a rating between 1 and 5.',
+                });
+                event.preventDefault();  // Prevent form submission
+                return;
             }
+
+            // Validation: Ensure review text is not empty
+            if (!reviewText.trim()) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Empty Review',
+                    text: 'Please write a review before submitting.',
+                });
+                event.preventDefault();  // Prevent form submission
+                return;
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Thank you!',
+                text: `Rating: ${rating}\nReview: ${reviewText}`,
+            }).then(() => {
+                reviewModal.style.display = "none"; // Close the modal after submission
+            });
         };
     });
     
-function downloadInvoice() {
-    const orderId = "{{ orders.id }}";
-    window.location.href = `/download-invoice/${orderId}/`;
-}
+    function downloadInvoice() {
+        const orderId = "{{ orders.id }}";
+        window.location.href = `/download-invoice/${orderId}/`;
+    }
 </script>
+
+
 
 <script>
     function showPopup(message, type) {

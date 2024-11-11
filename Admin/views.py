@@ -106,7 +106,6 @@ def edit_product(request):
         art_category_id = request.POST.get('art_category')
         paint_category_id = request.POST.get('paint_category')
         
-        
         if not art_category_id or not paint_category_id:
             print("not")
             messages.error(request, "Please select both Art Category and Paint Category.")
@@ -235,12 +234,12 @@ def variant(request, product_id):
         
         return redirect('variant', product_id=products.id)
     
-
+    no_variant_found = not variants.exists()
     paginator = Paginator(variants, 8)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'admin/variant.html', {'page_obj': page_obj})
+    return render(request, 'admin/variant.html', {'page_obj': page_obj, 'no_variant_found': no_variant_found})
 
 
 #---------------------- ORDERS SECTION -------------------#
@@ -254,7 +253,6 @@ def all_orders(request):
 
     no_orders_found = not orders.exists()
     
-
     return render(request,'admin/orders.html', {'page_obj': page_obj, 'no_orders_found': no_orders_found})
 
 
@@ -287,11 +285,20 @@ def change_order_status(request, order_id):
         new_status = request.POST.get('order_status')
         order = get_object_or_404(Order, id=order_id)
         order.status = new_status
-
+        
         if new_status == 'Delivered':
             order.deliver_date = timezone.now()
         else:
             order.deliver_date = None
+        
+        if new_status == 'Cancelled':
+            wallet=get_object_or_404(Wallet, user=order.user)
+            wallet.wallet_amount +=order.total_amount
+            wallet.save()
+
+        
+        
+
         order.save()
         return redirect('order_items', order_id=order_id)
 
@@ -372,13 +379,10 @@ def add_coupon(request):
 #-------------------------- OFFER SECTION ------------------------#
 
 def offer(request):
-
     offers = Art.objects.filter(art_type_offer__gt=0)
-
     no_offer_found = not offers.exists()
-
-
     return render(request, 'admin/offer.html', {'offers': offers, 'no_offer_found': no_offer_found})
+
 
 def add_offer_page(request):
     if not request.user.is_authenticated or not request.user.is_superuser: 
@@ -423,8 +427,6 @@ def remove_offer(request, offer_id):
 
 def sale(request):
     return render(request, 'admin/sale.html')
-
-
 
 
 from datetime import datetime, timedelta
@@ -510,11 +512,6 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph #
 from reportlab.lib.styles import getSampleStyleSheet # type: ignore
 from reportlab.lib import colors # type: ignore
 from django.db.models.functions import Round
-
-
-
-
-
 from datetime import datetime, timedelta
 
 def export_pdf(request):
@@ -577,7 +574,7 @@ def export_pdf(request):
     summary_data = [
         f"Total Sales: {overall_sales_count}",
         f"Total Amount: {overall_amount}",
-        f"Total Discount: {overall_discount}",
+        f"Total Discount: {overall_discount:.2f}",
     ]
     for summary in summary_data:
         elements.append(Paragraph(summary, styles['Normal']))
@@ -617,12 +614,6 @@ def export_pdf(request):
     doc.build(elements)
 
     return response
-
-
-
-
-
-
 
 
 

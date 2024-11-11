@@ -142,10 +142,14 @@
                             <option value="Pending" selected>Pending</option>
                             <option value="Shipped">Shipped</option>
                             <option value="Delivered">Delivered</option>
+                            <option value="Cancelled">Cancel</option>
 
                         {% elif order_id.status == "Shipped" %}
                             <option value="Shipped" selected>Shipped</option>
                             <option value="Delivered">Delivered</option>
+                            <option value="Cancelled">Cancel</option>
+
+
                         {% elif order_id.status == "Cancelled" %}
                             <option value="" selected disabled>Cancelled</option>
                         {% else %}
