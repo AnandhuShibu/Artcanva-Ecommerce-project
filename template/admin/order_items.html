@@ -112,7 +112,23 @@
             </div>
             <div class="info-box">
                 <h2>TOTAL AMOUNT</h2>
-                <p>{{ total_amount }}</p>
+
+                
+                {% if order_id.coupon_name %}
+                
+                <h5>Coupon name: {{order_id.coupon_name}}</h5>
+                <br>
+                <h5>Coupon percentage: {{order_id.coupon_percentage}} %</h5>
+                <br>
+
+                {% else %}
+                <h5>No coupon used</h5>
+                {% endif %}
+                
+
+                <h4>Rs.{{ total_amount }}</h4>
+
+               
             </div>
         </div>
         <h1>{{ order_id.status|upper }}</h1>
@@ -161,6 +177,7 @@
                         <th>Category</th>
                         <th>Frame Size</th>
                         <th>Status</th>
+
                     </tr>
                 </thead>
                 <tbody>
@@ -173,7 +190,13 @@
                         <td>{{ item.product.product_name }}</td>
                         <td>{{ item.quantity }}</td>
                         <td>{{ item.variant.price|floatformat:0}}</td>
+
+                        {% if item_offer %}
                         <td>{{ item_offer|floatformat:0 }}</td>
+                        {% else %}
+                        <td>No offer</td>
+                        {% endif %}
+                        
 
                         
                         <td>{{ item.product.art_category.art_type }}</td>

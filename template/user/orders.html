@@ -13,7 +13,7 @@
         }
 
         h2 {
-            margin-bottom: 20px;
+            margin-bottom: 11px;
             font-weight: bold;
             color: #343a40;
             text-align: center;
@@ -34,7 +34,7 @@
         }
 
         .table-responsive {
-            margin-top: 20px;
+            margin-top: 10px;
         }
 
         @media (max-width: 768px) {
@@ -78,7 +78,7 @@
             color: white;
         }
 
-        /* Style for the buttons */
+        {% comment %} /* Style for the buttons */
         .top-buttons {
             display: flex;
             justify-content: space-between;
@@ -88,18 +88,126 @@
         .top-buttons .btn {
             width: 150px;
             padding: 10px;
+        } {% endcomment %}
+
+        /* Style for the 'view' button */
+        .view-btn {
+            display: inline-block;
+            padding: 2px 21px;
+            background-color: #DEAD6F;
+            color: black;
+            font-weight: bold;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s, color 0.3s;
         }
+
+        .view-btn:hover {
+            background-color: #b38b5b;
+            color: white;
+            text-decoration: none;
+        }
+
+        .navbar {
+            background-color: #ffffe4;
+            padding: 21px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #000000 ;
+          }
+      
+          .navbar .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #000000;
+            letter-spacing: 1px;
+          }
+      
+          .navbar .nav-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+          }
+      
+          .navbar ul {
+            list-style: none;
+            display: flex;
+            gap: 90px;
+          }
+      
+          .navbar ul li {
+            display: inline;
+          }
+      
+          .navbar ul li a {
+            color: #000000;
+            text-decoration: none;
+            font-size: 18px;
+            transition: color 0.3s;
+          }
+      
+          .navbar ul li a:hover {
+            color: #000000;
+            text-decoration: underline;
+            transition: text-decoration 0.3s ease;
+          }
+      
+          hr {
+              border: none;
+              height: 1px;
+              background-color: #000000;
+              margin: 0;
+      
+          }
+
+          .footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+          }
+      
+          .footer p {
+            margin: 0;
+            font-size: 14px;
+          }
+
+
     </style>
 </head>
 <body>
 
-<div class="container mt-5">
-
-    <div class="top-buttons">
-        <a href="{% url 'home' %}" class="btn btn-primary">Go to Home</a>
-        <a href="{% url 'profile' %}" class="btn btn-primary">Go to Profile</a>
+    <!-- Navbar -->
+  <div class="navbar">
+    <div class="logo">ART CANVA</div>
+    <div class="nav-center">
+      <ul>
+        <li><a href="{% url 'home'%}">Home</a></li>
+        <li><a href="{% url 'shop'%}">Shop</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
     </div>
+    <ul>
+      <li><a href="{% url 'cart'%}">Cart</a></li>
+      <li><a href="{% url 'wishlist'%}">Wishlist</a></li>
+      <li><a href="{% url "profile" %}">Profile</a></li>
+    </ul>
+  </div>
 
+  <hr>
+
+
+
+
+
+
+
+<div class="container mt-3">
+   
     <h2>ALL ORDERS</h2>
     <div class="table-responsive">
         <table class="table table-bordered table-hover">
@@ -110,7 +218,7 @@
                     <th>Order Date</th>
                     <th>Payment method</th>
                     <th>Status</th>
-                    <th></th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -128,7 +236,7 @@
                     <td>{{ order.order_date|date:"d-m-y"}}</td>
                     <td>{{ order.payment_method }}</td>
                     <td>{{ order.status }}</td>
-                    <td><a href="{% url 'order_details' order.id %}">view</a></td>
+                    <td><a href="{% url 'order_details' order.id %}" class="view-btn">view</a></td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -153,6 +261,10 @@
     </div>
 
 </div>
+
+<div class="footer">
+    <p>&copy; 2024 ArtCanva. All rights reserved.</p>
+  </div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>

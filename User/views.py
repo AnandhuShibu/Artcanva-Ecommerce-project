@@ -791,9 +791,16 @@ def place_order(request):
         ##getting selected coupon code
         selected_coupon_code = request.POST.get('selected_coupon_code', None) 
         coupon = None
+        coupon_percentage = None
         if selected_coupon_code:
             ##getting selected coupon ID
             coupon = get_object_or_404(Coupons, coupon_code=selected_coupon_code)
+            coupon_percentage = coupon.percentage
+
+            print("CODE", selected_coupon_code)
+            print("PERCENT", coupon_percentage)
+
+
             Coupon_user.objects.create(
                 user = request.user,
                 coupon_used = coupon
@@ -824,11 +831,12 @@ def place_order(request):
                 user=request.user,
                 total_amount=final_amount / 100,
                 payment_method=payment_method,
-                coupon = coupon
+                coupon = coupon,
+                coupon_name = selected_coupon_code,
+                coupon_percentage = coupon_percentage
             )
 
-            
-
+        
             OrderAddress.objects.create(
                 order=order,
                 fullname=selected_address.fullname,
@@ -848,6 +856,7 @@ def place_order(request):
                     quantity=item.quantity,
                     variant=item.variant,
                     offer = offer_percentage
+
                 )
                 item.variant.stock -= item.quantity
                 item.variant.save()
@@ -860,7 +869,9 @@ def place_order(request):
                 user=request.user,
                 total_amount=final_amount / 100, 
                 payment_method=payment_method,
-                coupon = coupon
+                coupon = coupon,
+                coupon_name = selected_coupon_code,
+                coupon_percentage = coupon_percentage
             )
 
             OrderAddress.objects.create(
@@ -913,8 +924,9 @@ def place_order(request):
                 user=request.user,
                 total_amount=final_amount / 100,
                 payment_method=payment_method,
-                
-                coupon = coupon
+                coupon = coupon,
+                coupon_name = selected_coupon_code,
+                coupon_percentage = coupon_percentage
             )
             
             OrderAddress.objects.create(
@@ -983,43 +995,41 @@ def orders(request):
     return render(request, 'user/orders.html', context)
 
 
+@login_required
 def order_details(request, order_id):
-    orders = get_object_or_404(Order, id=order_id)
-    return_button = None
-    order_address = get_object_or_404(OrderAddress, order=order_id)
     
+    orders = get_object_or_404(Order, id=order_id)
+    # if orders.user != request.user:
+    #     return redirect('jasir')
+    return_button = None
+    hide = None
+    order_address = get_object_or_404(OrderAddress, order=order_id)
+    order_items = Order_details.objects.filter(order=orders)
     if orders.coupon:
             coupon_code = orders.coupon.coupon_code 
-
             print('code', coupon_code)
             print('percentage', orders.coupon.percentage )
-        #     elements.append(Paragraph(f"<br/>Coupon Used: {coupon_code}", styles['Normal']))
-        #     elements.append(Paragraph(f"Coupon percentage: {order.coupon.percentage} % ", styles['Normal'])) 
 
-    else:
-        print("NO COUPON")
-        #     elements.append(Paragraph(f"<br/>Coupon Used: No coupon Used", styles['Normal']))
-    
+    for item in order_items:
+        return_request = Return.objects.filter(order_item=item, status='accepted').exists()
+        print("inner return :", return_request)
+
+    print('return:',return_request)
 
     if orders.status == 'Delivered':
         return_button = 'delivered'
 
     order_items=Order_details.objects.filter(order = orders)
-    # accepted_returns = Return.objects.filter(variant__in=[item.variant for item in order_items], status='accepted', user=request.user)
-    # accepted_variant_ids = list(accepted_returns.values_list('variant_id', flat=True))
     items_with_price = []
-    normal_total_price = 0  # Initialize normal total price
+    normal_total_price = 0 
     item_offer = None
+
     for item in order_items:
-
         if item.offer:
-
             item_offer = item.variant.price * (Decimal(1) - (Decimal(item.offer) / Decimal(100)))
-
         original_price = item.variant.price * item.quantity
-        discount_price = original_price  # Start with no discount
-        
-        # Check if there is an art type offer
+        discount_price = original_price  
+    
         if item.product.art_category.art_type_offer:
             discount_price -= (original_price * item.product.art_category.art_type_offer / 100)
             
@@ -1029,17 +1039,21 @@ def order_details(request, order_id):
             'discount_price': discount_price,
         })
         
-        # Add to normal total price (without discount)
         normal_total_price += original_price
+    
+    
+
+
 
     context = {
         'order_items':order_items,
         'return_button': return_button,
-        # 'accepted_variant_ids': accepted_variant_ids,
         'orders':orders,
         'order_address': order_address,
         'normal_total_price': normal_total_price,
-        'item_offer': item_offer
+        'item_offer': item_offer,
+        'return_request':return_request,
+        # 'hide': hide
     }
     return render(request, 'user/order_details.html', context)
 
@@ -1056,13 +1070,14 @@ def item_return(request, order_id, item_id):
         request_value = request.POST.get('request')
         item = get_object_or_404(Order_details, id=item_id)
        
-       
-
-        # existing_return = Return.objects.filter(product=product, user=request.user, variant=variant).exists()
-
-        # if existing_return:
-        #     messages.warning(request, 'You have already submitted a return request for this item.')
-        #     return redirect('order_details', order_id)  # Redirect back to the order details page
+        print("ITEM", item)
+        # Check if a return request already exists for this item and user
+        existing_return = Return.objects.filter(order_item=item, status='request').exists()
+        print("EXISTING", existing_return)
+        if existing_return:
+            # If a return request already exists, show a warning message
+            messages.warning(request, 'You have already submitted a return request for this item.')
+            return redirect('order_details', order_id=order_id)  # 
         
         if reason == 'damaged':
             text = 'Damaged Product'
@@ -1217,7 +1232,7 @@ def order_cancel(request, order_id):
             user = request.user,
             transaction_amount = order.total_amount,
             type = 'Credit',
-            transaction_mode = order.payment_method     
+            transaction_mode = 'Item cancel'     
         )
    
     order.save()
@@ -1353,8 +1368,9 @@ def download_invoice(request, order_id):
             table_data.append([product_name, quantity, f"{normal_price:.2f}", f"{offer_price:.2f}"])
 
         # Apply coupon discount if present
-        if order.coupon:
-            coupon_discount = (offer_total_price * order.coupon.percentage) / 100
+        if order.coupon_name:
+            coupon_discount = (Decimal(offer_total_price) * Decimal(order.coupon_percentage)) / 100
+
             final_payable_price = offer_total_price - coupon_discount
         else:
             final_payable_price = offer_total_price  # No coupon applied
@@ -1382,10 +1398,10 @@ def download_invoice(request, order_id):
         
         
         # Display coupon details if applicable
-        if order.coupon:
-            coupon_code = order.coupon.coupon_code
+        if order.coupon_name:
+            coupon_code = order.coupon_name
             elements.append(Paragraph(f"<br/>Coupon Used: {coupon_code}", styles['Normal']))
-            elements.append(Paragraph(f"Coupon Percentage: {order.coupon.percentage}%", styles['Normal']))
+            elements.append(Paragraph(f"Coupon Percentage: {order.coupon_percentage}%", styles['Normal']))
         else:
             elements.append(Paragraph("<br/>Coupon Used: No coupon used", styles['Normal']))
 
@@ -1403,7 +1419,7 @@ def download_invoice(request, order_id):
             spaceAfter=12,
             alignment=1,
         )
-        elements.append(Paragraph("<br/>Ordered Address", custom_style))
+        elements.append(Paragraph("<br/>BILLING ADDRESS", custom_style))
         elements.append(Paragraph(f"Name: {order_address.fullname}", styles['Normal']))
         elements.append(Paragraph(f"Address: {order_address.address}", styles['Normal']))
         elements.append(Paragraph(f"Phone Number: {order_address.mobile}", styles['Normal']))

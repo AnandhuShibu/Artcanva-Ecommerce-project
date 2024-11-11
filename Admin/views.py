@@ -264,10 +264,11 @@ def order_items(request,order_id):
     order_items=Order_details.objects.filter(order=order_id)
     order_address = get_object_or_404(OrderAddress, order=order_id)
     item_offer = None
+    print(order_id.coupon_name)
+    
     for item in order_items:
 
         if item.offer:
-
             item_offer = item.variant.price * (Decimal(1) - (Decimal(item.offer) / Decimal(100)))
 
     context={
@@ -430,14 +431,6 @@ from datetime import datetime, timedelta
 from django.db.models import Sum, F
 from django.core.paginator import Paginator
 
-from datetime import datetime, timedelta
-from django.db.models import Sum, F
-from django.core.paginator import Paginator
-
-from datetime import datetime, timedelta
-from django.db.models import Sum, F
-from django.core.paginator import Paginator
-
 def sales(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
@@ -515,6 +508,14 @@ from django.db.models import Sum, F
 from reportlab.lib.pagesizes import A4 # type: ignore
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph # type: ignore
 from reportlab.lib.styles import getSampleStyleSheet # type: ignore
+from reportlab.lib import colors # type: ignore
+from django.db.models.functions import Round
+
+
+
+
+
+from datetime import datetime, timedelta
 
 def export_pdf(request):
     # Get filter parameters from the request
@@ -522,65 +523,53 @@ def export_pdf(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
 
-    # Prepare the response and PDF document
+    # Prepare the PDF response
     response = HttpResponse(content_type='application/pdf')
-    
     response['Content-Disposition'] = 'attachment; filename="sales_report.pdf"'
-    
-    # Prepare the document
     doc = SimpleDocTemplate(response, pagesize=A4)
     doc.title = "ARTCANVA SALES REPORT"
     elements = []
-    
 
-    # Add the Heading
+    # Add the heading
     styles = getSampleStyleSheet()
     heading_style = styles['Heading1']
-    heading_style.fontSize = 18  # Adjust font size
-    heading_style.alignment = 1  # Center alignment
-    
+    heading_style.fontSize = 18
+    heading_style.alignment = 1
     heading = Paragraph("ARTCANVA SALES REPORT", heading_style)
     elements.append(heading)
-
-    # Add some space after the heading
     elements.append(Paragraph("<br/><br/>", styles['Normal']))
 
-    # Handle different filter types (daily, weekly, monthly)
+    # Retrieve delivered orders and apply filtering if specified
     orders = Order.objects.filter(status='Delivered').order_by('-id')
 
+    # Determine date range based on filter type
+    today = datetime.now().date()
     if filter_type == 'daily':
-        today = datetime.now().date()
-        start_date = today
-        end_date = today
-
+        start_date = end_date = today
     elif filter_type == 'weekly':
-        today = datetime.now().date()
-        start_date = today - timedelta(days=today.weekday())  # Start of the week (Monday)
-        end_date = today + timedelta(days=(6 - today.weekday()))  # End of the week (Sunday)
-
+        start_date = today - timedelta(days=today.weekday())
+        end_date = start_date + timedelta(days=6)
     elif filter_type == 'monthly':
-        today = datetime.now().date()
-        start_date = today.replace(day=1)  # First day of the month
-        end_date = (today.replace(day=1) + timedelta(days=32)).replace(day=1) - timedelta(days=1)  # Last day of the month
+        start_date = today.replace(day=1)
+        end_date = (start_date + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+    elif filter_type == 'customize' and start_date and end_date:
+        try:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        except ValueError:
+            # Handle invalid date format by setting both dates to None
+            start_date = end_date = None
 
-    # Ensure start_date and end_date are valid date objects
-    if start_date and isinstance(start_date, str):
-        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
-    if end_date and isinstance(end_date, str):
-        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
-
-    # Apply date filtering if both dates are valid
+    # Apply date filtering if both start_date and end_date are valid
     if start_date and end_date:
-        orders = orders.filter(order_date__date__range=(start_date, end_date))  # Filter by date range
+        orders = orders.filter(order_date__date__range=(start_date, end_date))
 
-     # Calculate total sales count, total amount, and total discount
+    # Calculate summary data for filtered orders
     overall_sales_count = orders.count()
     overall_amount = orders.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
-
-    # Calculate discount amount (if coupon applied)
     overall_discount = (
         orders.filter(coupon__isnull=False)
-        .annotate(discount_amount=Round(F('total_amount') * F('coupon__percentage') / 100, 2))
+        .annotate(discount_amount=F('total_amount') * F('coupon__percentage') / 100)
         .aggregate(total_discount=Sum('discount_amount'))['total_discount'] or 0
     )
 
@@ -592,16 +581,12 @@ def export_pdf(request):
     ]
     for summary in summary_data:
         elements.append(Paragraph(summary, styles['Normal']))
-    
-    # Add some space after the summary
     elements.append(Paragraph("<br/><br/>", styles['Normal']))
 
-    # Define the table data
+    # Prepare table data
     data = [
-        ["Order ID", "Customer Name", "Total Amount", "Ordered at", "Delivered at", "Payment Method"]  # Header row
+        ["Order ID", "Customer Name", "Total Amount", "Ordered at", "Delivered at", "Payment Method"]
     ]
-
-    # Add data for each order in the filtered set
     for order in orders:
         row = [
             str(order.id),
@@ -613,27 +598,31 @@ def export_pdf(request):
         ]
         data.append(row)
 
-    # Create the table
+    # Create the table and apply styles
     table = Table(data)
-    
-    # Style the table (alignment, border width, etc.)
     table.setStyle(TableStyle([
-        ('TEXTCOLOR', (0, 0), (-1, 0), (0, 0, 0)),  # Header row text color
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),  # Align all columns to the center
-        ('GRID', (0, 0), (-1, -1), 1, (0, 0, 0)),  # Grid lines for all cells
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),  # Bold header row
-        ('FONTSIZE', (0, 0), (-1, -1), 10),  # Font size for table
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),  # Padding for header row
-        ('BACKGROUND', (0, 0), (-1, 0), (0.8, 0.8, 0.8)),  # Header background color
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
     ]))
-    
+
     # Add the table to the document
     elements.append(table)
 
     # Build the PDF
     doc.build(elements)
-    
+
     return response
+
+
+
+
+
+
 
 
 
@@ -677,14 +666,9 @@ def return_status(request):
                 art_offer=order_detail.offer
                 print('newwwart offer',art_offer)
                 
-                # Check if the product has an offer applied (Art model)
-                # art_offer = Art.objects.filter(
-                #     art_type_offer__isnull=False,
-                #     art_type_status=True,
-                #     art_type=order_detail.product.art_category
-                # ).first()
+               
 
-                # Debug: Check if we found an art offer
+                
                 if art_offer:
                     # print(f"Art offer found: {art_offer.art_type_offer}% off")
                     # Calculate the discount from the art offer
@@ -711,8 +695,13 @@ def return_status(request):
                     user = order_detail.order.user,
                     transaction_amount = amount_to_refund,
                     type = 'Credit',
-                    transaction_mode = 'ITEM RETURN'    
+                    transaction_mode = 'Item return'    
                 )
+
+                # Increase the stock of the returned variant
+                variant = order_detail.variant
+                variant.stock += order_detail.quantity  # Increment the stock by the returned quantity
+                variant.save()
 
             return_item.status = selected_status
             return_item.save()
