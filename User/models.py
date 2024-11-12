@@ -51,7 +51,7 @@ class Order(models.Model):
     deliver_date = models.DateTimeField(null=True, blank= True)
     coupon = models.ForeignKey(Coupons, null=True, blank=True, on_delete=models.SET_NULL, related_name='orders')
     coupon_name = models.CharField(max_length=100, null=True, blank=True)
-    coupon_percentage = models.CharField(max_length=100, null=True, blank=True)
+    coupon_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     
 
 class Order_details(models.Model):

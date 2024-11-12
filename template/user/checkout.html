@@ -311,9 +311,7 @@
             '{{ address.city }}', '{{ address.district }}', '{{ address.state }}')">Edit</button>
 
 
-            <a href="{% url 'remove_address' address.id %}">
-              <button type="button" class="btn btn-sm btn-outline-danger">DELETE</button>
-            </a>
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDelete({{ address.id }})">DELETE</button>
           </div>
         </div>
         {% endfor %}
@@ -333,7 +331,9 @@
           <img src="{{ item.product.images1.url }}" alt="Product Image">
           <div class="ms-3">
             <p class="mb-1">{{ item.product.product_name }}</p>
-            <p>Price: ₹{{ item.variant.price }}</p>
+            
+
+           
             <p>Frame size:{{ item.variant.frame_size }}</p>
           </div>
         </div>
@@ -604,6 +604,26 @@
   {% endif %}
     
   </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+function confirmDelete(addressId) {
+  Swal.fire({
+    title: "Are you sure?",
+    text: "Do you really want to delete this address?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Yes, delete it!"
+  }).then((result) => {
+    if (result.isConfirmed) {
+      window.location.href = "{% url 'remove_address' 0 %}".replace("0", addressId);
+    }
+  });
+}
+</script>
   
 </body>
 </html>

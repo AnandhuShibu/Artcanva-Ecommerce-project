@@ -112,10 +112,7 @@
             </div>
             <div class="info-box">
                 <h2>TOTAL AMOUNT</h2>
-
-                
                 {% if order_id.coupon_name %}
-                
                 <h5>Coupon name: {{order_id.coupon_name}}</h5>
                 <br>
                 <h5>Coupon percentage: {{order_id.coupon_percentage}} %</h5>
@@ -124,11 +121,7 @@
                 {% else %}
                 <h5>No coupon used</h5>
                 {% endif %}
-                
-
                 <h4>Rs.{{ total_amount }}</h4>
-
-               
             </div>
         </div>
         <h1>{{ order_id.status|upper }}</h1>
@@ -200,9 +193,6 @@
                         {% else %}
                         <td>No offer</td>
                         {% endif %}
-                        
-
-                        
                         <td>{{ item.product.art_category.art_type }}</td>
                         <td>{{ item.variant.frame_size }}</td>
                         <td>{{ order_id.status }}</td>

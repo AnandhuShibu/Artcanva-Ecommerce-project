@@ -331,12 +331,7 @@
                         <td>{{coupon.percentage}}<span>%</span></td>
                         <td>{{coupon.expiry_date}}</td>
                         <td>
-
-
-                            
-
                             <a href="{% url 'remove_coupon' coupon.id %}" onclick="return confirmDelete(event, this)" ><button class="deactivate-btn">DELETE</button></a>
-                    
                         </td>
                     </tr>
                     {% endfor %}
@@ -379,7 +374,6 @@
         </div>
     </form>
     </div>
-    
     
     
     <script>

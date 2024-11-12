@@ -148,8 +148,7 @@ def edit_art(request):
         if new_type_lower in existing_type or existing_type in new_type_lower:
             messages.error(request, f"Art type '{new_type}' is too similar to '{existing_type}'.")
             return redirect('art')
-
-    
+   
     art.art_type=new_type
     art.save()
     messages.success(request, "Success")

@@ -1,5 +1,7 @@
 from decimal import Decimal
 import re
+
+from django.shortcuts import get_object_or_404, redirect, render
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login as authlogin, logout
 from django.contrib.auth.models import User
@@ -285,20 +287,27 @@ def change_order_status(request, order_id):
         new_status = request.POST.get('order_status')
         order = get_object_or_404(Order, id=order_id)
         order.status = new_status
-        
+        print('PAYMENT',order.payment_method)
         if new_status == 'Delivered':
             order.deliver_date = timezone.now()
         else:
             order.deliver_date = None
         
-        if new_status == 'Cancelled':
+        if new_status == 'Cancelled' and order.payment_method in ['Wallets', 'Razorpay']:
             wallet=get_object_or_404(Wallet, user=order.user)
             wallet.wallet_amount +=order.total_amount
             wallet.save()
 
-        
-        
+            print("sample")
 
+            trasanction = Wallet_Transaction.objects.create(
+                    user = order.user,
+                    transaction_amount = order.total_amount,
+                    type = 'Credit',
+                    transaction_mode = 'Item cancel'    
+                )
+
+        
         order.save()
         return redirect('order_items', order_id=order_id)
 
@@ -429,22 +438,12 @@ def sale(request):
     return render(request, 'admin/sale.html')
 
 
-from datetime import datetime, timedelta
-from django.db.models import Sum, F
-from django.core.paginator import Paginator
-
 def sales(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
     filter_type = request.GET.get('status')
     orders = Order.objects.filter(status='Delivered').order_by('-id')
 
-    # Debugging prints to check the date filtering logic
-    print("start_date", start_date)
-    print("end_date", end_date)
-    print("filter_type", filter_type)
-
-    # Handle different filter types (daily, weekly, monthly)
     if filter_type == 'daily':
         print("Daily filter applied")
         today = datetime.now().date()
@@ -454,43 +453,35 @@ def sales(request):
     elif filter_type == 'weekly':
         print("Weekly filter applied")
         today = datetime.now().date()
-        start_date = today - timedelta(days=today.weekday())  # Start of the week (Monday)
-        end_date = today + timedelta(days=(6 - today.weekday()))  # End of the week (Sunday)
+        start_date = today - timedelta(days=today.weekday())  
+        end_date = today + timedelta(days=(6 - today.weekday()))  
 
     elif filter_type == 'monthly':
         print("Monthly filter applied")
         today = datetime.now().date()
-        start_date = today.replace(day=1)  # First day of the month
-        end_date = (today.replace(day=1) + timedelta(days=32)).replace(day=1) - timedelta(days=1)  # Last day of the month
+        start_date = today.replace(day=1)  
+        end_date = (today.replace(day=1) + timedelta(days=32)).replace(day=1) - timedelta(days=1)  
 
-    # Ensure the start_date and end_date are in date format
     if start_date and isinstance(start_date, str):
         start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
     if end_date and isinstance(end_date, str):
         end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
 
-    # Debugging prints to check if dates are parsed correctly
-    print("Parsed start_date:", start_date)
-    print("Parsed end_date:", end_date)
-
-    # Apply date filtering only if both dates are valid
     if start_date and end_date:
         print("Filtering orders by date range")
-        orders = orders.filter(order_date__date__range=(start_date, end_date))  # Use order_date__date to strip time part
+        orders = orders.filter(order_date__date__range=(start_date, end_date))  
 
-    # Pagination logic
     paginator = Paginator(orders, 4)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    # Calculate overall sales count, total amount, and overall discount
     overall_sales_count = orders.count()
     overall_amount = orders.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
 
     overall_discount = (
-        orders.filter(coupon__isnull=False)
-        .annotate(discount_amount=Round(F('total_amount') * F('coupon__percentage') / 100, 2))
-        .aggregate(total_discount=Sum('discount_amount'))['total_discount'] or 0
+    orders.filter(coupon__isnull=False)  # Ensure the coupon is not null
+    .annotate(discount_amount=Round(F('total_amount') * F('coupon_percentage') / 100, 2))  # Calculate discount based on coupon_percentage
+    .aggregate(total_discount=Sum('discount_amount'))['total_discount'] or 0  # Sum the discount amounts
     )
 
     context = {
@@ -503,31 +494,26 @@ def sales(request):
     return render(request, 'admin/sales.html', context)
 
 
-
-from datetime import datetime, timedelta
-from django.http import HttpResponse
-from django.db.models import Sum, F
 from reportlab.lib.pagesizes import A4 # type: ignore
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph # type: ignore
 from reportlab.lib.styles import getSampleStyleSheet # type: ignore
 from reportlab.lib import colors # type: ignore
 from django.db.models.functions import Round
+from django.http import HttpResponse
+from django.db.models import Sum, F
 from datetime import datetime, timedelta
-
+ 
 def export_pdf(request):
-    # Get filter parameters from the request
     filter_type = request.GET.get('status')
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
 
-    # Prepare the PDF response
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="sales_report.pdf"'
     doc = SimpleDocTemplate(response, pagesize=A4)
     doc.title = "ARTCANVA SALES REPORT"
     elements = []
 
-    # Add the heading
     styles = getSampleStyleSheet()
     heading_style = styles['Heading1']
     heading_style.fontSize = 18
@@ -536,11 +522,10 @@ def export_pdf(request):
     elements.append(heading)
     elements.append(Paragraph("<br/><br/>", styles['Normal']))
 
-    # Retrieve delivered orders and apply filtering if specified
     orders = Order.objects.filter(status='Delivered').order_by('-id')
 
-    # Determine date range based on filter type
     today = datetime.now().date()
+
     if filter_type == 'daily':
         start_date = end_date = today
     elif filter_type == 'weekly':
@@ -554,14 +539,11 @@ def export_pdf(request):
             start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
             end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
         except ValueError:
-            # Handle invalid date format by setting both dates to None
             start_date = end_date = None
 
-    # Apply date filtering if both start_date and end_date are valid
     if start_date and end_date:
         orders = orders.filter(order_date__date__range=(start_date, end_date))
 
-    # Calculate summary data for filtered orders
     overall_sales_count = orders.count()
     overall_amount = orders.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
     overall_discount = (
@@ -570,7 +552,6 @@ def export_pdf(request):
         .aggregate(total_discount=Sum('discount_amount'))['total_discount'] or 0
     )
 
-    # Add summary information to the PDF
     summary_data = [
         f"Total Sales: {overall_sales_count}",
         f"Total Amount: {overall_amount}",
@@ -580,7 +561,6 @@ def export_pdf(request):
         elements.append(Paragraph(summary, styles['Normal']))
     elements.append(Paragraph("<br/><br/>", styles['Normal']))
 
-    # Prepare table data
     data = [
         ["Order ID", "Customer Name", "Total Amount", "Ordered at", "Delivered at", "Payment Method"]
     ]
@@ -595,7 +575,6 @@ def export_pdf(request):
         ]
         data.append(row)
 
-    # Create the table and apply styles
     table = Table(data)
     table.setStyle(TableStyle([
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
@@ -607,10 +586,7 @@ def export_pdf(request):
         ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
     ]))
 
-    # Add the table to the document
     elements.append(table)
-
-    # Build the PDF
     doc.build(elements)
 
     return response
@@ -629,15 +605,11 @@ def return_request(request):
     return render(request, 'admin/return_request.html', {'page_obj': page_obj})
 
 
-from django.shortcuts import get_object_or_404, redirect, render
-
-
 def return_status(request):
     if request.method == 'POST':
         return_id = request.POST.get('return_id')  # ID of the return request
         selected_status = request.POST.get('accept')  # Fetch the selected status
-        print('RETURN STATUS', return_id)
-
+        
         if return_id and selected_status:
             return_item = get_object_or_404(Return, id=return_id)
             if selected_status == 'accepted':
@@ -645,34 +617,17 @@ def return_status(request):
                 order_detail = get_object_or_404(Order_details, id=return_item.order_item.id)
 
                 item_amount = order_detail.variant.price
-
-            
-                # Initialize the amount to refund as the full price
                 amount_to_refund = order_detail.variant.price * order_detail.quantity
-                print(f"Initial amount to refund (without any offer or coupon): {amount_to_refund}")
-
-                # Debug: Print the product's art category
-                print(f"Product Art Category: {order_detail.product.art_category}")
-
                 art_offer=order_detail.offer
-                print('newwwart offer',art_offer)
-                
-               
-
-                
+              
                 if art_offer:
-                    # print(f"Art offer found: {art_offer.art_type_offer}% off")
-                    # Calculate the discount from the art offer
                     discount_from_offer = (Decimal(art_offer) / Decimal(100)) * amount_to_refund
-                    print(f"Art offer discount applied: {discount_from_offer}")
                     amount_to_refund -= discount_from_offer
                 
-                # Check if a coupon was applied to the order
                 coupon_used = order_detail.order.coupon
                 if coupon_used:
                     # Calculate the discount from the coupon
                     discount_from_coupon = (coupon_used.percentage / 100) * amount_to_refund
-                    print(f"Coupon discount applied: {discount_from_coupon}")
                     amount_to_refund -= discount_from_coupon
                 else:
                     print("No coupon applied")
@@ -689,9 +644,8 @@ def return_status(request):
                     transaction_mode = 'Item return'    
                 )
 
-                # Increase the stock of the returned variant
                 variant = order_detail.variant
-                variant.stock += order_detail.quantity  # Increment the stock by the returned quantity
+                variant.stock += order_detail.quantity 
                 variant.save()
 
             return_item.status = selected_status
@@ -700,7 +654,6 @@ def return_status(request):
             print('HELLO')
             return redirect('return_request')
 
-    # Fetch return items with status 'request'
     return_items = Return.objects.filter(status='request').order_by('-id')
     return render(request, 'admin/return_request.html', {'return_items': return_items})
 

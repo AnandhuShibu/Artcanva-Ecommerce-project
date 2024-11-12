@@ -26,9 +26,14 @@
             color: #000000; 
             font-weight: bold;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); 
-            letter-spacing: 1px;
+            letter-spacing: 1px; 
             text-decoration: none;
-            }
+        }
+
+        .logo:hover {
+            color: inherit; 
+            text-decoration: none; 
+        }
         
         .navbar-nav .nav-link {
             font-size: 1.3rem; 
@@ -196,6 +201,7 @@
         .popup-show {
             top: 25px;
         }
+       
         
     </style>
 </head>
@@ -206,7 +212,7 @@
     <div class="container-fluid">
 
   <!-- Left Logo Section -->
-      <a class="logo" href="#">ART CANVA</a>
+      <a class="logo" href="{% url 'home'%}">ART CANVA</a>
 
   <!-- Center Links -->
       <button 
