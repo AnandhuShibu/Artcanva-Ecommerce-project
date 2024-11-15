@@ -27,17 +27,30 @@
         }
 
         /* Sidebar styling */
-        .sidebar {
-            width: 250px;
-            background-color: #dfe6e9; /* Light blue */
-            color: #2d3436;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
+.sidebar {
+    position: fixed; /* Make sidebar fixed */
+    top: 0;
+    left: 0;
+    height: 100vh; /* Full viewport height */
+    width: 250px;
+    background-color: #dfe6e9; /* Light blue */
+    color: #2d3436;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    overflow-y: auto; /* Allow scrolling within the sidebar if content overflows */
+}
+
+/* Main content styling */
+.container {
+    display: flex;
+    width: 100%;
+    margin-left: 125px; /* Offset content to avoid overlapping with the sidebar */
+    padding: 20px; /* Optional padding for content area */
+}
 
         .profile-section {
             display: flex;
@@ -163,7 +176,7 @@
                 <h3>ADMIN</h3>
             </div>
             <ul>
-                <li><a href="">Dashboard</a></li>
+                <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
                 <li><a href="{% url 'sales' %}">Sales</a></li>
                 <li><a href="{% url 'users' %}">Users</a></li>
                 <li><a href="{% url 'product' %}">Products</a></li>

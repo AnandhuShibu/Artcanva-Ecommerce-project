@@ -288,7 +288,7 @@
     <!-- Address Section -->
     <div class="col-lg-8">
 
-      <form action="{% url 'place_order' %}" method="POST">
+      <form action="{% url 'place_order' %}" method="POST" onsubmit="return validateAddress()" >
       {% csrf_token %}
       <div class="address-list">
         {% for address in all_address %}
@@ -373,6 +373,7 @@
           <input type="hidden" name="selected_coupon_code" id="selectedCouponCodeInput">
       </div>
         <div class="payment-method">
+          
           <h5>Select Payment Method</h5>
           <div class="form-check mt-2">
             <input 
@@ -392,8 +393,14 @@
               id="wallets" 
               name="payment_method" 
               value="Wallets">
-            <label class="form-check-label" for="wallets">Wallets</label>
+              <label class="form-check-label" for="wallets">
+                Wallets <span style="margin: 0 10px;"> 
+            </label>
+            
             <input type="hidden" id="walletBalance" value="{{ wallet_balance }}">
+           
+
+          
           </div>
       
           <div class="form-check mt-2">
@@ -405,6 +412,8 @@
               value="Razorpay">
             <label class="form-check-label" for="razorpay">Razorpay</label>
           </div>
+          <br>
+          <p class="balancewallet" style="margin-bottom: 0px; padding-top: 22px;" >Your Wallet Balance: ₹{{ wallet_balance }}</p>
       
         </div>
       <div class="text-end mt-3">
@@ -555,10 +564,46 @@
     const totalPrice = parseFloat(document.getElementById('totalPrice').innerText);
 
     if (walletBalance < totalPrice) {
-      alert('Insufficient wallet balance! Please select another payment method.');
-      this.checked = false; // Uncheck the wallet option
+      Swal.fire({
+        icon: 'warning',
+        title: 'Insufficient wallet balance!',
+        text: 'Please select another payment method.',
+        toast: true,
+        position: 'top',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        customClass: {
+        popup: 'small-alert-popup'
+        }
+    });
+    this.checked = false;
     }
   });
+</script>
+
+<script>
+ document.getElementById('cod').addEventListener('change', function () {
+    const totalPrice = parseFloat(document.getElementById('totalPrice').innerText);
+
+    if (totalPrice > 1000) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Cash on Delivery Unavailable',
+            text: 'Cash on Delivery is not available for orders above ₹1000.',
+            toast: true,
+            position: 'top',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            customClass: {
+                popup: 'small-alert-popup'
+            }
+        });
+        this.checked = false; // Uncheck the option
+    }
+});
+
 </script>
 
   <script>
@@ -624,6 +669,41 @@ function confirmDelete(addressId) {
   });
 }
 </script>
+
+<script>
+  // Function to check if an address is selected before submitting the form
+  function validateAddress() {
+    const selectedAddress = document.querySelector('input[name="selected_address"]:checked'); // Check if any address is selected
+    
+    if (!selectedAddress)  {
+     
+      Swal.fire({
+        icon: 'warning',
+        title: 'Address not selected!',
+        text: 'Please select a delivery address before placing the order.',
+        toast: true,
+        position: 'top',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        customClass: {
+          popup: 'small-alert-popup'
+        }
+      });
+      return false;  // Prevent form submission
+    }
+   
+    return true;
+  }
+
+  // Attach validation function to the form submit event
+  document.querySelector("form").addEventListener("submit", function(event) {
+    if (!validateAddress()) {
+      event.preventDefault();  // Prevent form submission if address is not selected
+    }
+  });
+</script>
+
   
 </body>
 </html>

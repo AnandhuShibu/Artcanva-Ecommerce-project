@@ -17,7 +17,7 @@ from datetime import datetime, timedelta
 from django.db.models import Sum,F
 from reportlab.lib.pagesizes import A4 # type: ignore
 from reportlab.pdfgen import canvas # type: ignore
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from coupon_app . models import Coupon_user, Coupons
 from django.utils import timezone
 from django.db.models.functions import Round
@@ -288,8 +288,10 @@ def change_order_status(request, order_id):
         order = get_object_or_404(Order, id=order_id)
         order.status = new_status
         print('PAYMENT',order.payment_method)
+       
         if new_status == 'Delivered':
             order.deliver_date = timezone.now()
+            order.payment_status = 'Success'
         else:
             order.deliver_date = None
         
@@ -313,12 +315,14 @@ def change_order_status(request, order_id):
 
 
 #-------------------- COUPONS SECTION ---------------------#
-
+from datetime import date
 def coupon(request):
+ 
     search_query = request.GET.get('q', '').strip()
     coupons = Coupons.objects.all()
     if search_query:
         coupons = coupons.filter(coupon_code__icontains=search_query)
+    today_date = date.today()
        
     paginator = Paginator(coupons, 8)
     page_number = request.GET.get('page')
@@ -326,7 +330,7 @@ def coupon(request):
 
     no_coupon_found = not coupons.exists()
 
-    return render(request,'admin/coupons.html', {'page_obj': page_obj, 'no_coupon_found': no_coupon_found})
+    return render(request,'admin/coupons.html', {'page_obj': page_obj, 'no_coupon_found': no_coupon_found, 'today_date': today_date})
 
 def remove_coupon(request, coupon_id):
     coupon_item = Coupons.objects.get(id = coupon_id)
@@ -479,9 +483,9 @@ def sales(request):
     overall_amount = orders.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
 
     overall_discount = (
-    orders.filter(coupon__isnull=False)  # Ensure the coupon is not null
-    .annotate(discount_amount=Round(F('total_amount') * F('coupon_percentage') / 100, 2))  # Calculate discount based on coupon_percentage
-    .aggregate(total_discount=Sum('discount_amount'))['total_discount'] or 0  # Sum the discount amounts
+    orders.filter(coupon__isnull=False)  
+    .annotate(discount_amount=Round(F('total_amount') * F('coupon_percentage') / 100, 2))  
+    .aggregate(total_discount=Sum('discount_amount'))['total_discount'] or 0  
     )
 
     context = {
@@ -489,6 +493,7 @@ def sales(request):
         'overall_sales_count': overall_sales_count,
         'overall_amount': overall_amount,
         'overall_discount': overall_discount,
+        'filter_type': filter_type
     }
 
     return render(request, 'admin/sales.html', context)
@@ -527,19 +532,24 @@ def export_pdf(request):
     today = datetime.now().date()
 
     if filter_type == 'daily':
-        start_date = end_date = today
+        today = datetime.now().date()
+        start_date = today
+        end_date = today
+
     elif filter_type == 'weekly':
-        start_date = today - timedelta(days=today.weekday())
-        end_date = start_date + timedelta(days=6)
+        today = datetime.now().date()
+        start_date = today - timedelta(days=today.weekday())  
+        end_date = today + timedelta(days=(6 - today.weekday()))  
+
     elif filter_type == 'monthly':
-        start_date = today.replace(day=1)
-        end_date = (start_date + timedelta(days=32)).replace(day=1) - timedelta(days=1)
-    elif filter_type == 'customize' and start_date and end_date:
-        try:
-            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
-            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
-        except ValueError:
-            start_date = end_date = None
+        today = datetime.now().date()
+        start_date = today.replace(day=1)  
+        end_date = (today.replace(day=1) + timedelta(days=32)).replace(day=1) - timedelta(days=1)  
+
+    if start_date and isinstance(start_date, str):
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+    if end_date and isinstance(end_date, str):
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
 
     if start_date and end_date:
         orders = orders.filter(order_date__date__range=(start_date, end_date))
@@ -629,8 +639,8 @@ def return_status(request):
                     # Calculate the discount from the coupon
                     discount_from_coupon = (coupon_used.percentage / 100) * amount_to_refund
                     amount_to_refund -= discount_from_coupon
-                else:
-                    print("No coupon applied")
+                # else:
+                #     print("No coupon applied")
 
                 requested_user = order_detail.order.user.username
                 wallet, created = Wallet.objects.get_or_create(user=order_detail.order.user)
@@ -656,6 +666,144 @@ def return_status(request):
 
     return_items = Return.objects.filter(status='request').order_by('-id')
     return render(request, 'admin/return_request.html', {'return_items': return_items})
+
+
+#------------------------- SALES CHART SECTION --------------------#
+
+
+from django.db.models import Sum
+from django.db.models import Sum
+
+def dashboard(request):
+
+    print("ABCDEFGH")
+    # Get the top-selling products by summing up the quantities for each product
+    top_selling_products = (
+        Order_details.objects
+        .values(
+            'product__product_name',  # Group by product name
+            'product__images1',       # Include the product image dynamically
+        )
+        .annotate(total_quantity=Sum('quantity'))  # Sum quantities for each product
+        .order_by('-total_quantity')[:5]  # Sort by total_quantity in descending order and limit to top 5
+    )
+
+   
+
+    # Best-selling art category based on quantity sold
+    best_selling_art_category = (
+        Order_details.objects
+        .values('product__art_category__art_type')  # Assuming `Art` has an `art_type` field
+        .annotate(total_quantity=Sum('quantity'))
+        .order_by('-total_quantity')
+    )
+
+    context = {
+        'top_selling_products': top_selling_products,
+        'best_selling_art_category': best_selling_art_category,
+    }
+
+    return render(request, 'admin/dashboard.html', context)
+
+
+
+
+
+# from django.shortcuts import render
+# from django.http import JsonResponse
+# from django.utils import timezone
+# from datetime import datetime, timedelta
+# from django.db.models import Sum
+
+
+# def sales_chart(request):
+#     # Get parameters from the request
+#     filter_type = request.GET.get('status', 'daily')  # Default filter is daily
+#     start_date = request.GET.get('start_date')
+#     end_date = request.GET.get('end_date')
+    
+#     print(f"Filter Type: {filter_type}, Start Date: {start_date}, End Date: {end_date}")  # Debugging line
+
+#     # Get current time for weekly and monthly filters
+#     now = timezone.now()
+
+#     if filter_type == 'daily':
+#         if start_date and end_date:
+#             start_date = datetime.strptime(start_date, '%Y-%m-%d')
+#             end_date = datetime.strptime(end_date, '%Y-%m-%d')
+#         else:
+#             start_date = now - timedelta(days=1)
+#             end_date = now
+#         orders = Order.objects.filter(order_date__gte=start_date, order_date__lte=end_date)
+
+#     elif filter_type == 'weekly':
+#         start_date = now - timedelta(weeks=1)
+#         end_date = now
+#         orders = Order.objects.filter(order_date__gte=start_date, order_date__lte=end_date)
+
+#     elif filter_type == 'monthly':
+#         start_date = now.replace(day=1)  # First day of the current month
+#         end_date = now
+#         orders = Order.objects.filter(order_date__gte=start_date, order_date__lte=end_date)
+
+#     # Aggregate sales data
+#     sales_data = orders.values('order_date__date').annotate(total_sales=Sum('total_amount')).order_by('order_date__date')
+
+#     chart_labels = [sale['order_date__date'].strftime('%Y-%m-%d') for sale in sales_data]
+#     chart_data = [sale['total_sales'] for sale in sales_data]
+
+#     if not chart_labels:
+#         return JsonResponse({'message': 'No orders found'})
+
+#     return JsonResponse({
+#         'chart_labels': chart_labels,
+#         'chart_data': chart_data,
+#     })
+
+
+
+
+from django.http import JsonResponse
+from django.utils import timezone
+from datetime import timedelta
+from django.db.models import Sum
+
+def get_sales_data(request):
+    print("HELLOOOO")
+    filter_type = request.GET.get('filter', 'daily')  # Get the filter type from the GET request
+    now = timezone.now()
+
+    print("SAMPLE", filter_type )
+
+    if filter_type == 'daily':
+        start_date = now - timedelta(days=7)  # Last 7 days
+        orders = Order.objects.filter(order_date__gte=start_date)
+        sales_data = orders.values('order_date__date').annotate(total_sales=Sum('total_amount'))
+        labels = [str(order['order_date__date']) for order in sales_data]
+        data = [order['total_sales'] for order in sales_data]
+
+    elif filter_type == 'weekly':
+        start_date = now - timedelta(weeks=5)  # Last 5 weeks
+        orders = Order.objects.filter(order_date__gte=start_date)
+        sales_data = orders.extra(select={'week': "strftime('%W', order_date)"}).values('week').annotate(total_sales=Sum('total_amount'))
+        labels = [f"Week {order['week']}" for order in sales_data]
+        data = [order['total_sales'] for order in sales_data]
+
+    elif filter_type == 'monthly':
+        start_date = now - timedelta(weeks=12)  # Last 12 months
+        orders = Order.objects.filter(order_date__gte=start_date)
+        sales_data = orders.extra(select={'month': "strftime('%m', order_date)"}).values('month').annotate(total_sales=Sum('total_amount'))
+        labels = [f"Month {order['month']}" for order in sales_data]
+        data = [order['total_sales'] for order in sales_data]
+
+    # Return the sales data as a JSON response
+    return JsonResponse({'labels': labels, 'sales_data': data})
+
+
+
+
+def sample(request):
+    return render(request, 'admin/out.html')
 
 
 

@@ -213,11 +213,12 @@
         <table class="table table-bordered table-hover">
             <thead class="thead-dark">
                 <tr>
-                    <th>Order ID</th>
+                    {% comment %} <th>Order ID</th> {% endcomment %}
                     <th>Total Amount</th>
                     <th>Order Date</th>
                     <th>Payment method</th>
-                    <th>Status</th>
+                    <th>Payment Status</th>
+                    <th>Order Status</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -231,10 +232,11 @@
                 {% else %}
                 {% for order in page_obj %}
                 <tr>
-                    <td>{{ order.id }}</td>
+                    {% comment %} <td>{{ order.id }}</td> {% endcomment %}
                     <td>₹ {{ order.total_amount }}</td>
                     <td>{{ order.order_date|date:"d-m-y"}}</td>
                     <td>{{ order.payment_method }}</td>
+                    <td>{{ order.payment_status }}</td>
                     <td>{{ order.status }}</td>
                     <td><a href="{% url 'order_details' order.id %}" class="view-btn">view</a></td>
                 </tr>

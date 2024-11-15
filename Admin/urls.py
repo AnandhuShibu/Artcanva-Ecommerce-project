@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -27,9 +29,16 @@ urlpatterns = [
     path('remove_coupon/<int:coupon_id>', views.remove_coupon, name='remove_coupon'),
     path('remove_offer/<int:offer_id>', views.remove_offer, name='remove_offer'),
     path('sales_report/export_pdf/', views.export_pdf, name='export_pdf'),
-     path('return_request/',views.return_request, name='return_request'),
+    path('return_request/',views.return_request, name='return_request'),
     path('return_status/',views.return_status, name='return_status'),
     path('edit_product/', views.edit_product, name='edit_product'),
+    # path('saleschart/', views.sales_chart, name='sales_chart'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('sample/', views.sample, name='sample'),
+    path('get_sales_data/', views.get_sales_data, name='get_sales_data'),
 
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

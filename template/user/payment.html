@@ -1,26 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Make Payment</title>
+    <title>Complete Your Payment</title>
+
+    <!-- Include Bootstrap CSS for styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABP2LqS9mFfAy26Hba6U1k2z8aE8hb0gHnhL9/CT6X8uD5D5p5wF+4" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Include custom CSS for styling the page -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+
+        .payment-container {
+            max-width: 500px;
+            margin: 100px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .payment-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .payment-header h1 {
+            color: #3399cc;
+        }
+
+        .payment-button {
+            width: 100%;
+            padding: 15px;
+            background-color: #3399cc;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .payment-button:hover {
+            background-color: #267aa1;
+        }
+
+        .payment-details {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .payment-details p {
+            margin: 5px 0;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+    </style>
+
+    <!-- Razorpay Checkout Script -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
+
 <body>
-    <h1>Complete Your Payment</h1>
-    <button id="rzp-button">Pay Now</button>
+
+    <div class="container">
+        <div class="payment-container">
+            <div class="payment-header">
+                <h1>Complete Your Payment</h1>
+                <p>Secure payment through Razorpay</p>
+            </div>
+
+            <div class="payment-details">
+                <p><strong>Amount:</strong> ₹{{ amount|floatformat:2 }}</p>
+                <p><strong>Description:</strong> Order Payment</p>
+            </div>
+
+            <button id="rzp-button" class="payment-button">Pay Now</button>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2024 ARTCANVA. All rights reserved.</p>
+    </div>
 
     <script>
         var options = {
-            "key": "{{ razorpay_key }}",  // Razorpay API Key
-            "amount": "{{ amount }}",  // Amount in paise
+            "key": "{{ razorpay_key }}",  
+            "amount": "{{ amount }}", 
             "currency": "INR",
             "name": "ARTCANVA",
             "description": "Order Payment",
-            "order_id": "{{ order_id }}",  // Razorpay Order ID
-            "handler": function (response) {
-                alert('Payment Successful!');
-                window.location.href = "/payment-success/?payment_id=" + response.razorpay_payment_id;
+            "order_id": "{{ order_id }}", 
+            "handler": function (response){
+               
+                Swal.fire({
+                    title: 'Payment Successful!',
+                    text: 'Thank you for your purchase. Your payment was completed successfully!',
+                    icon: 'success',
+                    showConfirmButton: false, 
+                    timer: 3000,  
+                    timerProgressBar: true  // Show progress bar while timer is running
+                });
+        
+                // Redirect after a short delay
+                setTimeout(function() {
+                    window.location.href = "/payment-success/?payment_id=" + response.razorpay_payment_id;
+                }, 3000);  // Redirect after 3 seconds
             },
             "prefill": {
                 "name": "{{ user.username }}",
@@ -36,5 +131,10 @@
             e.preventDefault();
         }
     </script>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1lM4tuDC7vQ4XwWlK7YzHqRr4OnlP8U7lS5f9oBRHEvfxeHbnEuw5d" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js" integrity="sha384-pzjw8f+ua7Kw1TIq0FwZ6sbS5fGQnK3dY0uM2I8v8IRZ6cNXTJxRMXzdJgmKFQAp" crossorigin="anonymous"></script>
 </body>
+
 </html>

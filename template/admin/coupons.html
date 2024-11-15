@@ -369,7 +369,9 @@
             <label for="">Percentage</label>
             <input type="number" name='percentage' min="1" max="100" required>
             <label for="">Expiry date</label>
-            <input type="date" name='expiry_date' required>
+            {% comment %} <input type="date" min="{{ today_date }}" name='expiry_date' required> {% endcomment %}
+            <input type="date" min="{{ today_date }}" name="expiry_date" id="expiry_date" required>
+
             <button type="submit" class="modal-btn">Submit</button>
         </div>
     </form>
@@ -396,33 +398,6 @@
             }
         }
 
-        {% comment %} // Edit Art Modal
-        var editModal = document.getElementById("editCouponModal");
-        var editButtons = document.querySelectorAll(".edit-btn");
-        var closeEditModal = document.getElementsByClassName("close-edit")[0];
-
-        editButtons.forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                editModal.style.display = "block";
-                var row = btn.closest('tr');
-                var categoryId = row.cells[1].textContent;
-                //var editCoupon = row.cells[2].textContent;
-                //var categoryId = row.cells[3].textContent;
-                var artType = row.cells[4].textContent;
-                document.getElementById("editCategoryId").value = categoryId;
-                document.getElementById("coupon_code").value = editCoupon;
-            });
-        }); {% endcomment %}
-
-        {% comment %} closeEditModal.onclick = function() {
-            editModal.style.display = "none";
-        }
-
-        window.onclick = function(event) {
-            if (event.target == editModal) {
-                editModal.style.display = "none";
-            }
-        } {% endcomment %}
     </script>
 
 
@@ -446,6 +421,24 @@
           });
           return false;  // Prevent the default link action
         }
+      </script>
+
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var today = new Date();
+            var month = today.getMonth();
+            var year = today.getFullYear();
+        
+            // Set the current month and year in the input
+            var dateInput = document.getElementById('expiry_date');
+            dateInput.setAttribute('min', today.toISOString().split('T')[0]);
+        
+            // Restrict the calendar display to the current month and future months
+            dateInput.addEventListener('focus', function() {
+                dateInput.setAttribute('value', today.toISOString().split('T')[0]);
+            });
+        });
+        
       </script>
 
 </body>

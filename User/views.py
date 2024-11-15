@@ -865,12 +865,27 @@ def place_order(request):
 
             for item in cart_items:
                 offer_percentage = item.product.art_category.art_type_offer or 0
+                offer_amount = item.variant.price * offer_percentage / 100
+                final_offer_price = item.variant.price - offer_amount
+
+                print('OFFER:', final_offer_price)
+
+                if coupon_percentage:
+                    coupon_item_amount = final_offer_price * coupon_percentage / 100
+                    coupon_item_final_amount = final_offer_price - coupon_item_amount
+
+                    print('COUPON:', coupon_item_final_amount)
+
+
+
                 Order_details.objects.create(
                     order=order,
                     product=item.product,
                     quantity=item.quantity,
                     variant=item.variant,
-                    offer = offer_percentage
+                    offer = offer_percentage,
+                    item_coupon_amount = coupon_item_final_amount
+
                 )
                 item.variant.stock -= item.quantity
                 item.variant.save()
@@ -928,7 +943,7 @@ def place_order(request):
             # Render payment page with Razorpay order ID and key
             return render(request, 'user/payment.html', {
                 'order_id': razorpay_order['id'],
-                'amount': final_amount,
+                'amount': final_amount / 100,
                 'razorpay_key': settings.RAZORPAY_KEY_ID,
                 'user': request.user,
             })
@@ -940,7 +955,8 @@ def place_order(request):
                 payment_method=payment_method,
                 coupon = coupon,
                 coupon_name = selected_coupon_code,
-                coupon_percentage = coupon_percentage
+                coupon_percentage = coupon_percentage,
+                payment_status = 'Success'
             )
             
             OrderAddress.objects.create(
@@ -987,6 +1003,7 @@ def place_order(request):
 def payment_success(request):
     payment_id = request.GET.get('payment_id')
     return redirect('order_placed')
+    
 
 
 #==================== ORDERS SECTION ==================#
@@ -1037,12 +1054,13 @@ def order_details(request, order_id):
     if orders.status == 'Delivered':
         return_button = 'delivered'
 
-    order_items=Order_details.objects.filter(order = orders)
+    order_items=Order_details.objects.filter(order = orders).order_by('-id')
     items_with_price = []
     normal_total_price = 0 
     item_offer = None
 
     for item in order_items:
+        
         if item.offer:
             item_offer = item.variant.price * (Decimal(1) - (Decimal(item.offer) / Decimal(100)))
         original_price = item.variant.price * item.quantity
@@ -1185,7 +1203,6 @@ def wishlist(request):
     })
 
 
-
 def remove_wishlist_item(request, variant_id):
     wishlist_items = Wishlist.objects.get(variant=variant_id, user=request.user)
     wishlist_items.delete()    
@@ -1224,7 +1241,9 @@ def order_cancel(request, order_id):
     for detail in order_details:
         variant = detail.variant
         variant.stock += detail.quantity  
-        variant.save() 
+        variant.save()
+        detail.item_status = 'Cancelled'
+        detail.save() 
     order.save()
     
     if order.payment_method in ['Razorpay', 'Wallets']:
@@ -1236,13 +1255,77 @@ def order_cancel(request, order_id):
             user = request.user,
             transaction_amount = order.total_amount,
             type = 'Credit',
-            transaction_mode = 'Item cancel'     
+            transaction_mode = 'Order cancel'     
         )
    
     order.save()
-
     return redirect('order_details',order_id=order_id)
 
+
+
+def item_cancel(request, order_id, item_id):
+    order = get_object_or_404(Order, id=order_id)
+    item = get_object_or_404(Order_details, id=item_id)
+    print('HElloo')
+    item.item_status='Cancelled'
+
+    if order.payment_method in ['Razorpay', 'Wallets']:
+
+        item_amount = item.variant.price
+
+        print('AMOUNT:', item_amount)
+        amount_to_refund = item.variant.price * item.quantity
+        art_offer=item.offer
+        
+        if art_offer:
+            discount_from_offer = (Decimal(art_offer) / Decimal(100)) * amount_to_refund
+            amount_to_refund -= discount_from_offer
+        
+        coupon_used = item.order.coupon
+        if coupon_used:
+            # Calculate the discount from the coupon
+            discount_from_coupon = (coupon_used.percentage / 100) * amount_to_refund
+            amount_to_refund -= discount_from_coupon
+        # else:
+        #     print("No coupon applied")
+        
+        requested_user = item.order.user.username
+        wallet, created = Wallet.objects.get_or_create(user=item.order.user)
+        wallet.wallet_amount += amount_to_refund
+        wallet.save()
+
+        order.total_amount -= amount_to_refund
+        order.save()
+
+        print('TOTALL:', order.total_amount)
+
+        print("AMTT:", amount_to_refund)
+
+        trasanction = Wallet_Transaction.objects.create(
+            user = item.order.user,
+            transaction_amount = amount_to_refund,
+            type = 'Credit',
+            transaction_mode = 'Item cancel'
+        )
+
+        variant = item.variant
+        variant.stock += item.quantity 
+        variant.save()
+   
+    item.save()
+
+    # Check if all items in the order are cancelled
+    all_items_cancelled = not Order_details.objects.filter(
+        order=order,
+    ).exclude(item_status='Cancelled').exists()
+
+    if all_items_cancelled:
+        print("All items in this order are cancelled!")
+        order.status = 'Cancelled'
+        order.save()
+
+
+    return redirect('order_details',order_id=order_id)
 
 
 #==================== SINGLE ORDER SECTION =================#

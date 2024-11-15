@@ -1,23 +1,216 @@
-<!-- Modal for Adding or Editing Paint -->
-<form action="{% url 'add_paint'%}" method = 'POST'>
-    {% csrf_token %}
-    <div id="myModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <div class="modal-header">
-                <h2 id="modal-title">Add New Paint</h2>
-            </div>
-            <div class="modal-body">
-                <!-- <label for="paint-id">Paint ID:</label>
-                <input type="text" id="paint-id" placeholder="Enter Paint ID"> -->
+{% extends "admin/sidebar.html" %}
 
-                <label for="paint-type">Paint Type:</label>
-                <input type="text" id="paint-type" name = 'add_paint' placeholder="Enter paint type">
+{% block content %}
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art Canva Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+        }
+
+        /* Dropdown styles */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-button {
+            text-decoration: none;
+            color: #2d3436;
+            font-size: 16px;
+            padding: 10px 15px;
+            display: block;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            background-color: transparent;
+            border: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .dropdown-button:hover {
+            background-color: #0984e3;
+            color: white;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #dfe6e9;
+            min-width: 250px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        .dropdown-content a {
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+            color: #2d3436;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #ddd;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .action {
+            padding: 10px 20px;
+            margin-right: 5px;
+            background-color: #ff2c2c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        .btn {
+            padding: 5px 10px;
+            margin-right: 5px;
+            background-color: #f01e2c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Chart container */
+        .chart-container {
+            flex-grow: 1;
+            padding: 20px;
+            background-color: white;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 400px !important;
+        }
+
+        /* Filter styles */
+        .filter-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .filter-container select, .filter-container button {
+            padding: 10px;
+            font-size: 14px;
+            border-radius: 5px;
+            border: 1px solid #000000;
+            cursor: pointer;
+            background-color: #0984e3;
+            color: white;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Main content -->
+        <div class="chart-container">
+            <div class="filter-container">
+                <select id="filter" onchange="updateChart()">
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                </select>
+                <button onclick="downloadReport()">Download Report</button>
             </div>
-            <div class="modal-footer">
-                <button type="submit" class="save-btn" id="modal-save-btn">SUBMIT</button>
-            </div>
+            <canvas id="salesChart"></canvas>
         </div>
     </div>
-    </form>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let chart;
+
+        // Sample sales data (you can replace it with actual data from your server)
+        const salesData = {
+            daily: [100, 120, 150, 200, 180, 220, 300],
+            weekly: [1000, 1200, 1500, 2000, 1800],
+            monthly: [4000, 5000, 6000, 7000, 7500, 8000, 8500, 9000, 9500, 10000, 11000, 12000] // Data for each month
+        };
+
+        // Initialize chart
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        function createChart(data, labels) {
+            if (chart) chart.destroy();
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Total Sales',
+                        data: data,
+                        borderColor: '#0984e3',
+                        fill: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update chart when filter is changed
+        function updateChart() {
+            const filter = document.getElementById('filter').value;
+            let data = [];
+            let labels = [];
+
+            if (filter === 'daily') {
+                data = salesData.daily;
+                labels = ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'];
+            } else if (filter === 'weekly') {
+                data = salesData.weekly;
+                labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'];
+            } else if (filter === 'monthly') {
+                data = salesData.monthly;
+                labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            }
+            createChart(data, labels);
+        }
+
+        // Download report as a PDF (using your existing functionality)
+        function downloadReport() {
+            alert("Report downloaded!");
+        }
+
+        // Initialize chart with default daily data
+        updateChart();
+    </script>
+</body>
+</html>
+
+{% endblock %}

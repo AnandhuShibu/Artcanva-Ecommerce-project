@@ -1,18 +1,394 @@
 {% extends "admin/sidebar.html" %}
+{% load static %}
+
 {% block content %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Art Canva Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+        }
+
+        /* Dropdown styles */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-button {
+            text-decoration: none;
+            color: #2d3436;
+            font-size: 16px;
+            padding: 10px 15px;
+            display: block;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            background-color: transparent;
+            border: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .dropdown-button:hover {
+            background-color: #0984e3;
+            color: white;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #dfe6e9;
+            min-width: 250px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        .dropdown-content a {
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+            color: #2d3436;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #ddd;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .action {
+            padding: 10px 20px;
+            margin-right: 5px;
+            background-color: #ff2c2c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        .btn {
+            padding: 5px 10px;
+            margin-right: 5px;
+            background-color: #f01e2c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Chart container */
+        .chart-container {
+            flex-grow: 1;
+            {% comment %} padding: 20px; {% endcomment %}
+            background-color: white;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 400px !important;
+        }
+
+        /* Filter styles */
+        .filter-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .filter-container select, .filter-container button {
+            padding: 10px;
+            font-size: 14px;
+            border-radius: 5px;
+            border: 1px solid #000000;
+            cursor: pointer;
+            background-color: #0984e3;
+            color: white;
+        }
+
+        /* Info Section styles */
+.info-section {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+}
+
+.info-box {
+    flex: 1;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-right: 15px;
+    text-align: center;
+}
+
+.info-box:last-child {
+    margin-right: 0;
+}
+
+.info-box .title {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.info-box .value {
+    font-size: 20px;
+    font-weight: bold;
+    color: #0984e3;
+}
+
+/* Top Selling Section */
+.top-selling-section {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.top-selling-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+.top-selling-table thead {
+    {% comment %} background-color: #0984e3; {% endcomment %}
+    {% comment %} color: #fff; {% endcomment %}
+}
+
+.top-selling-table th,
+.top-selling-table td {
+    padding: 12px;
+    text-align: left;
+    font-size: 16px;
+}
+
+.top-selling-table th {
+    font-weight: bold;
+}
+
+.top-selling-table tbody tr {
+    {% comment %} background-color: #f9f9f9; {% endcomment %}
+    transition: background-color 0.3s ease;
+}
+
+.top-selling-table tbody tr:hover {
+    background-color: #e1e8f0;
+}
+
+.top-selling-table td {
+    font-size: 18px;
+    color: #333;
+}
+
+.top-selling-table td#top-selling-product,
+.top-selling-table td#top-selling-category {
+    font-weight: bold;
+    color: #0984e3;
+}
+
+.product-image {
+    width: 60px; /* Adjust the size as needed */
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px; /* Optional for rounded corners */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+
+
+    </style>
 </head>
 <body>
+    <div class="container">
+        <!-- Main content -->
+        <div class="chart-container">
+            <div class="filter-container">
+                <select id="filter" onchange="updateChart()">
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                </select>
+                <button onclick="downloadReport()">Download Report</button>
+            </div>
+            <canvas id="salesChart"></canvas>
 
-    <h2>DASHBOARD</h2>
-    
+
+            <!-- Info Section below the chart -->
+        <div class="info-section">
+            <div class="info-box">
+                <div class="title">Total Sales Count</div>
+                <div class="value" id="total-sales">$10,000</div>
+            </div>
+            <div class="info-box">
+                <div class="title">Total Discount</div>
+                <div class="value" id="total-discount">$1,500</div>
+            </div>
+            <div class="info-box">
+                <div class="title">Total Amount</div>
+                <div class="value" id="total-amount">$8,500</div>
+            </div>
+        </div>
+
+<div class="top-selling-section">
+    <h2>Top Selling Products</h2>
+    <div class="table-container">
+        <table class="top-selling-table">
+            <thead>
+                <tr>
+                    <th>Product Image</th>
+                    <th>Product Name</th>
+                    <th>Product Category</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in top_selling_products %}
+                <tr>
+                    <td>
+                        <img src="{{ MEDIA_URL }}{{ product.product__images1 }}" alt="{{ product.product__product_name }}" class="product-image">
+                    </td>
+                    <td>{{product.product__product_name}}</td>
+                    <td>Mural Art</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<!-- Top Selling Categories Section -->
+<div class="top-selling-section">
+    <h2>Top Selling Categories</h2>
+    <div class="table-container">
+        <table class="top-selling-table">
+            <thead>
+                <tr>
+                    <th>Category Name</th>
+                
+                </tr>
+            </thead>
+            <tbody>
+
+                <tr>
+                    <td>1200</td>
+                </tr>
+
+                <tr>
+                    <td>800</td>
+                </tr>
+                <tr>
+                    <td>1200</td>
+                </tr>
+                <tr>
+                    <td>800</td>
+                </tr>
+
+                <!-- Add more rows as needed -->
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>   
+</div>
+
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    let chart;
+
+    // Sample sales data (you can replace it with actual data from your server)
+    const salesData = {
+        daily: [100, 120, 150, 200, 180, 220, 300],
+        weekly: [1000, 1200, 1500, 2000, 1800],
+        monthly: [4000, 5000, 6000, 7000, 7500, 8000, 8500, 9000, 9500, 10000, 11000, 12000] // Data for each month
+    };
+
+    // Initialize chart
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    function createChart(data, labels) {
+        if (chart) chart.destroy();
+        chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Total Sales',
+                    data: data,
+                    borderColor: '#0984e3',
+                    fill: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    // Update chart when filter is changed
+    function updateChart() {
+        const filter = document.getElementById('filter').value;
+        let data = [];
+        let labels = [];
+
+        if (filter === 'daily') {
+            data = salesData.daily;
+            labels = ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'];
+        } else if (filter === 'weekly') {
+            data = salesData.weekly;
+            labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'];
+        } else if (filter === 'monthly') {
+            data = salesData.monthly;
+            labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        }
+        createChart(data, labels);
+    }
+
+    // Initialize chart with default daily data
+    updateChart();
+</script>
+
 </body>
 </html>
-
 
 {% endblock %}

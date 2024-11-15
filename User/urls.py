@@ -55,5 +55,9 @@ urlpatterns = [
     path('submit-review/<int:order_id>/<int:product_id>/<int:variant_id>', submit_review, name='submit_review'),
     path('download-invoice/<int:order_id>/', views.download_invoice, name='download_invoice'),
 
-    path('item_return/<int:order_id>/<int:item_id>/', views.item_return, name='item_return')
+    path('item_return/<int:order_id>/<int:item_id>/', views.item_return, name='item_return'),
+    path('item_cancel/<int:order_id>/<int:item_id>/', views.item_cancel, name='item_cancel')
+
+    
+    
     ]

@@ -93,7 +93,7 @@
             <a href="{% url 'export_pdf' %}?status={{ filter_type }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}" class="btn btn-secondary">
                 Export PDF
             </a>
-            <a href="{% url 'panel' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i>Back to Dashboard</a>
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i>Back to Dashboard</a>
         </div>
     </div>
 
@@ -106,13 +106,13 @@
             <option value="customize" {% if filter_type == 'customize' %}selected{% endif %}>Customize</option>
         </select>
         
-        <!-- Preserve selected date values after form submission -->
         <input type="date" class="form-control" name="start_date" id="start-date" placeholder="Start Date" 
                value="{{ start_date }}" {% if filter_type != 'customize' %}disabled{% endif %}>
         <input type="date" class="form-control" name="end_date" id="end-date" placeholder="End Date" 
                value="{{ end_date }}" {% if filter_type != 'customize' %}disabled{% endif %}>
         <button type="submit" class="btn btn-primary">Filter</button>
     </form>
+    
 
         
         <!-- Sales Report Table and Pagination (Same as before) -->

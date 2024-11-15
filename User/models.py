@@ -60,6 +60,7 @@ class Order_details(models.Model):
     quantity = models.PositiveIntegerField()
     variant = models.ForeignKey(Variant, on_delete= models.CASCADE)
     offer = models.PositiveIntegerField(null=True, blank=True)
+    item_coupon_amount = models.PositiveIntegerField(null=True, blank=True)
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('shipped', 'Shipped'),
