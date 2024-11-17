@@ -47,6 +47,16 @@ urlpatterns = [
     
     path('place-order/', views.place_order, name='place_order'),
     path('payment-success/', views.payment_success, name='payment_success'),
+    path('retry-payment-success/', views.retry_payment_success, name='retry_payment_success'),
+
+    
+    # path('payment-failure/', views.payment_failure, name='payment_failure'),
+    path('retry_payment/<int:order_id>/', views.retry_payment, name='retry_payment'),
+
+
+    # path('razorpay-webhook/', views.razorpay_webhook, name='razorpay_webhook'),
+
+
     path('order-cancel/<int:order_id>', views.order_cancel, name= 'order_cancel'),
     # path('single_order_cancel/<int:order_id>/<int:product_id>/<int:variant_id>', views.single_order_cancel, name= 'single_order_cancel'),
 

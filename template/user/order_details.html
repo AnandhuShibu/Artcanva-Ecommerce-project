@@ -243,6 +243,9 @@
             margin-left: 84px;
         }
 
+        
+
+
         .cancel-btn {
             background-color: #968F9F;
             color: white;
@@ -255,6 +258,22 @@
 
         .cancel-btn:hover{
             background-color: #687289;
+        }
+
+
+
+        .retry-btn {
+            background-color: #FFA500;
+            color: white;
+            border: 2px;
+            padding: 7px 11px;
+            cursor: pointer;
+            font-size: 12px;
+            border-radius: 4px;
+        }
+
+        .retry-btn:hover{
+            background-color: #e88504;
         }
 
         .return-btn  {
@@ -517,7 +536,7 @@
 <!-- Main Content Section -->
 <a href="{% url 'orders' %}">
     <button class="go">
-        <i class="fas fa-arrow-left"></i> GO BACK
+         GO BACK
     </button>
 </a>
 <div class="container">
@@ -539,6 +558,8 @@
 
             <h4>TOTAL AMOUNT: ₹{{normal_total_price}}</h4>
 
+            <h4>PAYMENT STATUS: {{orders.payment_status}}</h4>
+
             <br>
             <!-- Show coupon code only if it exists -->
             {% if orders.coupon_name %}
@@ -550,6 +571,21 @@
 
             <h3 style="margin-bottom: 10px;">PAYABLE AMOUNT: ₹{{orders.total_amount}}</h3>
         </div>
+
+        {% if orders.payment_status == 'Failure' %}
+        <div class="cancel">
+
+            <a href="{% url 'retry_payment' orders.id %}" >
+                <button class="retry-btn">RETRY PAYMENT</button>
+            </a>
+
+
+
+            
+        </div>
+
+        {% else %}
+
         <div class="cancel">
             {% if orders.status == 'Cancelled' %}
                 <button class="cancel-btn" disabled style="background-color: gray; cursor: not-allowed;">
@@ -568,6 +604,20 @@
             {% endif %}
             {% endif %}
         </div>
+
+
+        
+        {% endif %}
+
+        
+
+
+        
+
+
+        
+
+
     </div>
 
     <!-- Product section below -->

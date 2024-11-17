@@ -31,6 +31,12 @@ from django.db import transaction
 from django.conf import settings
 from .models import Cart, Address, Order, Order_details, Wallet, Wallet_Transaction, OrderAddress
 from decimal import Decimal
+from reportlab.lib.pagesizes import A4 # type: ignore
+from reportlab.lib import colors # type: ignore
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle # type: ignore
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle # type: ignore
+from django.http import HttpResponse
+from .models import Order, Order_details  # Import your models
 
 
 #========================= USER SIGNUP =====================#
@@ -900,7 +906,8 @@ def place_order(request):
                 payment_method=payment_method,
                 coupon = coupon,
                 coupon_name = selected_coupon_code,
-                coupon_percentage = coupon_percentage
+                coupon_percentage = coupon_percentage,
+                payment_status = 'Failure'
             )
 
             OrderAddress.objects.create(
@@ -930,7 +937,6 @@ def place_order(request):
             # Clear cart items
             cart_items.delete()
 
-
             client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_SECRET_KEY))
 
             # Create Razorpay Order
@@ -946,6 +952,7 @@ def place_order(request):
                 'amount': final_amount / 100,
                 'razorpay_key': settings.RAZORPAY_KEY_ID,
                 'user': request.user,
+                'original_order_id': order.id
             })
         
         elif payment_method == 'Wallets':
@@ -994,18 +1001,48 @@ def place_order(request):
             transaction_mode = order.payment_method
             )
         
-            # Clear cart items
             cart_items.delete()
 
             return redirect('order_placed')
 
 
+#======================== PAYMENT SECTION ======================#
+
 def payment_success(request):
-    payment_id = request.GET.get('payment_id')
+    original_order_id = request.GET.get('order_id')
+    order = get_object_or_404(Order, id=original_order_id)
+    order.payment_status = 'Success'
+    order.save()
     return redirect('order_placed')
+
+def retry_payment(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    payment_amount = order.total_amount
+    payment_amount_float = float(payment_amount)
+    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_SECRET_KEY))
+    razorpay_order = client.order.create({
+        'amount': int(payment_amount_float * 100), 
+        'currency': 'INR',
+        'payment_capture': '1'
+    })
+
+    return render(request, 'user/retry_payment.html', {
+        'order_id': razorpay_order['id'],
+        'amount': payment_amount_float,
+        'razorpay_key': settings.RAZORPAY_KEY_ID,
+        'user': request.user,
+        'original_order_id': order.id
+    })
+
+
+def retry_payment_success(request):
+    original_order_id = request.GET.get('order_id')
+    order = get_object_or_404(Order, id=original_order_id)
+    order.payment_status = 'Success'
+    order.save()
+    return redirect('orders')
+
     
-
-
 #==================== ORDERS SECTION ==================#
 
 def orders(request):
@@ -1076,7 +1113,9 @@ def order_details(request, order_id):
         })
         
         normal_total_price += original_price
-    
+    if order.payment_status == 'Failure':
+        messages.error(request, "Your payment not completed")
+
     context = {
         'order_items':order_items,
         'return_button': return_button,
@@ -1393,12 +1432,7 @@ def item_cancel(request, order_id, item_id):
 #     return response
 
 
-from reportlab.lib.pagesizes import A4 # type: ignore
-from reportlab.lib import colors # type: ignore
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle # type: ignore
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle # type: ignore
-from django.http import HttpResponse
-from .models import Order, Order_details  # Import your models
+
 
 def download_invoice(request, order_id):
     try:
