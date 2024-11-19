@@ -588,7 +588,7 @@
 
         <div class="cancel">
             {% if orders.status == 'Cancelled' %}
-                <button class="cancel-btn" disabled style="background-color: gray; cursor: not-allowed;">
+                <button class="cancel-btn" disabled style="background-color: red; cursor: not-allowed;">
                     ORDER CANCELLED
                 </button>
 
@@ -603,21 +603,8 @@
             <button class="download-invoice-btn" onclick="downloadInvoice()">DOWNLOAD INVOICE</button>
             {% endif %}
             {% endif %}
-        </div>
-
-
-        
+        </div>        
         {% endif %}
-
-        
-
-
-        
-
-
-        
-
-
     </div>
 
     <!-- Product section below -->
@@ -643,12 +630,9 @@
 
         <div class="order-actions">
 
-
-
-
             {% if return_button == 'delivered' and item.item_status != 'Cancelled' %}
                 {% if item.returns.first.status == 'accepted' %}
-                    <button class="return-btn" disabled>RETURN ACCEPTED</button>
+                    <button class="return-btn" disabled style="cursor: not-allowed;">RETURN ACCEPTED</button>
                 {% else %}
                     <button class="return-btn" onclick="openReturnModal({{ item.id }})">RETURN ITEM</button>
                     <button class="review-btn">ADD REVIEW</button>
@@ -657,7 +641,7 @@
 
             {% if orders.payment_status == 'Success' %}
             {% if item.item_status == 'Cancelled' %}
-            <button class="item-cancel-btn" disabled style="background-color: gray; cursor: not-allowed;" >CANCELLED</button>
+            <button class="item-cancel-btn" disabled style="background-color: red; cursor: not-allowed;" >CANCELLED</button>
             {% else %}
             <a href="{% url 'item_cancel' orders.id item.id %}" onclick="return confirmCancelOrder(event, this)">
             <button class="item-cancel-btn"  >CANCEL ITEM</button>

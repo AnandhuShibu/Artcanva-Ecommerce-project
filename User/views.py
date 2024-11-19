@@ -737,10 +737,6 @@ def checkout(request):
     total_price = request.session.get('total_price', 0)
 
     cart_items=Cart.objects.filter(user=request.user, product__product_status=True)
-
-    
-
-
     used_coupon_ids = Coupon_user.objects.filter(user=request.user).values_list('coupon_used_id', flat=True)
     coupons = Coupons.objects.exclude(id__in=used_coupon_ids).filter(expiry_date__gte=date.today())
     
@@ -839,7 +835,7 @@ def remove_address(request,address_id):
     return redirect('checkout')
 
 
-#================== PLACE ORDER SECTION ==================#
+#===================== PLACE ORDER SECTION ==================#
 
 def place_order(request):
     cart_items = Cart.objects.filter(user=request.user)
@@ -916,18 +912,11 @@ def place_order(request):
                 offer_percentage = item.product.art_category.art_type_offer or 0
                 offer_amount = item.variant.price * offer_percentage / 100
                 final_offer_price = item.variant.price - offer_amount
-
-                print('OFFER:', final_offer_price)
-
                 coupon_item_final_amount = final_offer_price
 
                 if coupon_percentage:
                     coupon_item_amount = final_offer_price * coupon_percentage / 100
                     coupon_item_final_amount = final_offer_price - coupon_item_amount
-
-                    print('COUPON:', coupon_item_final_amount)
-
-
 
                 Order_details.objects.create(
                     order=order,
@@ -979,19 +968,16 @@ def place_order(request):
                 item.variant.stock -= item.quantity
                 item.variant.save()
 
-            # Clear cart items
             cart_items.delete()
 
             client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_SECRET_KEY))
 
-            # Create Razorpay Order
             razorpay_order = client.order.create({
-                'amount': final_amount,  # Amount in paise
+                'amount': final_amount,  
                 'currency': 'INR',
-                'payment_capture': '1'  # Auto-capture after payment
+                'payment_capture': '1'  
             })
 
-            # Render payment page with Razorpay order ID and key
             return render(request, 'user/payment.html', {
                 'order_id': razorpay_order['id'],
                 'amount': final_amount / 100,
@@ -1185,7 +1171,6 @@ def item_return(request, order_id, item_id):
        
         existing_return = Return.objects.filter(order_item=item, status='request').exists()
         if existing_return:
-            # If a return request already exists, show a warning message
             messages.warning(request, 'You have already submitted a return request for this item.')
             return redirect('order_details', order_id=order_id)  # 
         
@@ -1348,7 +1333,6 @@ def order_cancel(request, order_id):
 def item_cancel(request, order_id, item_id):
     order = get_object_or_404(Order, id=order_id)
     item = get_object_or_404(Order_details, id=item_id)
-    print('HElloo')
     item.item_status='Cancelled'
 
     if order.payment_method in ['Razorpay', 'Wallets']:
@@ -1365,7 +1349,6 @@ def item_cancel(request, order_id, item_id):
         
         coupon_used = item.order.coupon
         if coupon_used:
-            # Calculate the discount from the coupon
             discount_from_coupon = (coupon_used.percentage / 100) * amount_to_refund
             amount_to_refund -= discount_from_coupon
         # else:
@@ -1378,10 +1361,6 @@ def item_cancel(request, order_id, item_id):
 
         order.total_amount -= amount_to_refund
         order.save()
-
-        print('TOTALL:', order.total_amount)
-
-        print("AMTT:", amount_to_refund)
 
         trasanction = Wallet_Transaction.objects.create(
             user = item.order.user,
@@ -1410,71 +1389,7 @@ def item_cancel(request, order_id, item_id):
     return redirect('order_details',order_id=order_id)
 
 
-#==================== SINGLE ORDER SECTION =================#
-
-
-
-#========================  SALES REPORT SECTION ===================#
-
-# from django.db.models import Sum, Count, Q
-
-# def sales_report(request):
-#     total_revenue = Order.objects.filter(payment_status='Success').aggregate(
-#         total_sales=Sum('total_amount')
-#     )['total_sales'] or 0
-
-#     orders_by_status = Order.objects.values('status').annotate(
-#         count=Count('id')
-#     ).order_by('status')
-
-#     payment_status_count = Order.objects.values('payment_status').annotate(
-#         count=Count('id')
-#     ).order_by('payment_status')
-
-#     from datetime import datetime
-#     current_month = datetime.now().month
-#     monthly_orders = Order.objects.filter(order_date__month=current_month).count()
-
-#     coupon_usage = Order.objects.filter(coupon__isnull=False).count()
-
-#     context = {
-#         'total_revenue': total_revenue,
-#         'orders_by_status': orders_by_status,
-#         'payment_status_count': payment_status_count,
-#         'monthly_orders': monthly_orders,
-#         'coupon_usage': coupon_usage,
-#     }
-#     return render(request, 'admin/sale.html', context)
-
-
-
-
-# import csv
-# from django.http import HttpResponse
-
-# def export_sales_report(request):
-#     # Prepare the CSV response
-#     response = HttpResponse(content_type='text/csv')
-#     response['Content-Disposition'] = 'attachment; filename="sales_report.csv"'
-
-#     writer = csv.writer(response)
-#     writer.writerow(['Order ID', 'User', 'Total Amount', 'Status', 'Payment Status', 'Order Date', 'Coupon Applied'])
-
-#     orders = Order.objects.all()
-#     for order in orders:
-#         writer.writerow([
-#             order.id, 
-#             order.user.username, 
-#             order.total_amount, 
-#             order.status, 
-#             order.payment_status, 
-#             order.order_date, 
-#             order.coupon.coupon_code if order.coupon else 'No'
-#         ])
-
-#     return response
-
-
+#==================== DOWNLOAD INVOICE SECTION =================#
 
 
 def download_invoice(request, order_id):
