@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 from django.conf import settings
 from django.conf.urls.static import static
+
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -37,8 +38,8 @@ urlpatterns = [
     path('sample/', views.sample, name='sample'),
     path('get_sales_data/', views.get_sales_data, name='get_sales_data'),
 
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
 

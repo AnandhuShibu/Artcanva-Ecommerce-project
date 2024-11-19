@@ -259,9 +259,10 @@ def shop(request):
     selected_size = request.POST.getlist('size') if request.method == 'POST' else []
     price_order = request.POST.get('price_order') if request.method == 'POST' else None
     products = Product.objects.filter(
-    Q(product_status=True) & Q(variants__isnull=False)
+    Q(product_status=True) & 
+    Q(variants__isnull=False) & 
+    Q(art_category__art_type_status=True)
     ).distinct()
-
     if selected_categories:
         products = products.filter(art_category__id__in=selected_categories)
 
@@ -312,6 +313,14 @@ def single(request, product_id, variant_id):
     in_wishlist = None
     reviews = Review.objects.filter(variant = variant)[:2]
 
+    if product.product_status == False:
+        messages.error(request, "Item currently unavailable")
+        return redirect('shop')
+    
+    if product.art_category.art_type_status == False:
+        messages.error(request, "Item currently unavailable")
+        return redirect('shop')
+
     if request.user.is_authenticated:
         in_cart = Cart.objects.filter(user=request.user, variant=variant).exists()
     if request.user.is_authenticated:
@@ -348,6 +357,16 @@ def add_wishlist_single(request, product_id, variant_id):
         return redirect('login')
     
     product = get_object_or_404(Product, id=product_id)
+
+    if product.product_status == False:
+        messages.error(request, "Item currently unavailable")
+        return redirect('shop')
+
+    print('status:', product.art_category.art_type_status)
+    if product.art_category.art_type_status == False:
+        messages.error(request, "Item currently unavailable")
+        return redirect('shop')
+
     variant = get_object_or_404(Variant, id=variant_id)
     Wishlist.objects.create(product=product, user=request.user, variant=variant)
     messages.success(request, "Item has been added to your wishlist.")
@@ -579,6 +598,15 @@ def add_cart(request,product_id, variant_id):
     
     product_id = get_object_or_404(Product, id=product_id)
     variant_id = get_object_or_404(Variant,id = variant_id)
+    
+    if product_id.product_status == False:
+        messages.error(request, "Item currently unavailable")
+        return redirect('shop')
+    
+    if product_id.art_category.art_type_status == False:
+        messages.error(request, "Item currently unavailable")
+        return redirect('shop')
+    
     cart_item_exists = Cart.objects.filter(variant=variant_id, user=request.user).exists()
     if cart_item_exists:
         messages.warning(request, "This item is already in your cart.")
@@ -606,6 +634,10 @@ def checkout_og(request):
 
         for variant_id, quantity in quantities.items():
             variant = get_object_or_404(Variant, id=variant_id)
+
+            if variant.product.product_status == False:
+                messages.error(request, f"{variant.product.product_name} is currently unavailable !")
+                return redirect('cart')
 
             if quantity < 1:
                 messages.error(request, "Quantity cannot be less than 1.")
@@ -734,8 +766,19 @@ def validate_stock(user):
     for item in cart_items:
         variant = get_object_or_404(Variant, id=item.variant_id)
 
+        print("VALIDATE VARIANT")
+
         if item.quantity > variant.stock:
             return f"{variant.product.product_name} is Out of stock !"
+        
+        if not variant.product.art_category.art_type_status:
+            return f"{variant.product.product_name} is currently unavailable !"
+        
+        if item.product.product_status == False:
+
+            print("PRODUCT STATUS")
+            return f"{variant.product.product_name} is currently unavailable !"
+    
     return None
 
 def edit_address_chechout(request):
@@ -875,6 +918,8 @@ def place_order(request):
                 final_offer_price = item.variant.price - offer_amount
 
                 print('OFFER:', final_offer_price)
+
+                coupon_item_final_amount = final_offer_price
 
                 if coupon_percentage:
                     coupon_item_amount = final_offer_price * coupon_percentage / 100
@@ -1127,8 +1172,6 @@ def order_details(request, order_id):
         # 'hide': hide
     }
     return render(request, 'user/order_details.html', context)
-
-
 
 
 #============================= RETURN SECTION =========================#

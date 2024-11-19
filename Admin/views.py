@@ -35,7 +35,7 @@ def login_admin(request):
         if user is not None:
             if user.is_superuser:
                 authlogin(request, user)
-                return redirect('panel')
+                return redirect('dashboard')
             else:
                 return render(request, 'admin/log.html')
         else:
@@ -493,7 +493,9 @@ def sales(request):
         'overall_sales_count': overall_sales_count,
         'overall_amount': overall_amount,
         'overall_discount': overall_discount,
-        'filter_type': filter_type
+        'filter_type': filter_type,
+        'start_date':start_date,
+        'end_date': end_date
     }
 
     return render(request, 'admin/sales.html', context)
@@ -507,6 +509,8 @@ from django.db.models.functions import Round
 from django.http import HttpResponse
 from django.db.models import Sum, F
 from datetime import datetime, timedelta
+from dateutil.parser import parse # type: ignore
+
  
 def export_pdf(request):
     filter_type = request.GET.get('status')
@@ -546,10 +550,16 @@ def export_pdf(request):
         start_date = today.replace(day=1)  
         end_date = (today.replace(day=1) + timedelta(days=32)).replace(day=1) - timedelta(days=1)  
 
-    if start_date and isinstance(start_date, str):
-        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
-    if end_date and isinstance(end_date, str):
-        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+    if start_date:
+        try:
+            start_date = parse(start_date).date()
+        except ValueError:
+            raise ValueError(f"Invalid start_date format: {start_date}")
+    if end_date:
+        try:
+            end_date = parse(end_date).date()
+        except ValueError:
+            raise ValueError(f"Invalid end_date format: {end_date}")
 
     if start_date and end_date:
         orders = orders.filter(order_date__date__range=(start_date, end_date))
@@ -564,8 +574,8 @@ def export_pdf(request):
 
     summary_data = [
         f"Total Sales: {overall_sales_count}",
-        f"Total Amount: {overall_amount}",
-        f"Total Discount: {overall_discount:.2f}",
+        f"Total Amount: Rs {overall_amount}",
+        f"Total Discount: Rs {overall_discount:.2f}",
     ]
     for summary in summary_data:
         elements.append(Paragraph(summary, styles['Normal']))
@@ -674,28 +684,30 @@ def return_status(request):
 from django.db.models import Sum
 from django.db.models import Sum
 
-def dashboard(request):
+from django.db.models import Sum
 
-    print("ABCDEFGH")
+def dashboard(request):
+    if not request.user.is_authenticated or not request.user.is_superuser: 
+        return redirect('login_admin')
+
     # Get the top-selling products by summing up the quantities for each product
     top_selling_products = (
         Order_details.objects
+        .select_related('product', 'product__art_category')  # Efficiently join Product and Art category tables
         .values(
-            'product__product_name',  # Group by product name
-            'product__images1',       # Include the product image dynamically
-        )
+        'product__id',  # Include product id in the values query
+        'product__product_name',
+        'product__art_category__art_type',
+    )
         .annotate(total_quantity=Sum('quantity'))  # Sum quantities for each product
         .order_by('-total_quantity')[:5]  # Sort by total_quantity in descending order and limit to top 5
     )
 
-   
-
-    # Best-selling art category based on quantity sold
     best_selling_art_category = (
         Order_details.objects
-        .values('product__art_category__art_type')  # Assuming `Art` has an `art_type` field
+        .values('product__art_category__art_type')  # Get the art_type for best-selling categories
         .annotate(total_quantity=Sum('quantity'))
-        .order_by('-total_quantity')
+        .order_by('-total_quantity')  # Sort by total quantity
     )
 
     context = {
@@ -707,6 +719,150 @@ def dashboard(request):
 
 
 
+
+from django.http import JsonResponse
+from django.utils import timezone
+from datetime import timedelta
+from django.db.models import Sum
+from django.db.models.functions import TruncDay, TruncWeek, TruncMonth
+
+from django.http import JsonResponse
+
+# def get_sales_data(request):
+
+#     filter_type = request.GET.get('filter', 'daily')
+#     # Your logic to fetch data based on the filter
+#     now = datetime.now()
+
+#     print("FILTER", filter_type)
+#     if filter_type == 'daily':
+#         data = [100, 120, 150, 200, 180, 220, 300]
+#         labels = ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7']
+#     elif filter_type == 'weekly':
+#         data = [1000, 1200, 1500, 2000, 1800]
+#         labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5']
+#     else:
+#         data = [4000, 5000, 6000, 7000, 7500, 8000, 8500, 9000, 9500, 10000, 11000, 12000]
+#         labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
+#     return JsonResponse({'data': data, 'labels': labels})
+
+
+
+
+
+from datetime import datetime, timedelta
+from django.db.models import Sum
+from django.db.models.functions import TruncMonth, TruncWeek
+from django.http import JsonResponse
+
+
+def get_sales_data(request):
+    filter_type = request.GET.get('filter', 'daily')  # Default to daily if no filter is provided
+    now = datetime.now()
+
+    # Filter by 'Delivered' status
+    orders_delivered = Order.objects.filter(status='Delivered').order_by('-id')
+
+    if filter_type == 'daily':
+        start_date = now - timedelta(days=7)  # Default to the last 7 days if no start date provided
+        orders = orders_delivered.filter(deliver_date__gte=start_date)
+        # Get daily total amounts for the last 7 days
+        data = orders.values('deliver_date__date').annotate(total=Sum('total_amount')).order_by('deliver_date__date')
+        labels = [order['deliver_date__date'].strftime('%Y-%m-%d') for order in data]
+        # Add the current date to the labels, ensuring it's in the same format
+        current_date = now.strftime('%Y-%m-%d')
+        
+        # Check if the current date is already in the labels and avoid adding it again
+        if current_date not in labels:
+            labels.append(current_date)  # Add the current date to the end if not already present
+        
+        # Limit labels to the last 5 unique dates (if needed)
+        labels = labels[-5:]
+
+        data = [order['total'] for order in data]
+
+
+    elif filter_type == 'weekly':
+        start_date = now - timedelta(weeks=5)  # Default to the last 5 weeks if no start date provided
+        orders = orders_delivered.filter(deliver_date__gte=start_date)
+        # Get weekly total amounts for the last 5 weeks
+        data = orders.annotate(week=TruncWeek('deliver_date')).values('week').annotate(total=Sum('total_amount')).order_by('week')
+        labels = [week['week'].strftime('%Y-%m-%d') for week in data]
+        data = [week['total'] for week in data]
+
+    elif filter_type == 'monthly':
+        start_date = now - timedelta(days=365)  # Default to the last 12 months if no start date provided
+        orders = orders_delivered.filter(deliver_date__gte=start_date)
+        # Get monthly total amounts for the last 12 months
+        data = orders.annotate(month=TruncMonth('deliver_date')).values('month').annotate(total=Sum('total_amount')).order_by('month')
+        labels = [month['month'].strftime('%B %Y') for month in data]  # Display full month names
+        data = [month['total'] for month in data]
+
+    total_sales_count = orders.count()
+    total_amount = orders.aggregate(Sum('total_amount'))['total_amount__sum'] or 0  # Ensure it defaults to 0 if None
+
+    return JsonResponse({
+        'data': data,
+        'labels': labels,
+        'total_sales_count': total_sales_count,
+        'total_amount': total_amount
+    })
+
+
+
+
+
+
+
+
+
+
+
+# def total_sales_count(request):
+#     filter_type = request.GET.get('filter')  # Get the filter type (week, month, year)
+#     now = datetime.now()
+
+#     # Exclude orders with status 'returned'
+#     order_filter = Order.objects.exclude(status='Returned')
+
+#     if filter_type == 'week':
+#         start_date = now - timedelta(days=now.weekday())  # Start of the current week (Monday)
+#         end_date = start_date + timedelta(days=6)  # End of the current week (Sunday)
+#         sales_count = (
+#             order_filter.filter(delivered_at_date_range=[start_date, end_date])
+#             .values('delivered_at__date')  # Group by delivery date
+#             .annotate(count=Count('id'))  # Count orders
+#             .order_by('delivered_at__date')
+#         )
+#         labels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']  # Day names
+#         counts = [next((entry['count'] for entry in sales_count if entry['delivered_at__date'] == (start_date + timedelta(days=i)).date()), 0) for i in range(7)]
+
+#     elif filter_type == 'month':
+#         start_date = now.replace(month=1, day=1)  # First day of the year
+#         sales_count = (
+#             order_filter.filter(delivered_at__year=now.year)
+#             .values('delivered_at__month')  # Group by delivery month
+#             .annotate(count=Count('id'))
+#             .order_by('delivered_at__month')
+#         )
+#         labels = [datetime(now.year, i, 1).strftime('%B') for i in range(1, 13)]  # List of all months (January to December)
+#         counts = [next((entry['count'] for entry in sales_count if entry['delivered_at__month'] == i), 0) for i in range(1, 13)]
+
+#     elif filter_type == 'year':
+#         current_year = now.year
+#         start_year = current_year - 5  # Start from 5 years ago
+#         end_year = current_year + 5  # Include 5 years after the current year
+#         sales_count = (
+#             order_filter.filter(delivered_at_yeargte=start_year, delivered_atyear_lte=end_year)
+#             .values('delivered_at__year')  # Group by delivery year
+#             .annotate(count=Count('id'))
+#             .order_by('delivered_at__year')
+#         )
+#         labels = [str(year) for year in range(start_year, end_year + 1)]  # List of years from 5 years ago to 5 years after
+#         counts = [next((entry['count'] for entry in sales_count if entry['delivered_at__year'] == year), 0) for year in range(start_year, end_year + 1)]
+
+#     return JsonResponse({'labels': labels, 'counts': counts})
 
 
 # from django.shortcuts import render
@@ -759,45 +915,6 @@ def dashboard(request):
 #         'chart_labels': chart_labels,
 #         'chart_data': chart_data,
 #     })
-
-
-
-
-from django.http import JsonResponse
-from django.utils import timezone
-from datetime import timedelta
-from django.db.models import Sum
-
-def get_sales_data(request):
-    print("HELLOOOO")
-    filter_type = request.GET.get('filter', 'daily')  # Get the filter type from the GET request
-    now = timezone.now()
-
-    print("SAMPLE", filter_type )
-
-    if filter_type == 'daily':
-        start_date = now - timedelta(days=7)  # Last 7 days
-        orders = Order.objects.filter(order_date__gte=start_date)
-        sales_data = orders.values('order_date__date').annotate(total_sales=Sum('total_amount'))
-        labels = [str(order['order_date__date']) for order in sales_data]
-        data = [order['total_sales'] for order in sales_data]
-
-    elif filter_type == 'weekly':
-        start_date = now - timedelta(weeks=5)  # Last 5 weeks
-        orders = Order.objects.filter(order_date__gte=start_date)
-        sales_data = orders.extra(select={'week': "strftime('%W', order_date)"}).values('week').annotate(total_sales=Sum('total_amount'))
-        labels = [f"Week {order['week']}" for order in sales_data]
-        data = [order['total_sales'] for order in sales_data]
-
-    elif filter_type == 'monthly':
-        start_date = now - timedelta(weeks=12)  # Last 12 months
-        orders = Order.objects.filter(order_date__gte=start_date)
-        sales_data = orders.extra(select={'month': "strftime('%m', order_date)"}).values('month').annotate(total_sales=Sum('total_amount'))
-        labels = [f"Month {order['month']}" for order in sales_data]
-        data = [order['total_sales'] for order in sales_data]
-
-    # Return the sales data as a JSON response
-    return JsonResponse({'labels': labels, 'sales_data': data})
 
 
 
