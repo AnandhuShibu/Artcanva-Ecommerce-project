@@ -257,7 +257,7 @@
                 
                 <div class="info-box">
                     <div class="title">Total Amount</div>
-                    <div class="value" id="total-amount">$0.00</div>
+                    <div class="value" id="total-amount"></div>
                 </div>
             </div>
             
@@ -374,7 +374,7 @@
         
                         // Update the Total Sales Count and Total Amount
                         document.getElementById('total-sales').textContent = data.total_sales_count;
-                        document.getElementById('total-amount').textContent = `$${parseFloat(data.total_amount).toFixed(2)}`;
+                        document.getElementById('total-amount').textContent = `₹${parseFloat(data.total_amount).toFixed(2)}`;
                     }
                 })
                 .catch(error => {

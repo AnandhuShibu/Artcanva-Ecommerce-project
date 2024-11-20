@@ -26,7 +26,7 @@ from reportlab.lib.styles import getSampleStyleSheet # type: ignore
 from reportlab.lib import colors # type: ignore
 from dateutil.parser import parse # type: ignore
 from datetime import date
-from django.db.models.functions import TruncMonth, TruncWeek
+from django.db.models.functions import TruncMonth, TruncWeek, TruncDate
 from django.http import JsonResponse
 
 
@@ -452,12 +452,13 @@ def sales(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
     filter_type = request.GET.get('status')
-    orders = Order.objects.filter(status='Delivered').order_by('-id')
+    orders = Order.objects.filter(status='Delivered', deliver_date__isnull=False).order_by('-id')
 
     if filter_type == 'daily':
         today = datetime.now().date()
         start_date = today
         end_date = today
+        orders = orders.filter(deliver_date__date=today)  # Filter based on deliver_date for today
 
     elif filter_type == 'weekly':
         today = datetime.now().date()
@@ -475,7 +476,7 @@ def sales(request):
         end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
 
     if start_date and end_date:
-        orders = orders.filter(order_date__date__range=(start_date, end_date))  
+        orders = orders.filter(deliver_date__date__range=(start_date, end_date))  # Filter by deliver_date range
 
     paginator = Paginator(orders, 4)
     page_number = request.GET.get('page')
@@ -485,9 +486,9 @@ def sales(request):
     overall_amount = orders.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
 
     overall_discount = (
-    orders.filter(coupon__isnull=False)  
-    .annotate(discount_amount=Round(F('total_amount') * F('coupon_percentage') / 100, 2))  
-    .aggregate(total_discount=Sum('discount_amount'))['total_discount'] or 0  
+        orders.filter(coupon__isnull=False)  
+        .annotate(discount_amount=Round(F('total_amount') * F('coupon_percentage') / 100, 2))  
+        .aggregate(total_discount=Sum('discount_amount'))['total_discount'] or 0  
     )
 
     context = {
@@ -496,7 +497,7 @@ def sales(request):
         'overall_amount': overall_amount,
         'overall_discount': overall_discount,
         'filter_type': filter_type,
-        'start_date':start_date,
+        'start_date': start_date,
         'end_date': end_date
     }
 
@@ -541,19 +542,18 @@ def export_pdf(request):
         start_date = today.replace(day=1)  
         end_date = (today.replace(day=1) + timedelta(days=32)).replace(day=1) - timedelta(days=1)  
 
-    if start_date:
-        try:
-            start_date = parse(start_date).date()
-        except ValueError:
-            raise ValueError(f"Invalid start_date format: {start_date}")
-    if end_date:
-        try:
-            end_date = parse(end_date).date()
-        except ValueError:
-            raise ValueError(f"Invalid end_date format: {end_date}")
+    if start_date and isinstance(start_date, str):
+        start_date = parse(start_date).date()
+    elif isinstance(start_date, datetime):
+        start_date = start_date.date()
+
+    if end_date and isinstance(end_date, str):
+        end_date = parse(end_date).date()
+    elif isinstance(end_date, datetime):
+        end_date = end_date.date()
 
     if start_date and end_date:
-        orders = orders.filter(order_date__date__range=(start_date, end_date))
+        orders = orders.filter(deliver_date__date__range=(start_date, end_date))  # Use deliver_date
 
     overall_sales_count = orders.count()
     overall_amount = orders.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
@@ -601,7 +601,6 @@ def export_pdf(request):
     doc.build(elements)
 
     return response
-
 
 
 #----------------------  CHANGING RETURN STATUS --------------------#
@@ -702,53 +701,49 @@ def dashboard(request):
     return render(request, 'admin/dashboard.html', context)
 
 
-
 def get_sales_data(request):
-    filter_type = request.GET.get('filter', 'daily') 
+    filter_type = request.GET.get('filter', 'daily')  
     now = datetime.now()
-
-    orders_delivered = Order.objects.filter(status='Delivered').order_by('-id')
+    orders_delivered = Order.objects.filter(status='Delivered')
+    amount_orders = orders_delivered  
 
     if filter_type == 'daily':
-        start_date = now - timedelta(days=7)
-        orders = orders_delivered.filter(deliver_date__gte=start_date)
-       
-        data = orders.values('deliver_date__date').annotate(total=Sum('total_amount')).order_by('deliver_date__date')
-        labels = [order['deliver_date__date'].strftime('%Y-%m-%d') for order in data]
-        current_date = now.strftime('%Y-%m-%d')
-        
-        if current_date not in labels:
-            labels.append(current_date)
-        
-        # Limit labels to the last 5 unique dates (if needed)
-        labels = labels[-5:]
-
-        data = [order['total'] for order in data]
-
+        today = now.date()
+        amount_orders = orders_delivered.filter(deliver_date__date=today)
+        start_date = now - timedelta(days=5)
+        orders = orders_delivered.filter(deliver_date__date__gte=start_date.date())
+        data = orders.annotate(date=TruncDate('deliver_date')).values('date').annotate(total=Sum('total_amount')).order_by('date')
+        labels = [entry['date'].strftime('%Y-%m-%d') for entry in data]
+        values = [entry['total'] for entry in data]
 
     elif filter_type == 'weekly':
-        start_date = now - timedelta(weeks=5)  
+        today = now.date()
+        start_date_sales = today - timedelta(days=today.weekday())
+        end_date_sales = start_date_sales + timedelta(days=6)
+        amount_orders = orders_delivered.filter(deliver_date__date__range=(start_date_sales, end_date_sales))
+        start_date = now - timedelta(weeks=5)
         orders = orders_delivered.filter(deliver_date__gte=start_date)
         data = orders.annotate(week=TruncWeek('deliver_date')).values('week').annotate(total=Sum('total_amount')).order_by('week')
-        labels = [week['week'].strftime('%Y-%m-%d') for week in data]
-        data = [week['total'] for week in data]
+        labels = [entry['week'].strftime('%Y-%m-%d') for entry in data]
+        values = [entry['total'] for entry in data]
 
     elif filter_type == 'monthly':
         start_date = now - timedelta(days=365)
-        orders = orders_delivered.filter(deliver_date__gte=start_date)
-        data = orders.annotate(month=TruncMonth('deliver_date')).values('month').annotate(total=Sum('total_amount')).order_by('month')
-        labels = [month['month'].strftime('%B %Y') for month in data]
-        data = [month['total'] for month in data]
+        amount_orders = orders_delivered.filter(deliver_date__gte=start_date)
+        data = amount_orders.annotate(month=TruncMonth('deliver_date')).values('month').annotate(total=Sum('total_amount')).order_by('month')
+        labels = [entry['month'].strftime('%B %Y') for entry in data]
+        values = [entry['total'] for entry in data]
 
-    total_sales_count = orders.count()
-    total_amount = orders.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
+    total_sales_count = amount_orders.count() 
+    total_amount = amount_orders.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
 
     return JsonResponse({
-        'data': data,
+        'data': values,
         'labels': labels,
         'total_sales_count': total_sales_count,
         'total_amount': total_amount
     })
+
 
 
 def sample(request):

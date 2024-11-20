@@ -683,6 +683,12 @@ def checkout(request):
         messages.error(request, stock_error)
         return redirect('cart')
     
+    status_error = validate_status(request.user)
+    if status_error:
+        print("error")
+        messages.error(request, status_error)
+        return redirect('shop')
+    
     if request.method == 'POST':
         fullname = request.POST.get('fullname')
         mobile = request.POST.get('mobile')
@@ -740,12 +746,11 @@ def checkout(request):
     used_coupon_ids = Coupon_user.objects.filter(user=request.user).values_list('coupon_used_id', flat=True)
     coupons = Coupons.objects.exclude(id__in=used_coupon_ids).filter(expiry_date__gte=date.today())
     
-
     try:
         wallet = Wallet.objects.get(user=request.user)
         wallet_balance = wallet.wallet_amount if wallet.wallet_amount is not None and wallet.wallet_amount > 0 else 0
     except Wallet.DoesNotExist:
-        wallet_balance = 0  # Set balance to 0 if wallet does not exist
+        wallet_balance = 0 
 
     context = {
         'all_address': all_address,
@@ -757,25 +762,38 @@ def checkout(request):
 
     return render(request,'user/checkout.html', context)
 
+
 def validate_stock(user):
-    cart_items = Cart.objects.filter(user=user,product__product_status=True)
+    cart_items = Cart.objects.filter(user=user)
     for item in cart_items:
         variant = get_object_or_404(Variant, id=item.variant_id)
-
-        print("VALIDATE VARIANT")
+        product = variant.product 
 
         if item.quantity > variant.stock:
-            return f"{variant.product.product_name} is Out of stock !"
-        
-        if not variant.product.art_category.art_type_status:
-            return f"{variant.product.product_name} is currently unavailable !"
-        
-        if item.product.product_status == False:
+            return f"{product.product_name} is out of stock!"
 
-            print("PRODUCT STATUS")
-            return f"{variant.product.product_name} is currently unavailable !"
+        if not product.art_category.art_type_status:
+            return f"{product.product_name} is currently unavailable!"
+        
+        if not variant.variant_status:
+            return f"The selected frame size of {product.product_name} is currently unavailable!"
+        
+    return None
+
+
+def validate_status(user):
+    cart_items = Cart.objects.filter(user=user)
+    for item in cart_items:
+        variant = get_object_or_404(Variant, id=item.variant_id)
+        product = variant.product 
+
+        if not product.product_status:
+
+            print("HELLO")
+            return f"{product.product_name} is currently unavailable!"
     
     return None
+
 
 def edit_address_chechout(request):
     if request.method == 'POST':
@@ -885,6 +903,11 @@ def place_order(request):
         if stock_error:
             messages.error(request, stock_error)
             return redirect('cart')
+        
+        status_error = validate_status(request.user)
+        if status_error:
+            messages.error(request, status_error)
+            return redirect('shop')
         
         if payment_method == 'COD':
             order = Order.objects.create(
@@ -1155,6 +1178,7 @@ def order_details(request, order_id):
         'normal_total_price': normal_total_price,
         'item_offer': item_offer,
         'return_request':return_request,
+        'items_with_price': items_with_price
         # 'hide': hide
     }
     return render(request, 'user/order_details.html', context)
@@ -1375,7 +1399,6 @@ def item_cancel(request, order_id, item_id):
    
     item.save()
 
-    # Check if all items in the order are cancelled
     all_items_cancelled = not Order_details.objects.filter(
         order=order,
     ).exclude(item_status='Cancelled').exists()

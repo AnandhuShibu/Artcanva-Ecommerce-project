@@ -611,18 +611,29 @@
     {% for item in order_items %}
     <div class="order-details">
         <div class="product-image">
-            <img src="{{ item.product.images1.url }}" alt="Shree Ganesha Kerala Mural Painting">
+            <img src="{{ item.product.images1.url }}">
         </div>
         <div class="product-info">
             <h2>{{ item.product.product_name }}</h2>
             <div class="cash">
-                {% if item.offer %}
-                <span class = "offer_price">{{item_offer|floatformat:0}}</span>
+                {% comment %} {% if item.offer %}
+                <span class = "offer_price">{{item.i|floatformat:0}}</span>
                 <span class = "original_price">₹ {{ item.variant.price|floatformat:0 }}</span>
                 <span class="p">offer price</span>
                 {% else %}
                 <span class = "original">₹ {{ item.variant.price|floatformat:0 }}</span>
+                {% endif %} {% endcomment %}
+
+
+
+                {% if item.offer %}
+                <span class = "original">₹ {{ item.variant.price|floatformat:0 }}</span>
+                <span class="p">Item has offer</span>
+                {% else %}
+                <span class = "original">₹ {{ item.variant.price|floatformat:0 }}</span>
                 {% endif %}
+
+                
             </div>
             <p>Frame size: {{ item.variant.frame_size }}</p>
             <span>Qty: {{item.quantity}}</span>
