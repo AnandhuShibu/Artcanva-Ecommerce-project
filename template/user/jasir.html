@@ -1055,3 +1055,825 @@ def checkout_og(request):
 
 </body>
 </html>  
+
+
+#=======================  USER HOME PAGE ============================#
+
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Artcanva</title>
+  <link rel="icon" href="static/images/arts.png" type="image/x-icon">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+
+    body{
+      background-color:#ffffe4
+    }
+
+    .navbar {
+      height: 80px;
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      color: #000000; 
+      font-weight: bold; 
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); 
+      letter-spacing: 1px; 
+      text-decoration: none;
+  }
+  
+    .navbar-nav .nav-link {
+      font-size: 1.3rem; 
+      color:#000000
+    }
+
+    .navbar-nav .nav-item {
+      margin: 0 15px; 
+    }
+  
+    .navbar-toggler {
+      padding: 0.5rem;
+    }
+
+    .carousel-item {
+      height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    video {
+      width: 100vw; 
+      height: auto; 
+      object-fit: cover; 
+    }
+
+    .popular-products {
+      margin-top: 50px; 
+      text-align: left; 
+    }
+
+    .new-arrivals {
+      margin-top: 50px; 
+      text-align: center;
+    }
+
+    .new-arrivals-heading {
+        font-size: 2.5rem;
+        color: #5B534F; 
+        font-weight: bold; 
+        margin-bottom: 10px;
+    }
+
+    .new-arrivals p {
+        font-size: 1.25rem; 
+        color: #6c757d; 
+    }
+    .card {
+      
+      width: 90%; 
+      margin: 0 auto;
+    }
+
+    .small-card {
+      width: 80%;
+      margin: 0 auto;
+    }
+
+    #card_image_arrival{
+      height:310px ;
+    }
+      
+
+    #card_image_popular{
+        height:243px ;
+      }
+        
+    .quotes-section {
+      background-color: #f8f9fa;
+      padding: 30px;
+      background-color:#ffffe4
+    }
+
+    .quotes-section h3 {
+        color: #343a40; 
+    }
+
+    .quotes-section blockquote {
+        padding-left: 15px; 
+        margin-bottom: 20px;
+        font-style: italic;
+        color: #6c757d;
+    }
+
+    .slow-underline {
+      position: relative;
+      color: inherit;
+      text-decoration: none;
+      overflow: hidden;
+      display: inline-block;
+    }
+
+    .slow-underline::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 90%;
+      height: 1px;
+      background-color: currentColor;
+      transform: scaleX(0); 
+      transition: transform 0.4s ease-in-out;
+      transform-origin: left; 
+    }
+
+    .slow-underline:hover::after {
+      transform: scaleX(1);
+    }
+
+    .view{
+      text-decoration:none;
+    }
+
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMKtkz0p5sy4R8l1L4/fC1RfwD1kLwL4RbfE8" crossorigin="anonymous">
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark ">
+    <div class="container-fluid">
+
+  <!-- Left Logo Section -->
+      <a class="logo" href="{% url 'home'%}">ART CANVA</a>
+
+  <!-- Center Links -->
+      <button 
+        class="navbar-toggler" 
+        type="button" 
+        data-bs-toggle="collapse" 
+        data-bs-target="#navbarNav" 
+        aria-controls="navbarNav" 
+        aria-expanded="false" 
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+        <ul class="navbar-nav navbar-nav-center">
+          <li class="nav-item">
+            <a class="nav-link slow-underline" aria-current="page" href="{% url 'home'%}">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link slow-underline" href="{% url 'shop'%}">Shop</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link slow-underline" href="#">Contact</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link slow-underline" href="{% url 'signup' %}">Signup</a>
+          </li>
+        </ul>
+      </div>
+
+  <!-- Right Section (Cart, Wishlist, User) -->
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'cart' %}"><i class="bi bi-cart"></i> Cart</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'wishlist'%}"><i class="bi bi-heart"></i> Wishlist</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'profile'%}"><i class="bi bi-person"></i> Profile</a>
+        </li>
+      </ul>
+
+    </div>
+  </nav>
+<!-- Navbar End -->
+
+
+<!-- Carousel Start -->
+  <div id="staticCarousel" class="carousel slide">
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <video autoplay loop muted>
+          <source src="{% static 'images/video.mp4' %}" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    </div>
+  </div>
+<!-- Carousel End -->
+
+
+<!-- New Arrivals Section Start -->
+<div class="container my-5 new-arrivals">
+  <h2 class="new-arrivals-heading">NEW ARRIVALS</h2>
+  <hr class="my-4">
+  <p class="lead">Discover our latest products that just hit the shelves!</p>
+</div>
+<!-- New Arrivals Section End -->
+
+
+<!-- Card Section Start -->
+  <div class="container my-5">
+    <div class="row">
+      {% for arrival in arrivals %}
+      <div class="col-md-4">
+        <div class="card">
+          <img src="{{ arrival.images1.url }}" id="card_image_arrival" class="card-img-top" alt="Card Image">
+          <div class="card-body">
+            <h5 class="card-title">{{arrival.product_name}}</h5>
+            <p class="card-text">{{arrival.}}</p>
+            <a href="{% url 'single' arrival.id arrival.variants.first.id %}" ><button type="button" class="btn btn-primary btn-sm">View</button></a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+<!-- Card Section End -->
+
+
+<!-- Popular Products Section -->
+   <div class="container my-5 popular-products">
+    <h2>| POPULAR PRODUCTS</h2>
+  </div>
+
+<!-- Smaller Card Section Start -->
+  <div class="container my-5">
+    <div class="row">
+    {% for popular in populars %}
+      <div class="col-md-3">
+        <div class="card small-card">
+          <img src="{{popular.images1.url}}" id="card_image_popular" class="card-img-top" alt="Small Card Image 1">
+          <div class="card-body">
+            <h6 class="card-title">{{popular.product_name}}</h6>
+            <a href="" class="view">VIEW></a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+<!-- Smaller Card Section End -->
+
+
+<!-- Quotes Section Start -->
+<div class="container my-5 quotes-section text-center">
+  <h3 class="mb-4">The Essence of Painting</h3>
+  <blockquote class="blockquote">
+      <p class="mb-0">"Painting is the silent dialogue of the soul, capturing emotions where words fall short”</p>  
+  </blockquote>
+
+  <blockquote class="blockquote">
+      <p class="mb-0">“It is a timeless expression that invites us to see the world through the artist's heart."</p>
+  </blockquote>
+</div>
+<!-- Quotes Section End -->
+
+
+<!-- Footer Section Start -->
+<footer class="bg-dark text-white mt-5 pt-4">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-4">
+        <h5>About Us</h5>
+        <p>We are a team dedicated to providing the best products and services for our customers.</p>
+        <p>&copy; 2024 Artcanva</p>
+      </div>
+      <div class="col-md-4">
+        <h5>Quick Links</h5>
+        <ul class="list-unstyled">
+          <li><a href="#" class="text-white">Home</a></li>
+          <li><a href="#" class="text-white">About</a></li>
+          <li><a href="#" class="text-white">Contact</a></li>
+        </ul>
+      </div>
+      <div class="col-md-4 text-end">
+        <h6>Subscribe to Our Newsletter</h5>
+        <form class="d-flex justify-content-end mt-3">
+          <input type="email" class="form-control me-2" placeholder="Enter your email" aria-label="Email" required>
+          <button class="btn btn-primary" type="submit">Subscribe</button>
+        </form>
+        <h5 class="mt-4">Follow Us</h5>
+        <div>
+          <a href="#" class="text-white me-2"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="text-white me-2"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="text-white me-2"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="text-white"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+<!-- Footer Section End -->
+
+
+<!-- Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMKtkz0p5sy4R8l1L4/fC1RfwD1kLwL4RbfE8" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"rel="stylesheet">
+  
+</body>
+</html>
+
+
+
+#======================== USER SHOP PAGE =============================#
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop</title>
+  <link rel="icon" href="static/images/arts.png" type="image/x-icon">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+
+    body {
+      background-color: #ffffe4;
+    }
+
+    .filter-section {
+        background-color:  #ffffe4;
+        padding: 20px;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+      }
+  
+      .filter-heading {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #343a40;
+        border-bottom: 2px solid #dc3545;
+        padding-bottom: 8px;
+      }
+  
+      .filter-group {
+        margin-bottom: 20px;
+      }
+  
+      .filter-group label {
+        font-weight: 500;
+        margin-left: 5px;
+      }
+  
+      .form-range {
+        width: 100%;
+      }
+  
+      .filter-group input {
+        margin-right: 8px;
+      }
+
+      .product-card {
+        margin-bottom: 15px;
+        transition: transform 0.4s;
+        border-radius: 8px;
+        max-width: 90%;
+      }
+      
+      .product-card:hover {
+        transform: scale(1.02);
+      }
+      
+      .product-card img {
+        max-height: 280px; 
+        width: 100%;
+        object-fit: cover;
+        border-radius: 8px 8px 0 0;
+      }
+      
+      .card {
+        margin-left: 15px;
+        margin-right: 15px;
+        max-height:364px;
+      }
+      
+      .add-wishlist {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
+        color: #dc3545;
+        font-size: 1.5rem;
+        display: none;
+      }
+      
+      .product-card:hover .add-wishlist {
+        display: block;
+      }     
+      
+      .rating {
+        margin: 10px 0;
+      }
+
+      .btn {
+        margin-top: 2px;
+        margin-bottom:12px;
+      }
+
+      .navbar {
+          height: 80px; 
+      }
+
+      .logo {
+          font-size: 1.8rem; 
+          color: #000000; 
+          font-weight: bold; 
+          text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); 
+          letter-spacing: 1px; 
+          text-decoration: none;
+      }
+    
+      .navbar-nav .nav-link {
+        font-size: 1.3rem;
+        color:#000000
+      }
+
+      .navbar-nav .nav-item {
+          margin: 0 15px; 
+      }
+      
+      .navbar-nav .nav-link {
+          padding: 10px;
+      }
+      
+      .navbar-toggler {
+          padding: 0.5rem; 
+      }
+
+      hr {
+        border: none;
+        height: 1px;
+        background-color: #000000;
+        margin: 0;
+      }
+      .breadcrumb {
+          font-size: 14px;
+          color: #000000;
+          margin-top: 25px;
+          margin-bottom: 40px;
+          margin-left: 20px;
+      }
+        
+      .breadcrumb a {
+        text-decoration: none;
+        color: #000000;
+        margin-right: 10px;
+        margin-left: 10px;
+      }
+      
+      .breadcrumb a:hover {
+        text-decoration: underline;
+      }
+      
+      .breadcrumb span {
+        font-weight: bold;
+        color: #000;
+      }
+
+      .custom-search-input {
+        height: 40px;
+        font-size: 14px;
+        padding: 4px 8px;
+      }
+      
+      .custom-search-button {
+        height: 36px;
+        font-size: 14px;
+        padding: 0 10px;
+      }
+
+      .pagination-container {
+        text-align: center;
+        margin-top: 20px;
+        margin-bottom: 20px;
+      }
+      
+      .pagination {
+          list-style: none;
+          padding: 0;
+          display: inline-block;
+      }
+      
+      .pagination li {
+          display: inline;
+          margin: 0 5px;
+      }
+      
+      .pagination a {
+          text-decoration: none;
+          color: #007bff;
+          font-weight: bold;
+          padding: 8px 12px;
+          border: 1px solid #ddd;
+          border-radius: 5px;
+          transition: background-color 0.3s, color 0.3s;
+      }
+      
+      .pagination a:hover {
+          background-color: #007bff;
+          color: white;
+      }
+  
+      .popup-message {
+          position: fixed;
+          top: -100px;
+          left: 50%;
+          transform: translateX(-50%);
+          background-color: #FFDE21; 
+          color: #000000;
+          padding: 20px 35px;
+          border-radius: 6px;
+          z-index: 1000;
+          transition: top 0.5s ease-in-out;
+          box-shadow: 0 5px 7px rgba(0, 0, 0, 0.1);
+          font-family: Arial, sans-serif;
+      }
+
+      .popup-error {
+          background-color: #f44336;
+      }
+
+      .popup-warning {
+          background-color: #ff9800; 
+      }
+
+      .popup-show {
+          top: 25px;
+      }
+
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<div id="popup-message" class="popup-message"></div>
+    <!-- Navbar Start -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+    
+          <a class="logo" href="#">ART CANVA</a>
+    
+          <!-- Center Links -->
+          <button 
+            class="navbar-toggler" 
+            type="button" 
+            data-bs-toggle="collapse" 
+            data-bs-target="#navbarNav" 
+            aria-controls="navbarNav" 
+            aria-expanded="false" 
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+            <ul class="navbar-nav navbar-nav-center">
+              <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="{% url 'home'%}">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'shop'%}">Shop</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Contact</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'signup' %}">Signup</a>
+              </li>
+            </ul>
+          </div>
+    
+          <!-- Right Section (Cart, Wishlist, User) -->
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'cart'%}"><i class="bi bi-cart"></i> Cart</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'wishlist'%}"><i class="bi bi-heart"></i> Wishlist</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'profile'%}"><i class="bi bi-person"></i> Profile</a>
+            </li>
+          </ul>
+    
+        </div>
+      </nav>
+      <!-- Navbar End -->
+    
+      <hr>
+
+      <!-- Simple Breadcrumb -->
+      <nav class="breadcrumb">
+        <a href="{% url "home" %}">Home</a> /
+        <a href="{% url "shop" %}"><span>Shop</span></a>
+      </nav>
+
+      <div class="container mt-4">
+        <form method="GET" action="{% url 'shop' %}" class="d-flex justify-content-center">
+          <input 
+            class="form-control custom-search-input me-2 w-50" 
+            type="search" 
+            name="q" 
+            placeholder="Search products..." 
+            value="{{ search_query }}" 
+            aria-label="Search"
+          >
+          <button class="btn btn-outline-success custom-search-button" type="submit">Search</button>
+        </form>
+      </div>
+      
+<!-- Main Content -->
+<div class="container-fluid mt-4">
+  <div class="row">
+
+    <!-- Filters Section -->
+    <div class="col-lg-3 col-md-4">
+      <form action="" method='POST'>
+        {% csrf_token %}
+        <div class="filter-section">
+          <h3 class="filter-heading">Filters</h3>
+
+          <div class="button-container">
+            <button type="submit" class="btn btn-danger w-90">Apply Filters</button>
+            <a href="{% url 'shop' %}" class="btn btn-secondary">Reset</a> 
+          </div>
+
+          <hr>
+          
+          <!-- Category Filter -->
+          <div class="filter-group">
+            <h5>Category</h5>
+            {% for i in arts %}
+            <div class="form-check">
+              <input 
+              class="form-check-input"
+              type="checkbox"
+              name="categories"
+              id="cat{{ forloop.counter }}" 
+              value="{{ i.id }}">
+              {% comment %} {% if i.id|stringformat:"s" in selected_ids %}checked{% endif %}>  <!-- Keep checked if selected --> {% endcomment %}
+              <label class="form-check-label" for="cat{{ forloop.counter }}">{{ i.art_type }}</label>
+              </div>
+            {% endfor %}
+          </div>
+          <hr>
+          <!-- Size Filter -->
+          <div class="filter-group">
+            <h5>Size</h5>
+            {% for size in variants %}
+            <div class="form-check">
+              <input 
+              class="form-check-input"
+              type="checkbox"
+              name="size"
+              id="cat{{ forloop.counter }}"
+              value="{{ size.id }}">
+              <label class="form-check-label" for="cat{{ forloop.counter }}">{{size.frame_size}}</label>
+            </div>
+            {% endfor %}
+          </div>
+          <hr>
+        <!-- Price Filter -->
+        <div class="filter-group">
+          <h5>Filter Price</h5>
+          <ul class="list-unstyled">
+            <li><input type="radio" name="price_order" value="asc" id="price1"><label for="price1">LOW TO HIGH</label></li>
+            <li><input type="radio" name="price_order" value="desc" id="price2"><label for="price2">HIGH TO LOW</label></li>
+          </ul>
+      </div>
+        </form>
+      </div>
+      </div>
+
+ 
+
+    <div class="col-lg-9 col-md-8">
+      {% if no_products_found %}
+        <p class="text-center text-danger">No items found matching these filters !</p>
+      {% else %}
+        <div class="row g-3"> <!-- Add 'g-3' class to manage spacing between cards -->
+          {% for product in products %}
+            
+          <!-- Product Card 1 -->
+          <div class="col-lg-4 col-md-6 col-sm-12 product-card">
+            <div class="card">
+              <a href="{% url 'single' product.id product.variants.first.id %}"><img src="{{product.images1.url}}" class="card-img-top" alt="Loading"></a>
+              <div class="card-body" style="padding-bottom: 0px;">
+                <h6 class="card-title">{{product.product_name}}</h6>
+                <a href="{% url 'add_wishlist' product.id product.variants.first.id %}"><button class="add-wishlist" title="Add to Wishlist"><i class="fas fa-heart"></i></button></a>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="pagination-container">
+        <ul class="pagination">
+          {% if page_obj.has_previous %}
+            <li><a href="?page=1">&laquo; First</a></li>
+            <li><a href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+          {% endif %}
+      
+          <li class="current-page">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</li>
+      
+          {% if page_obj.has_next %}
+            <li><a href="?page={{ page_obj.next_page_number }}">Next</a></li>
+            <li><a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
+          {% endif %}
+        </ul>
+      </div>
+      
+<!-- Footer Section Start -->
+<footer class="bg-dark text-white mt-5 pt-4">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-4">
+        <h5>About Us</h5>
+        <p>We are a team dedicated to providing the best products and services for our customers.</p>
+        <p>&copy; 2024 Your Company</p>
+      </div>
+      <div class="col-md-4">
+        <h5>Quick Links</h5>
+        <ul class="list-unstyled">
+          <li><a href="#" class="text-white">Home</a></li>
+          <li><a href="#" class="text-white">About</a></li>
+          <li><a href="#" class="text-white">Services</a></li>
+          <li><a href="#" class="text-white">Contact</a></li>
+        </ul>
+      </div>
+      <div class="col-md-4 text-end">
+        <h5>Subscribe to Our Newsletter</h5>
+        <form class="d-flex justify-content-end mt-3">
+          <input type="email" class="form-control me-2" placeholder="Enter your email" aria-label="Email" required>
+          <button class="btn btn-primary" type="submit">Subscribe</button>
+        </form>
+        <h5 class="mt-4">Follow Us</h5>
+        <div>
+          <a href="#" class="text-white me-2"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="text-white me-2"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="text-white me-2"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="text-white"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+<!-- Footer Section End -->
+      
+      
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  // Function to show the popup message
+  function showPopup(message, type) {
+      const popup = document.getElementById('popup-message');
+      popup.textContent = message;
+      popup.className = `popup-message popup-${type} popup-show`;
+
+      // Hide the popup after 3 seconds
+      setTimeout(() => {
+          popup.className = 'popup-message';
+      }, 3000);
+  }
+
+  // Check for Django messages and display them
+  {% if messages %}
+      {% for message in messages %}
+          showPopup("{{ message }}", "{{ message.tags }}");
+      {% endfor %}
+  {% endif %}
+</script>
+
+<script>
+  const priceRange = document.getElementById('priceRange');
+  const priceValue = document.getElementById('priceValue');
+
+  priceRange.addEventListener('input', () => {
+    priceValue.textContent = priceRange.value;
+  });
+
+</script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+</body>
+</html>

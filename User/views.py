@@ -571,12 +571,6 @@ def cart(request):
         product = item.product
         art_category = product.art_category
 
-        session_quantity = request.session.get(f'quantity_{item.variant.id}')
-        
-        if session_quantity:
-            item.quantity = session_quantity
-            item.save()
-
         if art_category.art_type_offer:
             offer_price = item.variant.price - (item.variant.price * art_category.art_type_offer / 100)
         else:
@@ -685,7 +679,6 @@ def checkout(request):
     
     status_error = validate_status(request.user)
     if status_error:
-        print("error")
         messages.error(request, status_error)
         return redirect('shop')
     
@@ -1299,21 +1292,34 @@ def remove_wishlist_item(request, variant_id):
     wishlist_items.delete()    
     return redirect('wishlist')
 
-def add_cart_wishlist(request,product_id, variant_id):
+def add_cart_wishlist(request, product_id, variant_id):
     if not request.user.is_authenticated:
         messages.info(request, "Please log in to add items to your cart.")
         return redirect('login')
     
-    product_id = get_object_or_404(Product, id=product_id)
-    variant_id = get_object_or_404(Variant,id = variant_id)
-    cart_item_exists = Cart.objects.filter(variant=variant_id, user=request.user).exists()
+    # Get the product and variant
+    product = get_object_or_404(Product, id=product_id)
+    variant = get_object_or_404(Variant, id=variant_id)
+
+
+    cart_item_exists = Cart.objects.filter(variant=variant, user=request.user).exists()
     if cart_item_exists:
         messages.warning(request, "This item is already in your cart.")
         return redirect('wishlist')
     
-    Cart.objects.create(product=product_id, user=request.user, variant=variant_id)
-    messages.success(request, "Item added to Cart")
+    # Add item to the cart
+    Cart.objects.create(product=product, user=request.user, variant=variant)
+    messages.success(request, "Item added to Cart.")
+
+    # Delete the item from the wishlist
+    try:
+        wishlist_item = Wishlist.objects.get(variant=variant, user=request.user)
+        wishlist_item.delete()
+    except Wishlist.DoesNotExist:
+        messages.warning(request, "The item was not found in your wishlist.")
+    
     return redirect('wishlist')
+
 
 
 #=========================== ORDER CANCEL SECTION =======================#

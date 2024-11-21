@@ -77,65 +77,96 @@
         }
 
         .navbar {
-            height: 80px; 
+        height: 80px; 
+        display: flex; 
+        align-items: center;
+      
         }
 
         .logo {
-            font-size: 1.8rem; 
-            color: #000000; 
-            font-weight: bold;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); 
-            letter-spacing: 1px; 
-            text-decoration: none;
+        font-size: 1.8rem; 
+        color: #000000; 
+        font-weight: bold;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); 
+        letter-spacing: 1px; 
+        text-decoration: none;
+        }
+
+        /* Nav Links */
+        .navbar-nav .nav-link {
+        font-size: 1.3rem;
+        color: #000000;
+        padding: 10px;
+        transition: color 0.3s;
+        }
+
+        .navbar-nav .nav-link {
+            position: relative;
+            text-decoration: none; /* Remove default underline */
         }
         
-        .navbar-nav .nav-link {
-            font-size: 1.3rem;
-            color:#000000
-            }
+        .navbar-nav .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background-color: #000;
+            transition: width 0.5s ease; /* Slow transition */
+        }
+        
+        .navbar-nav .nav-link:hover::after {
+            width: 100%;
+        }
+        
 
         .navbar-nav .nav-item {
-            margin: 0 15px; 
+        margin: 0 15px; 
         }
-        
-        .navbar-nav .nav-link {
-            padding: 10px;
-        }
-        
+
+        /* Toggler Button */
         .navbar-toggler {
-            padding: 0.5rem;
+        padding: 0.5rem;
         }
+
+        .navbar-toggler-icon {
+        width: 30px;
+        height: 30px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+        .navbar {
+        height: auto; 
+        padding: 10px;
+        }
+
+        .navbar-nav {
+        flex-direction: column; /* Stack links vertically */
+        }
+
+        .navbar-nav .nav-item {
+        margin: 10px 0;
+        }
+
+        .navbar-collapse {
+        justify-content: center; /* Center items in collapsible menu */
+        }
+        }
+
+        @media (max-width: 576px) {
+        .navbar-nav .nav-link {
+        font-size: 1.1rem;
+        }
+        }
+
 
         hr {
             border: none;
             height: 1px;
             background-color: #000000;
             margin: 0;
-        }
-
-        .popup-message {
-            position: fixed;
-            top: -100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #FFDE21;
-            color: White;
-            padding: 20px 35px;
-            border-radius: 6px;
-            z-index: 1000;
-            transition: top 0.5s ease-in-out;
-            box-shadow: 0 5px 7px rgba(0, 0, 0, 0.1);
-            font-family: Arial, sans-serif;
-        }
-
-        .popup-error {
-            background-color: #f44336;
-        }
-        .popup-warning {
-            background-color: #ff9800;
-        }
-        .popup-show {
-            top: 25px;
         }
 
         .cart-header {
@@ -153,56 +184,58 @@
 <body>
     <div id="popup-message" class="popup-message"></div>
     <!-- Navbar Start -->
-  <nav class="navbar navbar-expand-lg navbar-dark ">
-    <div class="container-fluid">
-
-      <!-- Left Logo Section -->
-      <a class="logo" href="{% url 'home'%}">ART CANVA</a>
-
-      <!-- Center Links -->
-      <button 
-        class="navbar-toggler" 
-        type="button" 
-        data-bs-toggle="collapse" 
-        data-bs-target="#navbarNav" 
-        aria-controls="navbarNav" 
-        aria-expanded="false" 
-        aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
-        <ul class="navbar-nav navbar-nav-center">
-          <li class="nav-item">
-            <a class="nav-link" aria-current="page" href="{% url 'home'%}">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'shop'%}">Shop</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Contact</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Signup</a>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Right Section (Cart, Wishlist, User) -->
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'cart'%}"><i class="bi bi-cart"></i> Cart</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'wishlist'%}"><i class="bi bi-heart"></i> Wishlist</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'profile'%}"><i class="bi bi-person"></i> Profile</a>
-        </li>
-      </ul>
-
-    </div>
-  </nav>
-  <!-- Navbar End -->
+    <nav class="navbar navbar-expand-lg ">
+        <div class="container-fluid">
+          <!-- Left Logo Section -->
+          <a class="logo" href="{% url 'home'%}">ART CANVA</a>
+      
+          <!-- Toggler Button -->
+          <button 
+            class="navbar-toggler" 
+            type="button" 
+            data-bs-toggle="collapse" 
+            data-bs-target="#navbarNav" 
+            aria-controls="navbarNav" 
+            aria-expanded="false" 
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+      
+          <!-- Collapsible Content -->
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- Center Links -->
+            <ul class="navbar-nav mx-auto">
+              <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="{% url 'home'%}">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'shop'%}">Shop</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Contact</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Signup</a>
+              </li>
+            </ul>
+      
+            <!-- Right Section (Cart, Wishlist, User) -->
+            <ul class="navbar-nav ms-auto">
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'cart'%}"><i class="bi bi-cart"></i> Cart</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'wishlist'%}"><i class="bi bi-heart"></i> Wishlist</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'profile'%}"><i class="bi bi-person"></i> Profile</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+      
 
   <hr>
 
@@ -216,7 +249,7 @@
         {% if is_empty %}
         <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 400px;">
             <h4>Your cart is empty !</h4>
-            <form method="GET" action="{% url 'shop' %}">  <!-- Replace 'shop' with your actual shop URL -->
+            <form method="GET" action="{% url 'shop' %}"> 
                 <button type="submit" class="btn btn-order w-100 mt-3">SHOP NOW</button>
             </form>
         </div>
@@ -427,28 +460,32 @@ document.getElementById('checkout-form').addEventListener('submit', function (ev
 });
 
 displayTotalAmount();
+    </script>
 
-    // Function to show the popup message
-    function showPopup(message, type) {
-        const popup = document.getElementById('popup-message');
-        popup.textContent = message;
-        popup.className = `popup-message popup-${type} popup-show`;
 
-        // Hide the popup after 3 seconds
-        setTimeout(() => {
-            popup.className = 'popup-message';
-        }, 3000);
-    }
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    // Check for Django messages and display them
+<script>
+    // Check for Django messages and display them using SweetAlert
     {% if messages %}
         {% for message in messages %}
-            showPopup("{{ message }}", "{{ message.tags }}");
+            {% if message.tags == 'success' or message.tags == 'warning' or message.tags == 'error' %}
+                Swal.fire({
+                    icon: "{{ message.tags }}", // Directly uses 'success' or 'warning'
+                    title: "{{ message|escapejs }}",
+                    toast: true,
+                    position: 'top',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    customClass: {
+                        popup: 'small-alert-popup'
+                    }
+                });
+            {% endif %}
         {% endfor %}
     {% endif %}
-
-
-    </script>
+</script>
     
 <script 
   src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">

@@ -803,19 +803,26 @@
 
 
 
-<script>
-    function showPopup(message, type) {
-        const popup = document.getElementById('popup-message');
-        popup.textContent = message;
-        popup.className = `popup-message popup-${type} popup-show`;
-        setTimeout(() => {
-            popup.className = 'popup-message';
-        }, 3000);
-    }
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<script>
+    // Check for Django messages and display them using SweetAlert
     {% if messages %}
         {% for message in messages %}
-            showPopup("{{ message }}", "{{ message.tags }}");
+            {% if message.tags == 'success' or message.tags == 'warning' or message.tags == 'error' %}
+                Swal.fire({
+                    icon: "{{ message.tags }}", // Directly uses 'success' or 'warning'
+                    title: "{{ message|escapejs }}",
+                    toast: true,
+                    position: 'top',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    customClass: {
+                        popup: 'small-alert-popup'
+                    }
+                });
+            {% endif %}
         {% endfor %}
     {% endif %}
 </script>
