@@ -78,19 +78,6 @@
             color: white;
         }
 
-        {% comment %} /* Style for the buttons */
-        .top-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .top-buttons .btn {
-            width: 150px;
-            padding: 10px;
-        } {% endcomment %}
-
-        /* Style for the 'view' button */
         .view-btn {
             display: inline-block;
             padding: 2px 21px;
@@ -108,103 +95,155 @@
             text-decoration: none;
         }
 
-        .navbar {
-            background-color: #ffffe4;
-            padding: 21px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: #000000 ;
-          }
-      
-          .navbar .logo {
-            font-size: 1.8rem;
+        .logo {
+            font-size: 1.8rem; 
+            color: #000000; 
             font-weight: bold;
-            color: #000000;
-            letter-spacing: 1px;
-          }
-      
-          .navbar .nav-center {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-          }
-      
-          .navbar ul {
-            list-style: none;
-            display: flex;
-            gap: 90px;
-          }
-      
-          .navbar ul li {
-            display: inline;
-          }
-      
-          .navbar ul li a {
-            color: #000000;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); 
+            letter-spacing: 1px; 
             text-decoration: none;
-            font-size: 18px;
-            transition: color 0.3s;
-          }
-      
-          .navbar ul li a:hover {
-            color: #000000;
-            text-decoration: underline;
-            transition: text-decoration 0.3s ease;
-          }
-      
-          hr {
-              border: none;
-              height: 1px;
-              background-color: #000000;
-              margin: 0;
-      
-          }
+        }
 
-          .footer {
-            background-color: #333;
-            color: white;
-            text-align: center;
-            padding: 20px 0;
-            position: fixed;
+        .navbar-nav .nav-link {
+        font-size: 1.3rem;
+        color: #000000;
+        padding: 10px;
+        transition: color 0.3s;
+        }
+
+        .navbar-nav .nav-link {
+            position: relative;
+            text-decoration: none;
+        }
+        
+        .navbar-nav .nav-link::after {
+            content: '';
+            position: absolute;
             bottom: 0;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background-color: #000;
+            transition: width 0.5s ease;
+        }
+        
+        .navbar-nav .nav-link:hover::after {
             width: 100%;
-          }
-      
-          .footer p {
-            margin: 0;
-            font-size: 14px;
-          }
+        }
+        
+        .navbar-nav .nav-item {
+        margin: 0 15px; 
+        }
 
+        .navbar-toggler {
+        padding: 0.5rem;
+        }
+
+        .navbar-toggler-icon {
+        width: 30px;
+        height: 30px;
+        }
+
+        @media (max-width: 992px) {
+        .navbar {
+        height: auto; 
+        padding: 10px;
+        }
+
+        .navbar-nav {
+        flex-direction: column;
+        }
+
+        .navbar-nav .nav-item {
+        margin: 10px 0;
+        }
+
+        .navbar-collapse {
+        justify-content: center;
+        }
+        }
+
+        @media (max-width: 576px) {
+        .navbar-nav .nav-link {
+        font-size: 1.1rem;
+        }
+        }
+      
+        hr {
+            border: none;
+            height: 1px;
+            background-color: #000000;
+            margin: 0;
+    
+        }
+
+        .footer {
+        background-color: #333;
+        color: white;
+        text-align: center;
+        padding: 20px 0;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        }
+    
+        .footer p {
+        margin: 0;
+        font-size: 14px;
+        }
 
     </style>
 </head>
 <body>
 
-    <!-- Navbar -->
-  <div class="navbar">
-    <div class="logo">ART CANVA</div>
-    <div class="nav-center">
-      <ul>
-        <li><a href="{% url 'home'%}">Home</a></li>
-        <li><a href="{% url 'shop'%}">Shop</a></li>
-        <li><a href="#">Contact</a></li>
-      </ul>
-    </div>
-    <ul>
-      <li><a href="{% url 'cart'%}">Cart</a></li>
-      <li><a href="{% url 'wishlist'%}">Wishlist</a></li>
-      <li><a href="{% url "profile" %}">Profile</a></li>
-    </ul>
-  </div>
+    <nav class="navbar navbar-expand-lg ">
+        <div class="container-fluid">
+          <!-- Left Logo Section -->
+          <a class="logo" href="{% url 'home'%}">ART CANVA</a>
+      
+          <!-- Toggler Button -->
+          <button 
+            class="navbar-toggler" 
+            type="button" 
+            data-bs-toggle="collapse" 
+            data-bs-target="#navbarNav" 
+            aria-controls="navbarNav" 
+            aria-expanded="false" 
+            aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+      
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+              <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="{% url 'home'%}">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'shop'%}">Shop</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Contact</a>
+              </li>
+              
+            </ul>
+      
+            <!-- Right Section (Cart, Wishlist, User) -->
+            <ul class="navbar-nav ms-auto">
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'cart'%}"><i class="bi bi-cart"></i> Cart</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'wishlist'%}"><i class="bi bi-heart"></i> Wishlist</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'profile'%}"><i class="bi bi-person"></i> Profile</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
 
   <hr>
-
-
-
-
-
-
 
 <div class="container mt-3">
    
@@ -213,7 +252,6 @@
         <table class="table table-bordered table-hover">
             <thead class="thead-dark">
                 <tr>
-                    {% comment %} <th>Order ID</th> {% endcomment %}
                     <th>Total Amount</th>
                     <th>Order Date</th>
                     <th>Payment method</th>
@@ -266,10 +304,11 @@
 
 <div class="footer">
     <p>&copy; 2024 ArtCanva. All rights reserved.</p>
-  </div>
+</div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 </body>
 </html>

@@ -14,31 +14,90 @@
       background-color:#ffffe4
     }
 
+    
     .navbar {
-      height: 80px;
-    }
+      height: 80px; 
+      display: flex; 
+      align-items: center;
+    
+      }
 
-    .logo {
-      font-size: 1.8rem;
+      .logo {
+      font-size: 1.8rem; 
       color: #000000; 
-      font-weight: bold; 
+      font-weight: bold;
       text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); 
       letter-spacing: 1px; 
       text-decoration: none;
-  }
-  
-    .navbar-nav .nav-link {
-      font-size: 1.3rem; 
-      color:#000000
-    }
+      }
 
-    .navbar-nav .nav-item {
+      /* Nav Links */
+      .navbar-nav .nav-link {
+      font-size: 1.3rem;
+      color: #000000;
+      padding: 10px;
+      transition: color 0.3s;
+      }
+
+      .navbar-nav .nav-link {
+          position: relative;
+          text-decoration: none; /* Remove default underline */
+      }
+      
+      .navbar-nav .nav-link::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 0;
+          height: 1px;
+          background-color: #000;
+          transition: width 0.5s ease; /* Slow transition */
+      }
+      
+      .navbar-nav .nav-link:hover::after {
+          width: 100%;
+      }
+      
+      .navbar-nav .nav-item {
       margin: 0 15px; 
-    }
-  
-    .navbar-toggler {
+      }
+
+      /* Toggler Button */
+      .navbar-toggler {
       padding: 0.5rem;
-    }
+      }
+
+      .navbar-toggler-icon {
+      width: 30px;
+      height: 30px;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 992px) {
+      .navbar {
+      height: auto; 
+      padding: 10px;
+      }
+
+      .navbar-nav {
+      flex-direction: column; /* Stack links vertically */
+      }
+
+      .navbar-nav .nav-item {
+      margin: 10px 0;
+      }
+
+      .navbar-collapse {
+      justify-content: center; /* Center items in collapsible menu */
+      }
+      }
+
+      @media (max-width: 576px) {
+      .navbar-nav .nav-link {
+      font-size: 1.1rem;
+      }
+      }
 
     .carousel-item {
       height: 80vh;
@@ -146,45 +205,48 @@
 </head>
 <body>
 
-  <nav class="navbar navbar-expand-lg navbar-dark ">
-    <div class="container-fluid">
+ <!-- Navbar Start -->
+ <nav class="navbar navbar-expand-lg ">
+  <div class="container-fluid">
+    <!-- Left Logo Section -->
+    <a class="logo" href="{% url 'home'%}">ART CANVA</a>
 
-  <!-- Left Logo Section -->
-      <a class="logo" href="{% url 'home'%}">ART CANVA</a>
+    <!-- Toggler Button -->
+    <button 
+      class="navbar-toggler" 
+      type="button" 
+      data-bs-toggle="collapse" 
+      data-bs-target="#navbarNav" 
+      aria-controls="navbarNav" 
+      aria-expanded="false" 
+      aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-  <!-- Center Links -->
-      <button 
-        class="navbar-toggler" 
-        type="button" 
-        data-bs-toggle="collapse" 
-        data-bs-target="#navbarNav" 
-        aria-controls="navbarNav" 
-        aria-expanded="false" 
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
-        <ul class="navbar-nav navbar-nav-center">
-          <li class="nav-item">
-            <a class="nav-link slow-underline" aria-current="page" href="{% url 'home'%}">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link slow-underline" href="{% url 'shop'%}">Shop</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link slow-underline" href="#">Contact</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link slow-underline" href="{% url 'signup' %}">Signup</a>
-          </li>
-        </ul>
-      </div>
+    <!-- Collapsible Content -->
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <!-- Center Links -->
+      <ul class="navbar-nav mx-auto">
+        <li class="nav-item">
+          <a class="nav-link" aria-current="page" href="{% url 'home'%}">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'shop'%}">Shop</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Contact</a>
+        </li>
+        {% if not customer %}
+      <li class="nav-item">
+        <a class="nav-link slow-underline" href="{% url 'signup' %}">Signup</a>
+      </li>
+      {% endif %}
+      </ul>
 
-  <!-- Right Section (Cart, Wishlist, User) -->
+      <!-- Right Section (Cart, Wishlist, User) -->
       <ul class="navbar-nav ms-auto">
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'cart' %}"><i class="bi bi-cart"></i> Cart</a>
+          <a class="nav-link" href="{% url 'cart'%}"><i class="bi bi-cart"></i> Cart</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{% url 'wishlist'%}"><i class="bi bi-heart"></i> Wishlist</a>
@@ -193,9 +255,9 @@
           <a class="nav-link" href="{% url 'profile'%}"><i class="bi bi-person"></i> Profile</a>
         </li>
       </ul>
-
     </div>
-  </nav>
+  </div>
+</nav>
 <!-- Navbar End -->
 
 

@@ -118,4 +118,19 @@ class Return(models.Model):
     reason = models.CharField(max_length=200, default='Other')
     
 
-  
+class UserInformations(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    mobile = models.CharField(max_length=15)
+    GENDER_CHOICES = [
+        ('male', 'Male'),
+        ('female', 'Female'),
+        ('other', 'Other')
+    ]
+    gender = models.CharField(max_length=30, choices=GENDER_CHOICES)
+   
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
+
+   

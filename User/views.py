@@ -29,7 +29,7 @@ from . models import Order,Order_details, Review, Wishlist, Return
 from django.http import JsonResponse
 from django.db import transaction
 from django.conf import settings
-from .models import Cart, Address, Order, Order_details, Wallet, Wallet_Transaction, OrderAddress
+from .models import Cart, Address, Order, Order_details, Wallet, Wallet_Transaction, OrderAddress, UserInformations
 from decimal import Decimal
 from reportlab.lib.pagesizes import A4 # type: ignore
 from reportlab.lib import colors # type: ignore
@@ -243,10 +243,21 @@ def home(request):
     Q(product_status=True) & Q(variants__isnull=False)
     ).distinct().order_by('-id')[:3]
 
+
+    try:
+        user = request.user
+        if user.is_authenticated:
+            customer = user.username
+        else:
+            customer = None
+    except Exception as e:
+        customer = None
+
     populars = Product.objects.filter(product_status = True)[:4]
     context = {
         'arrivals': arrivals,
-        'populars': populars
+        'populars': populars,
+        'customer': customer
     }
     return render(request,'user/home.html', context)
 
@@ -254,6 +265,14 @@ def home(request):
 #========================= SHOP SECTION =========================#
 
 def shop(request):
+    try:
+        user = request.user
+        if user.is_authenticated:
+            customer = user.username
+        else:
+            customer = None
+    except Exception as e:
+        customer = None
     search_query = request.GET.get('q', '').strip()
     selected_categories = request.POST.getlist('categories') if request.method == 'POST' else []
     selected_size = request.POST.getlist('size') if request.method == 'POST' else []
@@ -297,6 +316,7 @@ def shop(request):
         'no_products_found': no_products_found,
         'search_query': search_query,
         'page_obj': page_obj,
+        'customer': customer
     }
 
     return render(request, 'user/shop.html', context)
@@ -439,6 +459,12 @@ def profile(request):
         return redirect('profile')
         
     informations = Address.objects.filter(user_id_id = request.user)
+   
+    try:
+        user_info = UserInformations.objects.get(user_id=request.user)
+    except UserInformations.DoesNotExist:
+        user_info = None 
+
     if request.user.is_authenticated:
         username = request.user.username
         email = request.user.email
@@ -455,6 +481,7 @@ def profile(request):
 
     context = {
         'informations':informations,
+        'user_info': user_info,
         'username': username,
         'email': email,
         'coupons': coupons,
@@ -524,6 +551,29 @@ def remove_address_profile(request,address_id):
     address.delete()    
     return redirect('profile')
 
+
+def personal_info(request):
+    user = request.user
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        mobile = request.POST.get('mobile')
+        gender = request.POST.get('gender')
+        
+
+        # Update or create user information
+        user_info, created = UserInformations.objects.update_or_create(
+            user=user,
+            defaults={
+                'first_name': first_name,
+                'last_name': last_name,
+                'mobile': mobile,
+                'gender': gender,
+                
+            }
+        )
+
+    return redirect('profile')
 
 #======================= CHANGE PASSWORD SECTION ===================#
 
@@ -693,23 +743,6 @@ def checkout(request):
 
         errors = []
 
-        if not fullname or len(fullname) < 3 or not fullname.replace(" ", "").isalpha():
-            errors.append("Fullname must be at least 3 characters long.")
-
-        if not fullname.replace(" ", "").isalpha():
-            errors.append("Fullname must contain only alphabets")
-
-        pattern = r"^[6-9]\d{9}$"
-
-        if not re.match(pattern, mobile):
-            errors.append("Please Enter Valid Phone Number")
-
-        if not pincode.isdigit() or len(pincode) != 6:
-            errors.append("Pincode must be a 6-digit number.")
-
-        if not address or len(address) < 5:
-            errors.append("Address must be at least 5 characters long.")
-
         stock_error = validate_stock(request.user)
         if stock_error:
             messages.error(request, stock_error)
@@ -788,7 +821,7 @@ def validate_status(user):
     return None
 
 
-def edit_address_chechout(request):
+def edit_address_checkout(request):
     if request.method == 'POST':
         address_id = request.POST.get('address_id')
         fullname = request.POST.get('fullname')

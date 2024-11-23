@@ -14,6 +14,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
         <title>Sales Report</title>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     </head>
@@ -73,6 +74,8 @@
             </style>
         </head>
         <body>
+
+            <button onclick="refreshPage()">Refresh Page</button>
         
         <div class="container">
             <!-- Header with Export Buttons -->
@@ -150,6 +153,11 @@
                 </ul>
             </nav>
         </div>
+        <script>
+            function refreshPage() {
+                location.reload(); // Reloads the current page
+            }
+        </script>
         
         <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>

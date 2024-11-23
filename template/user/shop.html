@@ -97,85 +97,89 @@
       }
 
       .navbar {
-        height: 80px;
-        display: flex;
+        height: 80px; 
+        display: flex; 
         align-items: center;
-      }
       
-      .logo {
-        font-size: 1.8rem;
-        color: #000000;
-        font-weight: bold;
-        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-        letter-spacing: 1px;
-        text-decoration: none;
-      }
-      
-      .navbar-nav .nav-link {
-        font-size: 1.3rem;
-        color: #000000;
-      }
-      
-      .navbar-nav .nav-item {
-        margin: 0 15px;
-      }
-      
-      .navbar-nav .nav-link {
-        padding: 10px;
-      }
-      
-      .navbar-toggler {
-        padding: 0.5rem;
-        border: none;
-        background: none;
-      }
-      
-      .navbar-toggler-icon {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(0, 0, 0, 0.7)' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
-        width: 30px;
-        height: 30px;
-      }
-      
-      @media (max-width: 992px) {
-        .navbar {
-          height: auto;
-          padding: 10px 15px;
-        }
-      
-        .logo {
-          margin-right: auto;
-        }
-      
-        .navbar-nav {
-          flex-direction: column;
-          margin-top: 10px;
-        }
-      
-        .navbar-nav .nav-item {
-          margin: 10px 0;
-        }
-      
-        .navbar-collapse {
-          text-align: right;
-          
         }
 
-      
-        .navbar-toggler {
-          margin-left: auto;
+        .logo {
+        font-size: 1.8rem; 
+        color: #000000; 
+        font-weight: bold;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); 
+        letter-spacing: 1px; 
+        text-decoration: none;
         }
-      }
-      
-      @media (max-width: 576px) {
-        .navbar {
-          height: auto;
-          padding: 10px;
-        }
-      
+
+        /* Nav Links */
         .navbar-nav .nav-link {
-          font-size: 1.1rem;
+        font-size: 1.3rem;
+        color: #000000;
+        padding: 10px;
+        transition: color 0.3s;
         }
-      }
+
+        .navbar-nav .nav-link {
+            position: relative;
+            text-decoration: none; /* Remove default underline */
+        }
+        
+        .navbar-nav .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background-color: #000;
+            transition: width 0.5s ease; /* Slow transition */
+        }
+        
+        .navbar-nav .nav-link:hover::after {
+            width: 100%;
+        }
+        
+
+        .navbar-nav .nav-item {
+        margin: 0 15px; 
+        }
+
+        /* Toggler Button */
+        .navbar-toggler {
+        padding: 0.5rem;
+        }
+
+        .navbar-toggler-icon {
+        width: 30px;
+        height: 30px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+        .navbar {
+        height: auto; 
+        padding: 10px;
+        }
+
+        .navbar-nav {
+        flex-direction: column; /* Stack links vertically */
+        }
+
+        .navbar-nav .nav-item {
+        margin: 10px 0;
+        }
+
+        .navbar-collapse {
+        justify-content: center; /* Center items in collapsible menu */
+        }
+        }
+
+        @media (max-width: 576px) {
+        .navbar-nav .nav-link {
+        font-size: 1.1rem;
+        }
+        }
       
 
 
@@ -260,10 +264,10 @@
 <!-- Navbar -->
 
     <!-- Navbar Start -->
-    <nav class="navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg ">
       <div class="container-fluid">
-        <!-- Logo -->
-        <a class="logo" href="#">ART CANVA</a>
+        <!-- Left Logo Section -->
+        <a class="logo" href="{% url 'home'%}">ART CANVA</a>
     
         <!-- Toggler Button -->
         <button 
@@ -273,14 +277,14 @@
           data-bs-target="#navbarNav" 
           aria-controls="navbarNav" 
           aria-expanded="false" 
-          aria-label="Toggle navigation"
-        >
+          aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
     
-        <!-- Center Links -->
-        <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
-          <ul class="navbar-nav navbar-nav-center">
+        <!-- Collapsible Content -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <!-- Center Links -->
+          <ul class="navbar-nav mx-auto">
             <li class="nav-item">
               <a class="nav-link" aria-current="page" href="{% url 'home'%}">Home</a>
             </li>
@@ -290,15 +294,15 @@
             <li class="nav-item">
               <a class="nav-link" href="#">Contact</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'signup' %}">Signup</a>
-            </li>
+            {% if not customer %}
+          <li class="nav-item">
+            <a class="nav-link slow-underline" href="{% url 'signup' %}">Signup</a>
+          </li>
+          {% endif %}
           </ul>
-        </div>
     
-        <!-- Right Section (Cart, Wishlist, User) -->
-        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-          <ul class="navbar-nav">
+          <!-- Right Section (Cart, Wishlist, User) -->
+          <ul class="navbar-nav ms-auto">
             <li class="nav-item">
               <a class="nav-link" href="{% url 'cart'%}"><i class="bi bi-cart"></i> Cart</a>
             </li>
