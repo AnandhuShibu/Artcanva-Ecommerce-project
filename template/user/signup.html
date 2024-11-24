@@ -137,13 +137,31 @@
             <div class="links">
                 <a href="{% url 'login'%}">ALREADY I HAVE AN ACCOUNT</a>
             </div>
-
-            {% for message in messages %}
-            <div class="alert alert-danger w-25 mx-auto text-center" role="alert">
-                    {{message}}
-            </div>
-             {% endfor %}
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // Check for Django messages and display them using SweetAlert
+        {% if messages %}
+            {% for message in messages %}
+                
+                    Swal.fire({
+                        icon: "info",
+                        title: "{{ message|escapejs }}",
+                        toast: true,
+                        position: 'top',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        customClass: {
+                            popup: 'small-alert-popup'
+                        }
+                    });
+                
+            {% endfor %}
+        {% endif %}
+    </script>
 </body>
 </html>

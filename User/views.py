@@ -405,6 +405,13 @@ def error(request):
 def change(request):
     return render(request, 'user/password_verify.html')
 
+#======================= ABOUT US ===========================#
+
+def about_us(request):
+    return render(request, 'user/about_us.html')
+
+def contact_us(request):
+    return render(request, 'user/contact_us.html')
 
 #======================= USER PROFILE SECTION =====================#
 
@@ -497,13 +504,13 @@ def profile(request):
 def edit_address(request):
     if request.method == 'POST':
         address_id = request.POST.get('address_id')
-        fullname = request.POST.get('fullname')
-        mobile = request.POST.get('mobile')
-        pincode = request.POST.get('pincode')
-        address = request.POST.get('address')
-        city = request.POST.get('city')
-        district = request.POST.get('district')
-        state = request.POST.get('state')
+        fullname = request.POST.get('fullname').strip()
+        mobile = request.POST.get('mobile').strip()
+        pincode = request.POST.get('pincode').strip()
+        address = request.POST.get('address').strip()
+        city = request.POST.get('city').strip().replace(" ", "")
+        district = request.POST.get('district').strip().replace(" ", "")
+        state = request.POST.get('state').strip().replace(" ", "")
 
         errors = []
 
@@ -523,6 +530,18 @@ def edit_address(request):
 
         if not address or len(address) < 5:
             errors.append("Address must be at least 5 characters long.")
+
+        if not city or not re.match(r"^[a-zA-Z\s]+$", city):
+            errors.append("City must contain only alphabets and spaces.")
+
+        # District Validation (No special characters allowed)
+        if not district or not re.match(r"^[a-zA-Z\s]+$", district):
+            errors.append("District must contain only alphabets and spaces.")
+
+        # State Validation (No special characters allowed)
+        if not state or not re.match(r"^[a-zA-Z\s]+$", state):
+            errors.append("State must contain only alphabets and spaces.")
+
 
         if errors:
             for error in errors:
@@ -824,13 +843,13 @@ def validate_status(user):
 def edit_address_checkout(request):
     if request.method == 'POST':
         address_id = request.POST.get('address_id')
-        fullname = request.POST.get('fullname')
-        mobile = request.POST.get('mobile')
-        pincode = request.POST.get('pincode')
-        address = request.POST.get('address')
-        city = request.POST.get('city')
-        district = request.POST.get('district')
-        state = request.POST.get('state')
+        fullname = request.POST.get('fullname').strip()
+        mobile = request.POST.get('mobile').strip()
+        pincode = request.POST.get('pincode').strip()
+        address = request.POST.get('address').strip()
+        city = request.POST.get('city').strip().replace(" ", "")
+        district = request.POST.get('district').strip().replace(" ", "")
+        state = request.POST.get('state').strip().replace(" ", "")
 
         errors = []
 
@@ -850,6 +869,17 @@ def edit_address_checkout(request):
 
         if not address or len(address) < 5:
             errors.append("Address must be at least 5 characters long.")
+
+        if not city or not re.match(r"^[a-zA-Z\s]+$", city):
+            errors.append("City must contain only alphabets and spaces.")
+
+        # District Validation (No special characters allowed)
+        if not district or not re.match(r"^[a-zA-Z\s]+$", district):
+            errors.append("District must contain only alphabets and spaces.")
+
+        # State Validation (No special characters allowed)
+        if not state or not re.match(r"^[a-zA-Z\s]+$", state):
+            errors.append("State must contain only alphabets and spaces.")
 
         if errors:
             for error in errors:
@@ -1134,6 +1164,9 @@ def orders(request):
     orders=Order.objects.filter(user=request.user).order_by('-id')
     no_user_orders_found = not orders.exists()
 
+    if request.GET.get('cancelled') == 'true':
+        messages.warning(request, "Your order placed, But payment not completed !")
+
     paginator = Paginator(orders, 8)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -1144,6 +1177,7 @@ def orders(request):
     }
 
     return render(request, 'user/orders.html', context)
+
 
 
 @login_required
@@ -1168,8 +1202,8 @@ def order_details(request, order_id):
     for item in order_items:
         return_request = Return.objects.filter(order_item=item, status='accepted').exists()
         
-    if orders.status == 'Delivered':
-        return_button = 'delivered'
+    if orders.status in ['Delivered', 'Returned']:
+        return_button = 'Deliver_Return'
 
     order_items=Order_details.objects.filter(order = orders).order_by('-id')
     items_with_price = []
@@ -1194,7 +1228,7 @@ def order_details(request, order_id):
         
         normal_total_price += original_price
     if order.payment_status == 'Failure':
-        messages.error(request, "Your payment not completed")
+        messages.error(request, "Please complete your payment")
 
     context = {
         'order_items':order_items,
@@ -1280,7 +1314,15 @@ def add_wishlist(request, product_id, variant_id):
     
     product = get_object_or_404(Product, id=product_id)
     variant = get_object_or_404(Variant, id=variant_id)
-    
+   
+    if not product.product_status:
+        messages.warning(request, "This product is currently unavailable.")
+        return redirect('shop')
+
+    if not product.art_category.art_type_status:
+        messages.warning(request, "This category of product is currently unavailable.")
+        return redirect('shop')
+
     wishlist_item_exists = Wishlist.objects.filter(user=request.user, variant=variant).exists()
     if wishlist_item_exists:
         messages.warning(request, "This item is already in your wishlist.")
@@ -1288,6 +1330,7 @@ def add_wishlist(request, product_id, variant_id):
 
     Wishlist.objects.create(product=product, user=request.user, variant=variant)
     return redirect('wishlist')
+
 
 def wishlist(request):
     if not request.user.is_authenticated:
@@ -1334,7 +1377,14 @@ def add_cart_wishlist(request, product_id, variant_id):
     product = get_object_or_404(Product, id=product_id)
     variant = get_object_or_404(Variant, id=variant_id)
 
-
+    if not product.product_status:
+        messages.warning(request, "This product is currently unavailable.")
+        return redirect('wishlist')
+    
+    if not product.art_category.art_type_status:
+        messages.warning(request, "This category of product is currently unavailable.")
+        return redirect('wishlist')
+    
     cart_item_exists = Cart.objects.filter(variant=variant, user=request.user).exists()
     if cart_item_exists:
         messages.warning(request, "This item is already in your cart.")

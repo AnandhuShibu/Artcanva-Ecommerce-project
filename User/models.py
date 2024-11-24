@@ -32,7 +32,7 @@ class Cart(models.Model):
 class Order(models.Model):
     STATUS_CHOICES = [
     ('Pending', 'Pending'),
-    ('Processing', 'Processing'),
+    ('Returned', 'Returned'),
     ('Shipped', 'Shipped'),
     ('Delivered', 'Delivered'),
     ('Cancelled', 'Cancelled'),
@@ -64,8 +64,7 @@ class Order_details(models.Model):
     item_coupon_amount = models.PositiveIntegerField(null=True, blank=True)
     STATUS_CHOICES = [
         ('pending', 'Pending'),
-        ('shipped', 'Shipped'),
-        ('delivered', 'Delivered'),
+        ('return', 'Return'),
         ('cancelled', 'Cancelled'),
     ]
     

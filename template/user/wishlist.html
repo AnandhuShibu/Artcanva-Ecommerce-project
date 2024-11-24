@@ -308,7 +308,7 @@
 {% for entry in page_obj %}
 <div class="wishlist-item row" id="item1">
     <div class="col-md-2">
-        <img src="{{ entry.item.product.images1.url }}" alt="Product Image">
+        <a href="{% url "single" entry.item.product.id entry.item.variant.id %}"><img src="{{ entry.item.product.images1.url }}" alt="Product Image"></a>
     </div>
     <div class="details col-md-7">
         <h5>{{ entry.item.product.product_name }}</h5>

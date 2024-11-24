@@ -624,7 +624,8 @@ def return_status(request):
             return_item = get_object_or_404(Return, id=return_id)
             if selected_status == 'accepted':
                 order_detail = get_object_or_404(Order_details, id=return_item.order_item.id)
-
+                order_detail.item_status = 'Return'
+                order_detail.save()
                 item_amount = order_detail.variant.price
                 amount_to_refund = order_detail.variant.price * order_detail.quantity
                 art_offer=order_detail.offer
@@ -659,6 +660,13 @@ def return_status(request):
 
             return_item.status = selected_status
             return_item.save()
+
+            order = order_detail.order
+            all_items_returned = Order_details.objects.filter(order=order).exclude(item_status='Return').exists()
+
+            if not all_items_returned:
+                order.status = 'Returned'
+                order.save()
 
             return redirect('return_request')
 

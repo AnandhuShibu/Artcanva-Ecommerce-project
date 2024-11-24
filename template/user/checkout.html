@@ -527,7 +527,19 @@
         finalPriceInput.value = newPrice.toFixed(0);
         selectedCouponCodeInput.value = couponSelect.options[couponSelect.selectedIndex].getAttribute('data-code');
     } else {
-        alert('Please select a coupon.');
+      Swal.fire({
+        icon: 'info',
+        title: 'Please select a coupon.!',
+        toast: true,
+        position: 'top',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        customClass: {
+        popup: 'small-alert-popup'
+        }
+    });
+       
     }
 });
 </script>

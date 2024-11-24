@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        .navbar {
+            background: #333;
+        }
+        .navbar .nav-link, .navbar .navbar-brand {
+            color: white !important;
+        }
+        .navbar .nav-link:hover {
+            color: #f1c40f !important;
+        }
+        .contact-container {
+            padding: 69px 20px;
+        }
+        .contact-title {
+            text-align: center;
+            margin-bottom: 50px;
+            color: #333;
+            font-weight: bold;
+            font-size: 40px;
+        }
+        .contact-form label {
+            color: #555;
+            font-weight: bold;
+        }
+        .btn-custom {
+            background: #333;
+            color: white;
+            border: none;
+        }
+        .btn-custom:hover {
+            background: #f1c40f;
+            color: #333;
+        }
+        .image-upload {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .image-upload input {
+            margin-top: 10px;
+        }
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            margin-top: 1px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url "home" %}">
+                <i class="fas fa-home"></i> Home
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+           
+        </div>
+    </nav>
+
+    <!-- Contact Section -->
+    <div class="container contact-container">
+        <h2 class="contact-title">Get in Touch</h2>
+        <div class="row">
+            <!-- Contact Form -->
+            <div class="col-lg-6">
+                <form class="contact-form">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="name" placeholder="Enter your name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" placeholder="Enter your email">
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Message</label>
+                        <textarea class="form-control" id="message" rows="5" placeholder="Write your message here"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-custom">Send Message</button>
+                </form>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="col-lg-6" style="margin-top: 5px;">
+                <h4 class="mb-3">Contact Information</h4>
+                <p><i class="fas fa-phone-alt"></i> +1 234 567 890</p>
+                <p><i class="fas fa-envelope"></i> artcanvaworldofart@gmail.com</p>
+                <p><i class="fas fa-map-marker-alt"></i> 123 Wall Art Street, Art City</p>
+            </div>
+        </div>
+
+        <!-- Image Upload Section -->
+        
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 Wall Paint Art. All rights reserved.</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

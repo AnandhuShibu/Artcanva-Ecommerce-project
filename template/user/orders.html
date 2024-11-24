@@ -8,7 +8,7 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #f8f9fa;
+            background-color: #ffffe4;
             font-family: Arial, sans-serif;
         }
 
@@ -95,14 +95,7 @@
             text-decoration: none;
         }
 
-        .logo {
-            font-size: 1.8rem; 
-            color: #000000; 
-            font-weight: bold;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); 
-            letter-spacing: 1px; 
-            text-decoration: none;
-        }
+        
 
         .navbar-nav .nav-link {
         font-size: 1.3rem;
@@ -191,7 +184,15 @@
         margin: 0;
         font-size: 14px;
         }
-
+        .logo_art {
+            font-size: 1.8rem !important; 
+            color: #000000 !important; 
+            font-weight: bold !important;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1) !important; 
+            letter-spacing: 1px !important; 
+            text-decoration: none !important;
+        }
+        
     </style>
 </head>
 <body>
@@ -199,7 +200,7 @@
     <nav class="navbar navbar-expand-lg ">
         <div class="container-fluid">
           <!-- Left Logo Section -->
-          <a class="logo" href="{% url 'home'%}">ART CANVA</a>
+          <a class="logo_art" href="{% url 'home'%}">ART CANVA</a>
       
           <!-- Toggler Button -->
           <button 
@@ -309,6 +310,28 @@
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<script>
+    // Check for Django messages and display them using SweetAlert
+    {% if messages %}
+        {% for message in messages %}
+            
+                Swal.fire({
+                    icon: "error", // Directly uses 'success' or 'warning'
+                    title: "{{ message|escapejs }}",
+                    toast: true,
+                    position: 'top',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    customClass: {
+                        popup: 'small-alert-popup'
+                    }
+                });
+            
+        {% endfor %}
+    {% endif %}
+</script>
 </body>
 </html>

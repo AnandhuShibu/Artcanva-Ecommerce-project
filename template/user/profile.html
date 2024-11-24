@@ -587,36 +587,33 @@
         <h3>Add/Edit Address</h3>
         <span class="modal-close" onclick="closeModal()">×</span>
       </div>
-
-
-      <form action="" method= 'POST'>
+      <form action="" method="POST" onsubmit="return validateForm()">
         {% csrf_token %}
         <div class="form-group">
-          <p class='text'>Full Name</p>
-          <input type="text" name='fullname' required>
-
-          <p class='text'>Mobile</p>
-          <input type="text" name='mobile' required>
-
-          <p class='text'>Pincode</p>
-          <input type="text" name='pincode' required>
-
-          <p class='text'>Address</p>
-          <input type="text" name='address' placeholder='Max length(50)' required>
-
-          <p class='text'>City</p>
-          <input type="text" name='city' required>
-
-          <p class='text'>District</p>
-          <input type="text" name='district' required>
-
-          <p class='text'>State</p>
-          <input type="text" name='state' required>
+        <p class='text'>Full Name</p>
+        <input type="text" class="form-control mb-3" name="fullname" placeholder="Full Name" required
+            minlength="3" pattern="[A-Za-z\s]+" title="Full Name should contain only letters and spaces.">
+        <p class='text'>Mobile</p>
+        <input type="text" class="form-control mb-3" name="mobile" placeholder="Mobile" required
+            pattern="^\d{10}$" title="Enter a valid 10-digit mobile number.">
+        <p class='text'>Pincode</p>
+        <input type="text" class="form-control mb-3" name="pincode" placeholder="Pincode" required
+            pattern="^\d{6}$" title="Enter a valid 6-digit pincode.">
+        <p class='text'>Address</p>
+        <input type="text" class="form-control mb-3" name="address" placeholder="Address" required>
+        <p class='text'>City</p>
+        <input type="text" class="form-control mb-3" name="city" placeholder="City" required
+            pattern="[A-Za-z\s]+" title="City should contain only letters and spaces.">
+        <p class='text'>District</p>
+        <input type="text" class="form-control mb-3" name="district" placeholder="District" required
+            pattern="[A-Za-z\s]+" title="District should contain only letters and spaces.">
+        <p class='text'>State</p>
+        <input type="text" class="form-control mb-3" name="state" placeholder="State" required
+            pattern="[A-Za-z\s]+" title="State should contain only letters and spaces.">
+        <p></p>
+        <button class="btn" type="submit">SUBMIT</button>
         </div>
-        <button class="btn">Save Address</button>
-      </form>
-
-
+    </form>
     </div>
   </div>
 
@@ -656,12 +653,10 @@
         </div>
         <button class="btn">Save Changes</button>
       </form>
-
-
     </div>
   </div>
 
-   
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     function showSection(sectionId) {
       document.querySelectorAll('.section').forEach(section => {
@@ -706,27 +701,29 @@
     function closeModal() {
       document.getElementById('addressModal').style.display = 'none';
     }
-
-     // Function to show the popup message
-     function showPopup(message, type) {
-      const popup = document.getElementById('popup-message');
-      popup.textContent = message;
-      popup.className = `popup-message popup-${type} popup-show`;
-
-      // Hide the popup after 3 seconds
-      setTimeout(() => {
-          popup.className = 'popup-message';
-      }, 3000);
-  }
-
-  // Check for Django messages and display them
-  {% if messages %}
-      {% for message in messages %}
-          showPopup("{{ message }}", "{{ message.tags }}");
-      {% endfor %}
-  {% endif %}
-  
   </script>
+
+  <script>
+    // Check for Django messages and display them using SweetAlert
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'success' or message.tags == 'warning' or message.tags == 'error' %}
+                Swal.fire({
+                    icon: "{{ message.tags }}", // Directly uses 'success' or 'warning'
+                    title: "{{ message|escapejs }}",
+                    toast: true,
+                    position: 'top',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    customClass: {
+                        popup: 'small-alert-popup'
+                    }
+                });
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+</script>
   
 
   <script>
@@ -748,6 +745,56 @@
         }
       });
       return false;  // Prevent the default link action
+    }
+  </script>
+
+  <script>
+    function validateFormProfile() {
+        const fullname = document.getElementsByName("fullname")[0].value.trim();
+        const mobile = document.getElementsByName("mobile")[0].value.trim();
+        const pincode = document.getElementsByName("pincode")[0].value.trim();
+        const address = document.getElementsByName("address")[0].value.trim();
+        const city = document.getElementsByName("city")[0].value.trim();
+        const district = document.getElementsByName("district")[0].value.trim();
+        const state = document.getElementsByName("state")[0].value.trim();
+  
+        // Custom validations
+        if (!/^[A-Za-z\s]+$/.test(fullname)) {
+            alert("Full Name should only contain letters and spaces.");
+            return false;
+        }
+  
+        if (!/^\d{10}$/.test(mobile)) {
+            alert("Mobile number must be a 10-digit number.");
+            return false;
+        }
+  
+        if (!/^\d{6}$/.test(pincode)) {
+            alert("Pincode must be a 6-digit number.");
+            return false;
+        }
+  
+        if (!address) {
+            alert("Address cannot be empty.");
+            return false;
+        }
+  
+        if (!/^[A-Za-z\s]+$/.test(city)) {
+            alert("City should only contain letters and spaces.");
+            return false;
+        }
+  
+        if (!/^[A-Za-z\s]+$/.test(district)) {
+            alert("District should only contain letters and spaces.");
+            return false;
+        }
+  
+        if (!/^[A-Za-z\s]+$/.test(state)) {
+            alert("State should only contain letters and spaces.");
+            return false;
+        }
+  
+        return true; // Allow form submission if all validations pass
     }
   </script>
 

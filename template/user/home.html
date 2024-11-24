@@ -14,7 +14,6 @@
       background-color:#ffffe4
     }
 
-    
     .navbar {
       height: 80px; 
       display: flex; 
@@ -135,7 +134,6 @@
         color: #6c757d; 
     }
     .card {
-      
       width: 90%; 
       margin: 0 auto;
     }
@@ -196,9 +194,11 @@
       transform: scaleX(1);
     }
 
-    .view{
+    .popular_item{
       text-decoration:none;
+      color:#000000;
     }
+
 
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMKtkz0p5sy4R8l1L4/fC1RfwD1kLwL4RbfE8" crossorigin="anonymous">
@@ -234,7 +234,10 @@
           <a class="nav-link" href="{% url 'shop'%}">Shop</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">Contact</a>
+          <a class="nav-link" href="{% url 'about_us'%}">About us</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'contact_us'%}">Contact</a>
         </li>
         {% if not customer %}
       <li class="nav-item">
@@ -290,11 +293,11 @@
       {% for arrival in arrivals %}
       <div class="col-md-4">
         <div class="card">
-          <img src="{{ arrival.images1.url }}" id="card_image_arrival" class="card-img-top" alt="Card Image">
+          <a href="{% url 'single' arrival.id arrival.variants.first.id %}"><img src="{{ arrival.images1.url }}" id="card_image_arrival" class="card-img-top" alt="Card Image"></a>
           <div class="card-body">
             <h5 class="card-title">{{arrival.product_name}}</h5>
             <p class="card-text">{{arrival.}}</p>
-            <a href="{% url 'single' arrival.id arrival.variants.first.id %}" ><button type="button" class="btn btn-primary btn-sm">View</button></a>
+           
           </div>
         </div>
       </div>
@@ -315,10 +318,10 @@
     {% for popular in populars %}
       <div class="col-md-3">
         <div class="card small-card">
-          <img src="{{popular.images1.url}}" id="card_image_popular" class="card-img-top" alt="Small Card Image 1">
+          <a href="{% url 'single' popular.id popular.variants.first.id %}"><img src="{{popular.images1.url}}" id="card_image_popular" class="card-img-top" alt="Small Card Image 1"></a>
           <div class="card-body">
-            <h6 class="card-title">{{popular.product_name}}</h6>
-            <a href="" class="view">VIEW></a>
+          <h6 class="card-title">{{popular.product_name}}</h6>
+            
           </div>
         </div>
       </div>
