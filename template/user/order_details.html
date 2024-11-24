@@ -243,9 +243,6 @@
             margin-left: 84px;
         }
 
-        
-
-
         .cancel-btn {
             background-color: #968F9F;
             color: white;
@@ -259,8 +256,6 @@
         .cancel-btn:hover{
             background-color: #687289;
         }
-
-
 
         .retry-btn {
             background-color: #FFA500;
@@ -304,9 +299,6 @@
         .item-cancel-btn:hover{
             background-color: #687289;
         }
-
-
-
 
         .modal {
             display: none;
@@ -527,30 +519,22 @@
 
 
         <div class="order-summary" style="padding-left: 40px;">
-
             <h4>TOTAL AMOUNT: ₹{{normal_total_price}}</h4>
-
-            
-
             <br>
-            <!-- Show coupon code only if it exists -->
             {% if orders.coupon_name %}
                 <h5 style="margin-top: 0;margin-bottom: 9px;">Coupon Code: {{orders.coupon_name}}</h5>
                 <h5 style="margin-top: 0;">Coupon Percentage: {{orders.coupon_percentage}}%</h5>
             {% else %}
                 <h5>No coupon used</h5>
             {% endif %}
-
             <h3 style="margin-bottom: 10px;">PAYABLE AMOUNT: ₹{{orders.total_amount}}</h3>
         </div>
 
         {% if orders.payment_status == 'Failure' %}
         <div class="cancel">
-
             <a href="{% url 'retry_payment' orders.id %}" >
                 <button class="retry-btn">RETRY PAYMENT</button>
             </a>
-
         </div>
 
         {% else %}
@@ -560,21 +544,16 @@
                 <button class="cancel-btn" disabled style="background-color: red; cursor: not-allowed;">
                     ORDER CANCELLED
                 </button>
-
                 {% elif orders.status != 'Delivered' and orders.status != 'Returned'%}
-
                 <a href="{% url 'order_cancel' orders.id %}" onclick="return confirmCancelOrder(event, this)">
                     <button class="cancel-btn">CANCEL ORDER</button>
                 </a>
-
             {% else %}
             {% if orders.status == 'Delivered' or orders.status == 'Returned' %}
             <button class="download-invoice-btn" onclick="downloadInvoice()">DOWNLOAD INVOICE</button>
             {% endif %}
             {% endif %}
         </div> 
-        
-        
         {% endif %}
     </div>
 
@@ -587,16 +566,6 @@
         <div class="product-info">
             <h2>{{ item.product.product_name }}</h2>
             <div class="cash">
-                {% comment %} {% if item.offer %}
-                <span class = "offer_price">{{item.i|floatformat:0}}</span>
-                <span class = "original_price">₹ {{ item.variant.price|floatformat:0 }}</span>
-                <span class="p">offer price</span>
-                {% else %}
-                <span class = "original">₹ {{ item.variant.price|floatformat:0 }}</span>
-                {% endif %} {% endcomment %}
-
-
-
                 {% if item.offer %}
                 <span class = "original">₹ {{ item.variant.price|floatformat:0 }}</span>
                 <span class="p">Item has offer</span>
@@ -641,8 +610,6 @@
             <div class="modal-content">
                 <span class="close-btn">&times;</span>
                 <h3>Rate This Product</h3>
-
-
                 <div class="star-rating">
                 <input type="radio" id="star5" name="rating" value="5" />
                 <label for="star5" class="star">&#9733;</label>
@@ -655,8 +622,6 @@
                 <input type="radio" id="star1" name="rating" value="1" />
                 <label for="star1" class="star">&#9733;</label>
             </div>
-
-
                 <h3>Review This Product</h3>
                 <textarea id="reviewText" name='reviewtext' placeholder="Write your review here..."></textarea>
                 <button type= "submit" id="submitReview" class="submit-btn">SUBMIT</button>
@@ -772,8 +737,6 @@
     }
 </script>
 
-
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
@@ -819,9 +782,6 @@
       return false;  // Prevent the default link action
     }
   </script>
-
-  
-
 
 </body>
 </html>

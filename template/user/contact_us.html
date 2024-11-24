@@ -71,7 +71,6 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-           
         </div>
     </nav>
 
@@ -81,18 +80,19 @@
         <div class="row">
             <!-- Contact Form -->
             <div class="col-lg-6">
-                <form class="contact-form">
+                <form class="contact-form" action="{% url "contact_us" %}" method="POST">
+                    {% csrf_token %}
                     <div class="mb-3">
                         <label for="name" class="form-label">Full Name</label>
-                        <input type="text" class="form-control" id="name" placeholder="Enter your name">
+                        <input type="text" name="name" class="form-control" id="name" placeholder="Enter your name">
                     </div>
                     <div class="mb-3">
                         <label for="email" class="form-label">Email Address</label>
-                        <input type="email" class="form-control" id="email" placeholder="Enter your email">
+                        <input type="email" name="email" class="form-control" id="email" placeholder="Enter your email">
                     </div>
                     <div class="mb-3">
                         <label for="message" class="form-label">Message</label>
-                        <textarea class="form-control" id="message" rows="5" placeholder="Write your message here"></textarea>
+                        <textarea class="form-control" name="message" id="message" rows="5" placeholder="Write your message here"></textarea>
                     </div>
                     <button type="submit" class="btn btn-custom">Send Message</button>
                 </form>
@@ -101,21 +101,41 @@
             <!-- Contact Information -->
             <div class="col-lg-6" style="margin-top: 5px;">
                 <h4 class="mb-3">Contact Information</h4>
-                <p><i class="fas fa-phone-alt"></i> +1 234 567 890</p>
+                <p><i class="fas fa-phone-alt"></i>+91 9526014914</p>
                 <p><i class="fas fa-envelope"></i> artcanvaworldofart@gmail.com</p>
-                <p><i class="fas fa-map-marker-alt"></i> 123 Wall Art Street, Art City</p>
+                <p><i class="fas fa-map-marker-alt"></i> Kerala, India</p>
             </div>
         </div>
-
-        <!-- Image Upload Section -->
-        
     </div>
 
     <!-- Footer -->
     <footer>
-        <p>&copy; 2024 Wall Paint Art. All rights reserved.</p>
+        <p>&copy; 2024 Artcanva. All rights reserved.</p>
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    // Check for Django messages and display them using SweetAlert
+    {% if messages %}
+        {% for message in messages %}
+            
+                Swal.fire({
+                    icon: "info", // Directly uses 'success' or 'warning'
+                    title: "{{ message|escapejs }}",
+                    toast: true,
+                    position: 'top',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    customClass: {
+                        popup: 'small-alert-popup'
+                    }
+                });
+            
+        {% endfor %}
+    {% endif %}
+</script>
 </body>
 </html>

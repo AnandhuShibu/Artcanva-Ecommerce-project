@@ -37,6 +37,9 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle # type: ign
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle # type: ignore
 from django.http import HttpResponse
 from .models import Order, Order_details  # Import your models
+from django.core.mail import send_mail
+
+
 
 
 #========================= USER SIGNUP =====================#
@@ -109,7 +112,6 @@ def is_otp_valid(request, input_otp):
 def otp(request):
     if request.method == 'POST':
         input_otp = request.POST.get('input_otp')
-        print(input_otp)
         if is_otp_valid(request, input_otp):
             del request.session['generated_otp']
             del request.session['otp_expiry']
@@ -411,7 +413,33 @@ def about_us(request):
     return render(request, 'user/about_us.html')
 
 def contact_us(request):
+    if request.method == "POST":
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        message = request.POST.get('message')
+        subject = f"Contact Form Submission by {name}"
+        body = f"""
+        Name: {name}
+        Email: {email}
+        
+        Message:
+        {message}
+        """
+        try:
+            send_mail(
+                subject,              
+                body,                 
+                settings.DEFAULT_FROM_EMAIL,  
+                [settings.CONTACT_EMAIL],    
+                fail_silently=False,
+            )
+            messages.info(request, "Your message has been sent successfully!")
+            return redirect('contact_us')
+        except Exception as e:
+            print(f"Error sending email: {e}")
+           
     return render(request, 'user/contact_us.html')
+
 
 #======================= USER PROFILE SECTION =====================#
 

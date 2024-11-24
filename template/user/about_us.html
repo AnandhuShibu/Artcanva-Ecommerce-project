@@ -16,13 +16,33 @@
             font-family: 'Arial', sans-serif;
             line-height: 1.6;
             color: #333;
+            background: #ffffe4;
         }
         header {
-            background: linear-gradient(90deg, #FF7E5F, #FEB47B);
+            background: #333;
             color: white;
             padding: 20px 10%;
             text-align: center;
+            position: relative;
         }
+        
+        .navbar-brand {
+            position: absolute; 
+            top: 50%; 
+            left: 5%; 
+            transform: translateY(-50%); 
+            text-decoration: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            font-size: 1.2rem;
+        }
+        
+        .navbar-brand i {
+            margin-right: 8px; 
+            font-size: 1.5rem; 
+        }
+        
         header h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
@@ -67,7 +87,7 @@
             font-weight: bold;
         }
         .values-section {
-            background: #FF7E5F;
+            background: #333;
             color: white;
             padding: 40px 10%;
         }
@@ -106,20 +126,24 @@
             padding: 20px;
             text-align: center;
         }
+       
     </style>
 </head>
 <body>
     <header>
-        <h1>Welcome to [Your Wall Painting Website]</h1>
+        <a class="navbar-brand" href="{% url "home" %}">
+            <i class="fas fa-home"></i> Home
+        </a>
+        <h1>Welcome to Art Canva</h1>
         <p>Transforming Your Walls into Masterpieces</p>
     </header>
     <section class="about-section">
         <h2>About Us</h2>
         <div class="about-content">
-            <img src="{% static 'images/a.jpeg' %}" alt="Wall Painting">
+            <img src="{% static 'images/r.jpg' %}" alt="Wall Painting" style="filter: brightness(50%);">
             <div class="about-text">
                 <p>
-                    At <span class="highlight">[Your Company Name]</span>, we believe that walls have the power to tell stories and set moods.
+                    At <span class="highlight">Artcanva</span>, we believe that walls have the power to tell stories and set moods.
                     With years of experience in the art of wall painting, we bring creativity, color, and precision to every space we touch.
                 </p>
                 <p>
@@ -154,7 +178,7 @@
         </div>
     </section>
     <footer>
-        <p>&copy; 2024 [Your Company Name]. All Rights Reserved.</p>
+        <p>&copy; 2024 Artcanva. All Rights Reserved.</p>
     </footer>
 </body>
 </html>

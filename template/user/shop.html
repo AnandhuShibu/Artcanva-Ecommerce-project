@@ -292,7 +292,7 @@
               <a class="nav-link" href="{% url 'shop'%}">Shop</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'about_us'%}">About Us</a>
+              <a class="nav-link" href="{% url 'about_us'%}">About us</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="#">Contact</a>
@@ -319,8 +319,6 @@
         </div>
       </div>
     </nav>
-    
-      <!-- Navbar End -->
     
       <hr>
 
@@ -407,8 +405,6 @@
       </div>
       </div>
 
- 
-
     <div class="col-lg-9 col-md-8">
       {% if no_products_found %}
         <p class="text-center text-danger">No items found matching these filters !</p>
@@ -454,23 +450,11 @@
       <div class="col-md-4">
         <h5>About Us</h5>
         <p>We are a team dedicated to providing the best products and services for our customers.</p>
-        <p>&copy; 2024 Your Company</p>
+        <p>&copy; 2024 Artcanva</p>
       </div>
       <div class="col-md-4">
-        <h5>Quick Links</h5>
-        <ul class="list-unstyled">
-          <li><a href="#" class="text-white">Home</a></li>
-          <li><a href="#" class="text-white">About</a></li>
-          <li><a href="#" class="text-white">Services</a></li>
-          <li><a href="#" class="text-white">Contact</a></li>
-        </ul>
       </div>
       <div class="col-md-4 text-end">
-        <h5>Subscribe to Our Newsletter</h5>
-        <form class="d-flex justify-content-end mt-3">
-          <input type="email" class="form-control me-2" placeholder="Enter your email" aria-label="Email" required>
-          <button class="btn btn-primary" type="submit">Subscribe</button>
-        </form>
         <h5 class="mt-4">Follow Us</h5>
         <div>
           <a href="#" class="text-white me-2"><i class="fab fa-facebook-f"></i></a>
@@ -511,7 +495,6 @@
         {% endfor %}
     {% endif %}
 </script>
-
 
 <script>
   const priceRange = document.getElementById('priceRange');

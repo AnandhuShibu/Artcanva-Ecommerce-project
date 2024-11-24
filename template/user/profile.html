@@ -448,11 +448,6 @@
             {% endif %}
         </form>
     </div>
-    
-    
-    
-    
-
       <div id="manageAddress" class="section">
         <h2>Manage Addresses</h2>
         
@@ -468,8 +463,6 @@
             <a href="{% url 'remove_address_profile' info.id %}" onclick="return confirmDelete(event, this)">
               <button class="btn btn-sm btn-outline-danger">DELETE</button>
           </a>
-          
-            
           </div>
         </div>
         {% endfor %}
@@ -526,10 +519,6 @@
           </tbody>
        </table>
       </div>
-
-
-
-
       <div id="wallets" class="section">
         <h2>Wallets</h2>
         <p style="font-size: 18px;">Wallet balance: ₹ {{wallet.wallet_amount}}</p>

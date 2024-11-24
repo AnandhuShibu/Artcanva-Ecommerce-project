@@ -76,6 +76,7 @@ EMAIL_HOST_USER = 'artcanvaworldofart@gmail.com'
 EMAIL_HOST_PASSWORD = 'qesr fbbc pplg cxgn'
 DEFAULT_FROM_EMAIL = 'ArtCanva <artcanvaworldofart@gmail.com>'
 
+CONTACT_EMAIL = 'artcanvaworldofart@gmail.com'
 
 TEMPLATES = [
     {
