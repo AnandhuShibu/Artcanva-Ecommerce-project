@@ -115,23 +115,24 @@
         <h1 class="logo">Art Canva</h1>
         <div class="login-box">
             <h2>SIGNUP</h2>
-            <form action='' method = 'POST'>
+            <form id="signupForm" action='' method='POST'>
                 {% csrf_token %}
                 <div class="input-box">
-                    <input type="text" name='username' placeholder="USERNAME" required>
+                    <input type="text" id="username" name='username' placeholder="USERNAME" required>
                 </div>
 
                 <div class="input-box">
-                    <input type="email" name = 'email' placeholder="EMAIL" required>
+                    <input type="email" id="email" name='email' placeholder="EMAIL" required>
                 </div>
 
                 <div class="input-box">
-                    <input type="password" name = 'password1' placeholder="PASSWORD" required>
+                    <input type="password" id="password1" name='password1' placeholder="PASSWORD" required>
                 </div>
 
                 <div class="input-box">
-                    <input type="password" name = 'password2' placeholder="CONFORM PASSWORD" required>
+                    <input type="password" id="password2" name='password2' placeholder="CONFIRM PASSWORD" required>
                 </div>
+
                 <button type="submit" class="signup-btn">Signup</button>
             </form>
             <div class="links">
@@ -143,23 +144,101 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        // Check for Django messages and display them using SweetAlert
+        // Front-end Validation
+        document.getElementById('signupForm').addEventListener('submit', function (event) {
+            // Prevent form submission
+            event.preventDefault();
+
+            // Get input values
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password1 = document.getElementById('password1').value.trim();
+            const password2 = document.getElementById('password2').value.trim();
+
+            // Username Validation
+            if (username.length < 5) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Username must be at least 5 characters long',
+                    toast: true,
+                    position: 'top',
+                    timer: 3000,
+                    showConfirmButton: false,
+                });
+                return;
+            }
+
+            const usernameRegex = /^[a-zA-Z]+$/;
+            if (!usernameRegex.test(username)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Username can only contain alphabetic characters',
+                    toast: true,
+                    position: 'top',
+                    timer: 3000,
+                    showConfirmButton: false,
+                });
+                return;
+            }
+
+            // Email Validation
+            const emailRegex = /^[a-zA-Z0-9._%+]+@[a-zA-Z0-9.]+\.[a-zA-Z]{2,}$/;
+
+            if (!emailRegex.test(email)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid email address. Please avoid using "-" in the email.',
+                    toast: true,
+                    position: 'top',
+                    timer: 3000,
+                    showConfirmButton: false,
+                });
+                return;
+            }
+
+            // Password Validation
+            if (password1.length < 8) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Password must be at least 8 characters long',
+                    toast: true,
+                    position: 'top',
+                    timer: 3000,
+                    showConfirmButton: false,
+                });
+                return;
+            }
+
+            // Confirm Password Validation
+            if (password1 !== password2) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Passwords do not match',
+                    toast: true,
+                    position: 'top',
+                    timer: 3000,
+                    showConfirmButton: false,
+                });
+                return;
+            }
+
+            
+            // Proceed with form submission
+            this.submit();
+        });
+
+        // Display Django messages with SweetAlert
         {% if messages %}
             {% for message in messages %}
-                
-                    Swal.fire({
-                        icon: "info",
-                        title: "{{ message|escapejs }}",
-                        toast: true,
-                        position: 'top',
-                        showConfirmButton: false,
-                        timer: 3000,
-                        timerProgressBar: true,
-                        customClass: {
-                            popup: 'small-alert-popup'
-                        }
-                    });
-                
+                Swal.fire({
+                    icon: "info",
+                    title: "{{ message|escapejs }}",
+                    toast: true,
+                    position: 'top',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                });
             {% endfor %}
         {% endif %}
     </script>

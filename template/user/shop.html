@@ -256,6 +256,25 @@
           background-color: #007bff;
           color: white;
       }
+
+      .offer-percentage {
+        position: absolute;
+        top: 10px; 
+        left: 9px; 
+        background-color: rgba(255, 0, 0, 0.8);
+        color: white;
+        padding: 5px;
+        border-radius: 10px;
+        font-weight: 100;
+        font-size: 1em; 
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); 
+        transition: transform 0.3s ease; 
+        z-index: 10; 
+    }
+    
+    .offer-percentage:hover {
+        transform: scale(1.1);
+    }
   
   </style>
 </head>
@@ -295,7 +314,7 @@
               <a class="nav-link" href="{% url 'about_us'%}">About us</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Contact</a>
+              <a class="nav-link" href="{% url 'contact_us'%}">Contact</a>
             </li>
             {% if not customer %}
           <li class="nav-item">
@@ -420,7 +439,14 @@
                 <h6 class="card-title">{{product.product_name}}</h6>
                 <a href="{% url 'add_wishlist' product.id product.variants.first.id %}"><button class="add-wishlist" title="Add to Wishlist"><i class="fas fa-heart"></i></button></a>
               </div>
+
+              {% if product.art_category.art_type_offer != 0 %}
+              <span class="offer-percentage" style="position: absolute; top: 10px; left: 8px; background-color: rgba(255, 0, 0, 0.7); color: white; padding: 5px; border-radius: 5px;">
+                {{ product.art_category.art_type_offer }}% OFF
+              </span>
+              {% endif %}
             </div>
+            
           </div>
           {% endfor %}
         </div>
@@ -457,10 +483,9 @@
       <div class="col-md-4 text-end">
         <h5 class="mt-4">Follow Us</h5>
         <div>
+          <a href="https://www.youtube.com/@art-N-craft-by-achus" class="text-white me-2"><i class="fab fa-youtube"></i></a>
+          <a href="https://www.instagram.com/_art_canva/" class="text-white me-2"><i class="fab fa-instagram"></i></a>
           <a href="#" class="text-white me-2"><i class="fab fa-facebook-f"></i></a>
-          <a href="#" class="text-white me-2"><i class="fab fa-twitter"></i></a>
-          <a href="#" class="text-white me-2"><i class="fab fa-instagram"></i></a>
-          <a href="#" class="text-white"><i class="fab fa-linkedin-in"></i></a>
         </div>
       </div>
     </div>

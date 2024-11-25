@@ -25,6 +25,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import check_password
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from . models import Order,Order_details, Review, Wishlist, Return
 from django.http import JsonResponse
 from django.db import transaction
@@ -44,7 +45,7 @@ from django.core.mail import send_mail
 
 #========================= USER SIGNUP =====================#
 
-
+@never_cache
 def signup(request):
     if request.method == 'POST':
         username = request.POST['username'].strip()
@@ -52,19 +53,22 @@ def signup(request):
         password1 = request.POST['password1'].strip()
         password2 = request.POST['password2'].strip()
 
-        if User.objects.filter(Q(username = username)).exists():
-            messages.info(request,'USER NAME ALREADY TAKEN')
-            return redirect('signup')
-        if len(username) < 5:
-            messages.info(request, 'Username must be at least 5 characters long.')
+        if User.objects.filter(username=username).exists():
+            messages.info(request, 'Username already taken')
             return redirect('signup')
         
-        if len(password1) < 8:
-            messages.info(request, 'Password must be at least 8 characters long')
+        if User.objects.filter(email=email).exists():
+            messages.info(request, 'Email is already registered')
+            return redirect('signup')
+        
+        try:
+            validate_email(email)
+        except ValidationError:
+            messages.info(request, 'Invalid email address')
             return redirect('signup')
         
         if password1 != password2:
-            messages.info(request, 'PASSWORD DO NOT MATCH !')
+            messages.info(request, 'Password does not match !')
             return redirect('signup')
         else:
             user = User.objects.create_user(username = username, email = email, password = password1)
@@ -75,7 +79,6 @@ def signup(request):
             return redirect('otp')
         
     return render(request, 'user/signup.html')
-
 
 
 #=========================== USER OTP SECTION =========================#
@@ -167,7 +170,6 @@ def user_logout(request):
     logout(request)
     return redirect('home')
 
-
 #======================= RESET PASSWORD =========================#
 
 def email_verify(request):
@@ -244,7 +246,6 @@ def home(request):
     arrivals = Product.objects.filter(
     Q(product_status=True) & Q(variants__isnull=False)
     ).distinct().order_by('-id')[:3]
-
 
     try:
         user = request.user
@@ -327,6 +328,14 @@ def shop(request):
 #========================== SINGLE PRODUCT SECTION ==========================#
 
 def single(request, product_id, variant_id):
+    try:
+        user = request.user
+        if user.is_authenticated:
+            customer = user.username
+        else:
+            customer = None
+    except Exception as e:
+        customer = None
     product = get_object_or_404(Product, id=product_id)
     variant = get_object_or_404(Variant, id=variant_id)
     sizes = Variant.objects.filter(product=product)
@@ -369,7 +378,8 @@ def single(request, product_id, variant_id):
         'related_product':related_product,
         'variant_amount': variant_amount,
         'offer_amount': offer_amount,
-        'offer_display': offer_display
+        'offer_display': offer_display,
+        'customer': customer
     })
 
 
@@ -384,7 +394,6 @@ def add_wishlist_single(request, product_id, variant_id):
         messages.error(request, "Item currently unavailable")
         return redirect('shop')
 
-    print('status:', product.art_category.art_type_status)
     if product.art_category.art_type_status == False:
         messages.error(request, "Item currently unavailable")
         return redirect('shop')
@@ -562,14 +571,11 @@ def edit_address(request):
         if not city or not re.match(r"^[a-zA-Z\s]+$", city):
             errors.append("City must contain only alphabets and spaces.")
 
-        # District Validation (No special characters allowed)
         if not district or not re.match(r"^[a-zA-Z\s]+$", district):
             errors.append("District must contain only alphabets and spaces.")
 
-        # State Validation (No special characters allowed)
         if not state or not re.match(r"^[a-zA-Z\s]+$", state):
             errors.append("State must contain only alphabets and spaces.")
-
 
         if errors:
             for error in errors:
@@ -598,7 +604,6 @@ def remove_address_profile(request,address_id):
     address.delete()    
     return redirect('profile')
 
-
 def personal_info(request):
     user = request.user
     if request.method == 'POST':
@@ -607,8 +612,6 @@ def personal_info(request):
         mobile = request.POST.get('mobile')
         gender = request.POST.get('gender')
         
-
-        # Update or create user information
         user_info, created = UserInformations.objects.update_or_create(
             user=user,
             defaults={
@@ -658,13 +661,19 @@ def cart(request):
     if not request.user.is_authenticated:
         messages.info(request, "Please log in to view Cart.")
         return redirect('login')
-
+    
+    all_cart_items = Cart.objects.filter(user=request.user).order_by('-id')
+    items_to_delete = all_cart_items.filter(product__product_status=False)
+    if items_to_delete.exists():
+        items_to_delete.delete()
+       
     cart_items = Cart.objects.filter(user=request.user, product__product_status=True).order_by('-id')
     is_empty = not cart_items.exists()
 
     cart_items_with_offer_price = []
 
     for item in cart_items:
+        
         product = item.product
         art_category = product.art_category
 
@@ -725,7 +734,7 @@ def checkout_og(request):
 
         for variant_id, quantity in quantities.items():
             variant = get_object_or_404(Variant, id=variant_id)
-
+   
             if variant.product.product_status == False:
                 messages.error(request, f"{variant.product.product_name} is currently unavailable !")
                 return redirect('cart')
@@ -741,7 +750,7 @@ def checkout_og(request):
             if quantity > variant.stock:
                 messages.error(request, f"{variant.product.product_name} is Out of stock !")
                 return redirect('cart')
-
+        
             cart_item = get_object_or_404(Cart, user=request.user, variant_id=variant_id, product__product_status=True)
 
             cart_item.quantity = quantity
@@ -777,7 +786,7 @@ def checkout(request):
     status_error = validate_status(request.user)
     if status_error:
         messages.error(request, status_error)
-        return redirect('shop')
+        return redirect('cart')
     
     if request.method == 'POST':
         fullname = request.POST.get('fullname')
@@ -859,10 +868,7 @@ def validate_status(user):
     for item in cart_items:
         variant = get_object_or_404(Variant, id=item.variant_id)
         product = variant.product 
-
         if not product.product_status:
-
-            print("HELLO")
             return f"{product.product_name} is currently unavailable!"
     
     return None
@@ -901,11 +907,9 @@ def edit_address_checkout(request):
         if not city or not re.match(r"^[a-zA-Z\s]+$", city):
             errors.append("City must contain only alphabets and spaces.")
 
-        # District Validation (No special characters allowed)
         if not district or not re.match(r"^[a-zA-Z\s]+$", district):
             errors.append("District must contain only alphabets and spaces.")
 
-        # State Validation (No special characters allowed)
         if not state or not re.match(r"^[a-zA-Z\s]+$", state):
             errors.append("State must contain only alphabets and spaces.")
 
@@ -944,12 +948,12 @@ def place_order(request):
     if not cart_items:
         return redirect('home')
     
-    # inactive_items = Cart.objects.filter(user=request.user, product__product_status=False)
-    # if inactive_items.exists():
-    #     messages.error(request, "One or more items in your cart are unavailable.")
-    #     return redirect('home')
-    
+    # for i in cart_items:
+    #     if i.product.art_category.art_type_offer > 0:
+    #         print(i.product.art_category.art_type_offer)
+
     if request.method == 'POST':
+      
         payment_method = request.POST.get('payment_method')
         selected_address_id = request.POST.get('selected_address')
         total_price = int(request.session.get('total_price', 0)) * 100  
@@ -959,15 +963,18 @@ def place_order(request):
         coupon = None
         coupon_percentage = None
         if selected_coupon_code:
-            ##getting selected coupon ID
-            coupon = get_object_or_404(Coupons, coupon_code=selected_coupon_code)
-            coupon_percentage = coupon.percentage
+          
+            try:
+                coupon = Coupons.objects.get(coupon_code=selected_coupon_code)
+                coupon_percentage = coupon.percentage
+                Coupon_user.objects.create(
+                    user=request.user,
+                    coupon_used=coupon
+                )
+            except Coupons.DoesNotExist:
+                messages.error(request, "The selected coupon is invalid or has been deleted.")
+                return redirect('checkout')
 
-            Coupon_user.objects.create(
-                user = request.user,
-                coupon_used = coupon
-            )
-        
         if coupon_discount_price:
             final_amount = int(float(coupon_discount_price) * 100)  # Convert to paise
         else:
@@ -1003,7 +1010,6 @@ def place_order(request):
                 coupon_percentage = coupon_percentage
             )
 
-        
             OrderAddress.objects.create(
                 order=order,
                 fullname=selected_address.fullname,
@@ -1022,6 +1028,7 @@ def place_order(request):
                 coupon_item_final_amount = final_offer_price
 
                 if coupon_percentage:
+
                     coupon_item_amount = final_offer_price * coupon_percentage / 100
                     coupon_item_final_amount = final_offer_price - coupon_item_amount
 
@@ -1032,12 +1039,12 @@ def place_order(request):
                     variant=item.variant,
                     offer = offer_percentage,
                     item_coupon_amount = coupon_item_final_amount
-
                 )
                 item.variant.stock -= item.quantity
                 item.variant.save()
 
             cart_items.delete()
+
             return redirect('order_placed')
 
         elif payment_method == 'Razorpay':
@@ -1072,11 +1079,7 @@ def place_order(request):
                     variant=item.variant,
                     offer = offer_percentage
                 )
-                item.variant.stock -= item.quantity
-                item.variant.save()
-
-            cart_items.delete()
-
+                
             client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_SECRET_KEY))
 
             razorpay_order = client.order.create({
@@ -1140,13 +1143,20 @@ def place_order(request):
             )
         
             cart_items.delete()
-
             return redirect('order_placed')
 
 
 #======================== PAYMENT SECTION ======================#
 
 def payment_success(request):
+
+    cart_items = Cart.objects.filter(user=request.user)
+    for item in cart_items:
+            
+            item.variant.stock -= item.quantity
+            item.variant.save()
+
+    cart_items.delete()
     original_order_id = request.GET.get('order_id')
     order = get_object_or_404(Order, id=original_order_id)
     order.payment_status = 'Success'
@@ -1174,6 +1184,15 @@ def retry_payment(request, order_id):
 
 
 def retry_payment_success(request):
+    cart_items = Cart.objects.filter(user=request.user)
+
+    for item in cart_items:
+            
+            item.variant.stock -= item.quantity
+            item.variant.save()
+
+    cart_items.delete()
+
     original_order_id = request.GET.get('order_id')
     order = get_object_or_404(Order, id=original_order_id)
     order.payment_status = 'Success'
@@ -1207,7 +1226,6 @@ def orders(request):
     return render(request, 'user/orders.html', context)
 
 
-
 @login_required
 def order_details(request, order_id):
     order = get_object_or_404(Order, id=order_id)
@@ -1239,7 +1257,6 @@ def order_details(request, order_id):
     item_offer = None
 
     for item in order_items:
-        
         if item.offer:
             item_offer = item.variant.price * (Decimal(1) - (Decimal(item.offer) / Decimal(100)))
         original_price = item.variant.price * item.quantity
@@ -1329,8 +1346,6 @@ def submit_review(request,product_id, order_id, variant_id):
         )
         messages.success(request, 'Thank you for your review!')
         return redirect('order_details',order_id)  
-
-
 
 #==================== WISHLIST SECTION ================#
 
@@ -1432,7 +1447,6 @@ def add_cart_wishlist(request, product_id, variant_id):
     return redirect('wishlist')
 
 
-
 #=========================== ORDER CANCEL SECTION =======================#
 
 def order_cancel(request, order_id):
@@ -1479,8 +1493,6 @@ def item_cancel(request, order_id, item_id):
     if order.payment_method in ['Razorpay', 'Wallets']:
 
         item_amount = item.variant.price
-
-        print('AMOUNT:', item_amount)
         amount_to_refund = item.variant.price * item.quantity
         art_offer=item.offer
         
@@ -1492,8 +1504,6 @@ def item_cancel(request, order_id, item_id):
         if coupon_used:
             discount_from_coupon = (coupon_used.percentage / 100) * amount_to_refund
             amount_to_refund -= discount_from_coupon
-        # else:
-        #     print("No coupon applied")
         
         requested_user = item.order.user.username
         wallet, created = Wallet.objects.get_or_create(user=item.order.user)
@@ -1513,6 +1523,11 @@ def item_cancel(request, order_id, item_id):
         variant = item.variant
         variant.stock += item.quantity 
         variant.save()
+
+    elif order.payment_method == 'COD':
+        variant = item.variant
+        variant.stock += item.quantity 
+        variant.save()
    
     item.save()
 
@@ -1521,7 +1536,6 @@ def item_cancel(request, order_id, item_id):
     ).exclude(item_status='Cancelled').exists()
 
     if all_items_cancelled:
-        print("All items in this order are cancelled!")
         order.status = 'Cancelled'
         order.save()
 

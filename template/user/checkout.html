@@ -6,6 +6,7 @@
   <title>Checkout</title>
   <link rel="icon" href="static/images/arts.png" type="image/x-icon">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
   <style>
 
@@ -146,34 +147,88 @@
     }
    
     .navbar {
-        height: 80px; /* Adjust the height as needed */
-    }
+      height: 80px; 
+      display: flex; 
+      align-items: center;
+    
+      }
 
-    .logo {
-        font-size: 1.8rem; 
-        color: #000000; 
-        font-weight: bold; 
-        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-        letter-spacing: 1px; 
-        text-decoration: none;
-    }
-    
-    .navbar-nav .nav-link {
-        font-size: 1.3rem; 
-        color:#000000
-    }
+      .logo {
+      font-size: 1.8rem; 
+      color: #000000; 
+      font-weight: bold;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); 
+      letter-spacing: 1px; 
+      text-decoration: none;
+      }
 
-    .navbar-nav .nav-item {
-        margin: 0 15px;
-    }
-    
-    .navbar-nav .nav-link {
-        padding: 10px; 
-    }
-    
-    .navbar-toggler {
-        padding: 0.5rem; 
-        }
+      /* Nav Links */
+      .navbar-nav .nav-link {
+      font-size: 1.3rem;
+      color: #000000;
+      padding: 10px;
+      transition: color 0.3s;
+      }
+
+      .navbar-nav .nav-link {
+          position: relative;
+          text-decoration: none; 
+      }
+      
+      .navbar-nav .nav-link::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 0;
+          height: 1px;
+          background-color: #000;
+          transition: width 0.5s ease; 
+      }
+      
+      .navbar-nav .nav-link:hover::after {
+          width: 100%;
+      }
+      
+      .navbar-nav .nav-item {
+      margin: 0 15px; 
+      }
+
+      /* Toggler Button */
+      .navbar-toggler {
+      padding: 0.5rem;
+      }
+
+      .navbar-toggler-icon {
+      width: 30px;
+      height: 30px;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 992px) {
+      .navbar {
+      height: auto; 
+      padding: 10px;
+      }
+
+      .navbar-nav {
+      flex-direction: column; 
+      }
+
+      .navbar-nav .nav-item {
+      margin: 10px 0;
+      }
+
+      .navbar-collapse {
+      justify-content: center; 
+      }
+      }
+
+      @media (max-width: 576px) {
+      .navbar-nav .nav-link {
+      font-size: 1.1rem;
+      }
+      }
 
     hr {
         border: none;
@@ -203,9 +258,12 @@
 </head>
 <body>
 
-  <nav class="navbar navbar-expand-lg navbar-dark ">
+  <nav class="navbar navbar-expand-lg ">
     <div class="container-fluid">
+      <!-- Left Logo Section -->
       <a class="logo" href="{% url 'home'%}">ART CANVA</a>
+  
+      <!-- Toggler Button -->
       <button 
         class="navbar-toggler" 
         type="button" 
@@ -216,8 +274,11 @@
         aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
-        <ul class="navbar-nav navbar-nav-center">
+  
+      <!-- Collapsible Content -->
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <!-- Center Links -->
+        <ul class="navbar-nav mx-auto">
           <li class="nav-item">
             <a class="nav-link" aria-current="page" href="{% url 'home'%}">Home</a>
           </li>
@@ -225,25 +286,23 @@
             <a class="nav-link" href="{% url 'shop'%}">Shop</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Contact</a>
+            <a class="nav-link" href="{% url 'contact_us'%}">Contact</a>
           </li>
-          
+        </ul>
+  
+        <!-- Right Section (Cart, Wishlist, User) -->
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'cart'%}"><i class="bi bi-cart"></i> Cart</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'wishlist'%}"><i class="bi bi-heart"></i> Wishlist</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'profile'%}"><i class="bi bi-person"></i> Profile</a>
+          </li>
         </ul>
       </div>
-
-      <!-- Right Section (Cart, Wishlist, User) -->
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'cart'%}"><i class="bi bi-cart"></i> Cart</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#"><i class="bi bi-heart"></i> Wishlist</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'profile'%}"><i class="bi bi-person"></i> Profile</a>
-        </li>
-      </ul>
-
     </div>
   </nav>
   <!-- Navbar End -->
@@ -439,26 +498,13 @@
           <p>&copy; 2024 Your Company</p>
         </div>
         <div class="col-md-4">
-          <h5>Quick Links</h5>
-          <ul class="list-unstyled">
-            <li><a href="#" class="text-white">Home</a></li>
-            <li><a href="#" class="text-white">About</a></li>
-            <li><a href="#" class="text-white">Services</a></li>
-            <li><a href="#" class="text-white">Contact</a></li>
-          </ul>
         </div>
         <div class="col-md-4 text-end">
-          <h5>Subscribe to Our Newsletter</h5>
-          <form class="d-flex justify-content-end mt-3">
-            <input type="email" class="form-control me-2" placeholder="Enter your email" aria-label="Email" required>
-            <button class="btn btn-primary" type="submit">Subscribe</button>
-          </form>
           <h5 class="mt-4">Follow Us</h5>
           <div>
+            <a href="https://www.youtube.com/@art-N-craft-by-achus" class="text-white me-2"><i class="fab fa-youtube"></i></a>
+            <a href="https://www.instagram.com/_art_canva/" class="text-white me-2"><i class="fab fa-instagram"></i></a>
             <a href="#" class="text-white me-2"><i class="fab fa-facebook-f"></i></a>
-            <a href="#" class="text-white me-2"><i class="fab fa-twitter"></i></a>
-            <a href="#" class="text-white me-2"><i class="fab fa-instagram"></i></a>
-            <a href="#" class="text-white"><i class="fab fa-linkedin-in"></i></a>
           </div>
         </div>
       </div>

@@ -75,8 +75,6 @@ def product_status(request, product_id):
 #======================= EDIT PRODUCT ==================#
 
 
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import Product, Art, Paint
 
 
     

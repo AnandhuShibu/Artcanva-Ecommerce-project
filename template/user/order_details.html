@@ -590,7 +590,7 @@
 
             {% else %}
 
-            {% if orders.payment_status == 'Success' %}
+            {% if orders.payment_status == 'Success' or orders.payment_status == 'Pending' %}
             {% if item.item_status == 'Cancelled' %}
             <button class="item-cancel-btn" disabled style="background-color: red; cursor: not-allowed;" >CANCELLED</button>
             {% else %}

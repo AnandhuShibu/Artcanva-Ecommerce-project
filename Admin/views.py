@@ -271,8 +271,6 @@ def order_items(request,order_id):
     order_items=Order_details.objects.filter(order=order_id)
     order_address = get_object_or_404(OrderAddress, order=order_id)
     item_offer = None
-    print(order_id.coupon_name)
-    
     for item in order_items:
 
         if item.offer:
@@ -294,8 +292,7 @@ def change_order_status(request, order_id):
         new_status = request.POST.get('order_status')
         order = get_object_or_404(Order, id=order_id)
         order.status = new_status
-        print('PAYMENT',order.payment_method)
-       
+      
         if new_status == 'Delivered':
             order.deliver_date = timezone.now()
             order.payment_status = 'Success'
@@ -306,8 +303,6 @@ def change_order_status(request, order_id):
             wallet=get_object_or_404(Wallet, user=order.user)
             wallet.wallet_amount +=order.total_amount
             wallet.save()
-
-            print("sample")
 
             trasanction = Wallet_Transaction.objects.create(
                     user = order.user,
