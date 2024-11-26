@@ -12,7 +12,7 @@ urlpatterns = [
     path('product/',include('product_app.urls')),
     path('variant/',include('variant_app.urls')),
     path('category/',include('category_app.urls'))
-    # path('login/',include('User.urls'))
+    
    
     
 
