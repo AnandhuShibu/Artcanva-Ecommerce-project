@@ -2,7 +2,6 @@ from django.urls import path
 from . import views
 from django.conf import settings
 from django.conf.urls.static import static
-
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -32,7 +31,6 @@ urlpatterns = [
     path('return_request/',views.return_request, name='return_request'),
     path('return_status/',views.return_status, name='return_status'),
     path('edit_product/', views.edit_product, name='edit_product'),
-    # path('saleschart/', views.sales_chart, name='sales_chart'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('sample/', views.sample, name='sample'),
     path('get_sales_data/', views.get_sales_data, name='get_sales_data'),

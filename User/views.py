@@ -769,11 +769,6 @@ def checkout(request):
     if not em:
         return redirect('home')
     
-    # inactive_items = Cart.objects.filter(user=request.user, product__product_status=False)
-    # if inactive_items.exists():
-    #     messages.error(request, "One or more items in your cart are unavailable.")
-    #     return redirect('shop')
-
     if not request.user.is_authenticated:
         messages.info(request, "PLEASE LOGIN.")
         return redirect('login')
